@@ -246,6 +246,12 @@ Vercel 构建过程：
 3. 添加自定义域名
 4. 按照提示配置 DNS 记录
 
+## 快速参考
+
+- **快速开始**: [Vercel 快速开始指南](./vercel-quick-start.md)
+- **环境变量配置**: [环境变量配置指南](./vercel-env-setup.md)
+- **配置检查清单**: [Vercel 配置检查清单](./vercel-config-checklist.md)
+
 ## 参考文档
 
 - [Vercel 部署文档](https://vercel.com/docs)

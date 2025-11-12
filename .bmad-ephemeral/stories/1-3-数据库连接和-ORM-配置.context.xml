@@ -1,0 +1,236 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>3</storyId>
+    <title>数据库连接和 ORM 配置</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-12 16:29:45</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/1-3-数据库连接和-ORM-配置.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>to configure database connection and ORM (Object-Relational Mapping)</iWant>
+    <soThat>I can interact with the database from the application</soThat>
+    <tasks>
+      <task id="1" ac="1.3.1,1.3.2,1.3.3">
+        <title>Create Database Connection Module</title>
+        <subtasks>
+          <subtask>Create `lib/db/` directory if it doesn't exist</subtask>
+          <subtask>Create `lib/db/prisma.ts` file</subtask>
+          <subtask>Import `PrismaClient` from `@prisma/client`</subtask>
+          <subtask>Implement singleton pattern to prevent multiple instances in development hot-reload</subtask>
+          <subtask>Read `DATABASE_URL` from environment variables</subtask>
+          <subtask>Export Prisma Client instance</subtask>
+          <subtask>Add JSDoc comments explaining singleton pattern and usage</subtask>
+        </subtasks>
+      </task>
+      <task id="2" ac="1.3.4">
+        <title>Verify Prisma Client Generation</title>
+        <subtasks>
+          <subtask>Verify `npx prisma generate` was executed in Story 1.2</subtask>
+          <subtask>Verify `node_modules/.prisma/client/` exists</subtask>
+          <subtask>Verify TypeScript types are available</subtask>
+          <subtask>Run `npx prisma generate` again if needed</subtask>
+        </subtasks>
+      </task>
+      <task id="3" ac="1.3.2">
+        <title>Implement Singleton Pattern</title>
+        <subtasks>
+          <subtask>Use global variable to store Prisma Client instance (for Next.js)</subtask>
+          <subtask>Check if instance exists in global scope, reuse if exists</subtask>
+          <subtask>Create new instance only if not exists</subtask>
+          <subtask>Handle development hot-reload scenario</subtask>
+          <subtask>Add comments explaining the pattern</subtask>
+        </subtasks>
+      </task>
+      <task id="4" ac="1.3.3">
+        <title>Configure Environment Variable Reading</title>
+        <subtasks>
+          <subtask>Ensure `DATABASE_URL` is read from `process.env.DATABASE_URL`</subtask>
+          <subtask>Verify `.env.local` contains `DATABASE_URL` (already exists from Story 1.2)</subtask>
+          <subtask>Add error handling if `DATABASE_URL` is missing</subtask>
+        </subtasks>
+      </task>
+      <task id="5" ac="1.3.5">
+        <title>Test Database Connection</title>
+        <subtasks>
+          <subtask>Create a simple test query to verify database connection</subtask>
+          <subtask>Test reading from database (e.g., `prisma.user.findMany()`)</subtask>
+          <subtask>Verify connection works correctly</subtask>
+          <subtask>Handle connection errors gracefully</subtask>
+        </subtasks>
+      </task>
+      <task id="6" ac="1.3.6">
+        <title>Verify Connection Pool Configuration</title>
+        <subtasks>
+          <subtask>Verify Prisma uses default connection pooling (automatic)</subtask>
+          <subtask>Document that Prisma handles connection pooling automatically</subtask>
+          <subtask>Note: No manual configuration needed for Prisma</subtask>
+        </subtasks>
+      </task>
+      <task id="7">
+        <title>Add Error Handling</title>
+        <subtasks>
+          <subtask>Add error handling for database connection failures</subtask>
+          <subtask>Add error handling for missing environment variables</subtask>
+          <subtask>Use unified error format from architecture</subtask>
+        </subtasks>
+      </task>
+      <task id="8">
+        <title>Verify TypeScript Compilation</title>
+        <subtasks>
+          <subtask>Run `npx tsc --noEmit` to verify TypeScript compilation</subtask>
+          <subtask>Ensure no type errors</subtask>
+          <subtask>Verify Prisma Client types are correctly imported</subtask>
+        </subtasks>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-1.3.1">`lib/db/prisma.ts` file exists, exporting Prisma Client instance</criterion>
+    <criterion id="AC-1.3.2">Prisma Client uses singleton pattern (prevent multiple instances in dev hot-reload)</criterion>
+    <criterion id="AC-1.3.3">Database connection string is read from `DATABASE_URL` environment variable</criterion>
+    <criterion id="AC-1.3.4">Execute `npx prisma generate` successfully generates Prisma Client</criterion>
+    <criterion id="AC-1.3.5">Can successfully execute database CRUD operations (test query)</criterion>
+    <criterion id="AC-1.3.6">Connection pool configuration is correct (Prisma default configuration)</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture/project-structure.md</path>
+        <title>Project Structure</title>
+        <section>lib/db</section>
+        <snippet>Database connection module location: `lib/db/prisma.ts`. This file should export Prisma Client instance. Future: `lib/db/seed.ts` for database seeding (optional).</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture/implementation-patterns.md</path>
+        <title>Implementation Patterns</title>
+        <section>Code Documentation</section>
+        <snippet>All public functions, public interfaces, classes, and exported types MUST include JSDoc-style comments. JSDoc must include @param, @returns, @throws tags. Use clear, concise descriptions. Include parameter types and descriptions. Document return types and possible return values. List all possible exceptions/errors.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture/implementation-patterns.md</path>
+        <title>Implementation Patterns</title>
+        <section>Error Handling</section>
+        <snippet>Error Format: Success response `{ success: true, data: T }`, Error response `{ success: false, error: { message: string, code: string } }`. Database connection errors should be handled gracefully. Use unified error format from architecture.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture/decision-summary.md</path>
+        <title>Decision Summary</title>
+        <section>ORM Decision</section>
+        <snippet>ORM: Prisma (Latest). Rationale: Type-safe, good Next.js integration, comprehensive migration system. Affects Epics: Epic 1, 2, 3, 5. Prisma handles connection pooling automatically.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture/development-environment.md</path>
+        <title>Development Environment</title>
+        <section>Setup Commands</section>
+        <snippet>Prerequisites: Node.js 18.18 or higher, PostgreSQL 14 or higher, npm or yarn. Environment variables: `DATABASE_URL` must be configured in `.env.local`. Prisma Client generation: `npx prisma generate`.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics/epic-1-项目基础架构foundation.md</path>
+        <title>Epic 1: 项目基础架构（Foundation）</title>
+        <section>Story 1.3: 数据库连接和 ORM 配置</section>
+        <snippet>As a developer, I want to configure database connection and ORM, so that I can interact with the database from the application. Choose ORM: Prisma (recommended). Configure database connection string. Set up connection pooling. Create database client/connection module. Test database connectivity.</snippet>
+      </doc>
+      <doc>
+        <path>.bmad-ephemeral/stories/tech-spec-epic-1.md</path>
+        <title>Epic Technical Specification: 项目基础架构（Foundation）</title>
+        <section>Story 1.3: 数据库连接和 ORM 配置</section>
+        <snippet>Epic 1 Story 1.3 establishes the database connection module using Prisma Client. Acceptance criteria include: lib/db/prisma.ts file exists exporting Prisma Client instance, Prisma Client uses singleton pattern (prevent multiple instances in dev hot-reload), database connection string read from DATABASE_URL environment variable, npx prisma generate successfully generates Prisma Client, can successfully execute database CRUD operations, connection pool configuration is correct (Prisma default).</snippet>
+      </doc>
+      <doc>
+        <path>.bmad-ephemeral/stories/1-2-数据库设计和初始化.md</path>
+        <title>Story 1.2: 数据库设计和初始化</title>
+        <section>Learnings from Previous Story</section>
+        <snippet>From Story 1.2: Prisma Schema Complete - Complete Prisma schema with all models, enums, relationships, and indexes is defined in prisma/schema.prisma. Prisma Client Generated - Prisma Client has been generated in Story 1.2. TypeScript types are available at node_modules/.prisma/client/. Database Migration Applied - Database migration has been successfully applied to Neon database (travis-blog). Environment Variables - .env.local file exists with DATABASE_URL configured for Neon database connection. Prisma Dependencies - prisma and @prisma/client are already installed in package.json devDependencies.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <!-- Story 1.2 established: -->
+      <!-- prisma/schema.prisma - Complete database schema -->
+      <!-- package.json - Prisma dependencies installed -->
+      <!-- .env.local - DATABASE_URL configured -->
+      <!-- node_modules/.prisma/client/ - Prisma Client generated -->
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="@prisma/client" version="^6.19.0">Prisma Client for type-safe database access (already installed)</package>
+        <package name="prisma" version="^6.19.0">Prisma ORM for database schema management (already installed)</package>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>
+      <type>Database ORM Decision</type>
+      <description>Must use Prisma as ORM (architecture decision). Prisma Client provides type-safe database access. Prisma handles connection pooling automatically. Cannot use other ORMs.</description>
+      <source>docs/architecture/decision-summary.md</source>
+    </constraint>
+    <constraint>
+      <type>Singleton Pattern</type>
+      <description>Must use singleton pattern to prevent multiple Prisma Client instances in development hot-reload. Use global variable pattern for Next.js (prevents multiple instances during hot-reload). Check if instance exists in global scope, reuse if exists. Create new instance only if not exists.</description>
+      <source>.bmad-ephemeral/stories/tech-spec-epic-1.md#AC-1.3.2</source>
+    </constraint>
+    <constraint>
+      <type>Environment Variables</type>
+      <description>Database connection string must be read from `DATABASE_URL` environment variable. `.env.local` already contains `DATABASE_URL` from Story 1.2. Must add error handling if `DATABASE_URL` is missing.</description>
+      <source>docs/architecture/development-environment.md</source>
+    </constraint>
+    <constraint>
+      <type>Code Documentation</type>
+      <description>All public functions and interfaces MUST include JSDoc comments with @param, @returns, @throws tags. Prisma Client export must have JSDoc explaining singleton pattern and usage.</description>
+      <source>docs/architecture/implementation-patterns.md#Code-Documentation</source>
+    </constraint>
+    <constraint>
+      <type>Error Handling</type>
+      <description>Database connection errors should be handled gracefully. Use unified error format: Success `{ success: true, data: T }`, Error `{ success: false, error: { message: string, code: string } }`.</description>
+      <source>docs/architecture/implementation-patterns.md#Error-Handling</source>
+    </constraint>
+    <constraint>
+      <type>Project Structure</type>
+      <description>Database connection module: `lib/db/prisma.ts`. Prisma Client will be imported from `@prisma/client`. Prisma Client types are auto-generated from schema.</description>
+      <source>docs/architecture/project-structure.md</source>
+    </constraint>
+    <constraint>
+      <type>Connection Pooling</type>
+      <description>Prisma handles connection pooling automatically. No manual configuration needed. Prisma uses default connection pooling settings.</description>
+      <source>.bmad-ephemeral/stories/tech-spec-epic-1.md#AC-1.3.6</source>
+    </constraint>
+    <constraint>
+      <type>TypeScript Configuration</type>
+      <description>TypeScript strict mode is enabled. Prisma Client types are automatically available after `npx prisma generate`. Must verify TypeScript compilation with `npx tsc --noEmit`.</description>
+      <source>Story Dev Notes</source>
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <!-- Prisma Client will be imported from @prisma/client -->
+    <!-- Prisma Client types are auto-generated from prisma/schema.prisma -->
+    <!-- No custom interfaces needed for this story -->
+  </interfaces>
+
+  <tests>
+    <standards>
+      Testing framework setup will be done in later stories. For this story, focus on verifying database connection, singleton pattern implementation, and TypeScript compilation. Manual verification is acceptable for this foundational story. Use `npx tsc --noEmit` to verify TypeScript compilation. Test database connection with a simple query (e.g., `prisma.user.findMany()`). Future stories will establish unit testing, integration testing, and E2E testing patterns.
+    </standards>
+    <locations>
+      <!-- Test locations will be established in later stories -->
+      <!-- Expected: Co-located tests (e.g., `lib/db/prisma.test.ts` next to prisma.ts) -->
+    </locations>
+    <ideas>
+      <test id="AC-1.3.1">Verify `lib/db/prisma.ts` file exists and exports Prisma Client instance</test>
+      <test id="AC-1.3.2">Verify Prisma Client uses singleton pattern (check global variable usage, verify only one instance created)</test>
+      <test id="AC-1.3.3">Verify `DATABASE_URL` is read from `process.env.DATABASE_URL`</test>
+      <test id="AC-1.3.4">Verify `npx prisma generate` successfully generates Prisma Client (already done in Story 1.2)</test>
+      <test id="AC-1.3.5">Test database connection with simple query (e.g., `prisma.user.findMany()`) and verify it works</test>
+      <test id="AC-1.3.6">Verify Prisma uses default connection pooling (document that Prisma handles this automatically)</test>
+      <test id="AC-1.3.7">Test error handling for missing `DATABASE_URL` environment variable</test>
+      <test id="AC-1.3.8">Run `npx tsc --noEmit` to verify TypeScript compilation with Prisma Client types</test>
+    </ideas>
+  </tests>
+</story-context>
+

@@ -1,0 +1,169 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// Enums
+// ============================================
+
+/**
+ * User role enumeration.
+ * - USER: Regular user (can register, login, comment)
+ * - ADMIN: Administrator/Blogger (can register, login, comment, edit articles, manage admin dashboard)
+ */
+enum Role {
+  USER
+  ADMIN
+}
+
+/**
+ * Article status enumeration.
+ * - DRAFT: Article is saved as draft (not visible in frontend)
+ * - PUBLISHED: Article is published and visible in frontend
+ */
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+}
+
+// ============================================
+// Models
+// ============================================
+
+/**
+ * User model represents blog users and administrators.
+ * 
+ * Relationships:
+ * - One-to-Many with Article (author)
+ * - One-to-Many with Comment (commenter)
+ */
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  image     String?
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  articles  Article[]
+  comments  Comment[]
+
+  @@map("users")
+}
+
+/**
+ * Category model represents article categories (e.g., 技术, 生活, 旅行).
+ * 
+ * Relationships:
+ * - One-to-Many with Article
+ */
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  slug      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  articles  Article[]
+
+  @@map("categories")
+}
+
+/**
+ * Tag model represents article tags for flexible categorization.
+ * 
+ * Relationships:
+ * - Many-to-Many with Article (via ArticleTag junction table)
+ */
+model Tag {
+  id        String      @id @default(cuid())
+  name      String      @unique
+  slug      String      @unique
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  articles  ArticleTag[]
+
+  @@map("tags")
+}
+
+/**
+ * Article model represents blog posts.
+ * 
+ * Relationships:
+ * - Many-to-One with User (author)
+ * - Many-to-One with Category (optional)
+ * - Many-to-Many with Tag (via ArticleTag)
+ * - One-to-Many with Comment
+ */
+model Article {
+  id          String        @id @default(cuid())
+  title       String
+  content     String        @db.Text
+  excerpt     String?
+  slug        String        @unique
+  status      ArticleStatus @default(DRAFT)
+  categoryId  String?
+  authorId    String
+  publishedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  author      User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  category    Category?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags        ArticleTag[]
+  comments    Comment[]
+
+  @@index([publishedAt])
+  @@index([slug])
+  @@index([authorId])
+  @@map("articles")
+}
+
+/**
+ * ArticleTag junction table for Many-to-Many relationship between Article and Tag.
+ */
+model ArticleTag {
+  articleId String
+  tagId     String
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, tagId])
+  @@map("article_tags")
+}
+
+/**
+ * Comment model represents user comments on articles.
+ * Supports nested replies via self-referential relationship.
+ * 
+ * Relationships:
+ * - Many-to-One with Article
+ * - Many-to-One with User (optional, for anonymous comments)
+ * - Self-referential for comment replies (parentId)
+ */
+model Comment {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  articleId String
+  userId    String?
+  parentId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentReplies")
+
+  @@index([articleId])
+  @@index([parentId])
+  @@map("comments")
+}

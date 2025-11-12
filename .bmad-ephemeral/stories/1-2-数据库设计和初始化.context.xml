@@ -1,0 +1,270 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>2</storyId>
+    <title>数据库设计和初始化</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-12 16:09:29</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/1-2-数据库设计和初始化.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>to design and initialize the PostgreSQL database schema</iWant>
+    <soThat>I can store users, articles, comments, and other data</soThat>
+    <tasks>
+      <task id="1" ac="1.2.1">
+        <title>Install Prisma Dependencies</title>
+        <subtasks>
+          <subtask>Install `prisma` and `@prisma/client` packages</subtask>
+          <subtask>Verify packages are added to `package.json`</subtask>
+          <subtask>Run `npm install` to install dependencies</subtask>
+        </subtasks>
+      </task>
+      <task id="2" ac="1.2.1">
+        <title>Initialize Prisma</title>
+        <subtasks>
+          <subtask>Run `npx prisma init` to initialize Prisma</subtask>
+          <subtask>Verify `prisma/` directory is created</subtask>
+          <subtask>Verify `prisma/schema.prisma` file is created</subtask>
+          <subtask>Verify `.env` file is updated with `DATABASE_URL` (if not already present)</subtask>
+        </subtasks>
+      </task>
+      <task id="3" ac="1.2.2,1.2.3">
+        <title>Design Database Schema</title>
+        <subtasks>
+          <subtask>Create User model with fields: id, email, name, image, role, createdAt, updatedAt</subtask>
+          <subtask>Create Role enum (USER, ADMIN)</subtask>
+          <subtask>Create Article model with fields: id, title, content, excerpt, slug, status, categoryId, authorId, publishedAt, createdAt, updatedAt</subtask>
+          <subtask>Create ArticleStatus enum (DRAFT, PUBLISHED)</subtask>
+          <subtask>Create Category model with fields: id, name, slug</subtask>
+          <subtask>Create Tag model with fields: id, name, slug</subtask>
+          <subtask>Create ArticleTag junction model with fields: articleId, tagId</subtask>
+          <subtask>Create Comment model with fields: id, content, articleId, userId, parentId, createdAt, updatedAt</subtask>
+          <subtask>Define all foreign key relationships</subtask>
+        </subtasks>
+      </task>
+      <task id="4" ac="1.2.1">
+        <title>Configure Database Connection</title>
+        <subtasks>
+          <subtask>Update `prisma/schema.prisma` with PostgreSQL provider</subtask>
+          <subtask>Configure `datasource db` with PostgreSQL provider</subtask>
+          <subtask>Set `generator client` to generate Prisma Client</subtask>
+          <subtask>Verify `DATABASE_URL` is configured in `.env.example` and `.env.local`</subtask>
+        </subtasks>
+      </task>
+      <task id="5" ac="1.2.4">
+        <title>Add Performance Indexes</title>
+        <subtasks>
+          <subtask>Add `@@index([publishedAt])` to Article model</subtask>
+          <subtask>Add `@@index([slug])` to Article model (already unique, but explicit index)</subtask>
+          <subtask>Add `@@index([authorId])` to Article model</subtask>
+          <subtask>Add `@@index([articleId])` to Comment model</subtask>
+          <subtask>Add `@@index([parentId])` to Comment model</subtask>
+        </subtasks>
+      </task>
+      <task id="6" ac="1.2.5,1.2.6">
+        <title>Run Database Migration</title>
+        <subtasks>
+          <subtask>Ensure PostgreSQL database is running and accessible</subtask>
+          <subtask>Verify `DATABASE_URL` in `.env.local` points to correct database</subtask>
+          <subtask>Run `npx prisma migrate dev --name init` to create initial migration</subtask>
+          <subtask>Verify migration file is created in `prisma/migrations/` directory</subtask>
+          <subtask>Verify database tables are created successfully</subtask>
+          <subtask>Verify all foreign key constraints are applied</subtask>
+        </subtasks>
+      </task>
+      <task id="7" ac="1.2.2,1.2.3">
+        <title>Verify Schema and Relationships</title>
+        <subtasks>
+          <subtask>Verify all models are defined correctly</subtask>
+          <subtask>Verify all relationships are properly configured</subtask>
+          <subtask>Verify all enums are defined</subtask>
+          <subtask>Verify all required fields have appropriate types</subtask>
+          <subtask>Verify all optional fields are marked with `?`</subtask>
+          <subtask>Run `npx prisma validate` to validate schema</subtask>
+        </subtasks>
+      </task>
+      <task id="8">
+        <title>Generate Prisma Client</title>
+        <subtasks>
+          <subtask>Run `npx prisma generate` to generate Prisma Client</subtask>
+          <subtask>Verify `node_modules/.prisma/client/` is created</subtask>
+          <subtask>Verify TypeScript types are generated correctly</subtask>
+          <subtask>Note: Prisma Client usage will be implemented in Story 1.3</subtask>
+        </subtasks>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-1.2.1">`prisma/schema.prisma` file exists, containing all required table definitions</criterion>
+    <criterion id="AC-1.2.2">Schema contains User, Article, Category, Tag, ArticleTag, Comment models</criterion>
+    <criterion id="AC-1.2.3">All foreign key relationships are properly defined (User → Articles, Article → Category, Article → Tags, Article → Comments)</criterion>
+    <criterion id="AC-1.2.4">Performance indexes are created (articles.publishedAt, articles.slug, articles.authorId, comments.articleId, comments.parentId)</criterion>
+    <criterion id="AC-1.2.5">Execute `npx prisma migrate dev` successfully creates database and tables</criterion>
+    <criterion id="AC-1.2.6">Database migration files are generated in `prisma/migrations/` directory</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture/data-architecture.md</path>
+        <title>Data Architecture</title>
+        <section>Database Schema</section>
+        <snippet>Complete Prisma schema definitions for User, Article, Category, Tag, ArticleTag, and Comment models. All models use `cuid()` for primary keys, DateTime fields use `@default(now())` for createdAt and `@updatedAt` for updatedAt. All dates must be stored in UTC.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture/data-architecture.md</path>
+        <title>Data Architecture</title>
+        <section>Data Relationships</section>
+        <snippet>User → Articles (One-to-Many), User → Comments (One-to-Many), Article → Category (Many-to-One), Article → Tags (Many-to-Many via ArticleTag), Article → Comments (One-to-Many), Comment → Comment (Self-referential for replies).</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture/data-architecture.md</path>
+        <title>Data Architecture</title>
+        <section>Indexes</section>
+        <snippet>Performance indexes: articles.publishedAt (for sorting published articles), articles.slug (for article lookup), articles.authorId (for author's articles), comments.articleId (for article comments), comments.parentId (for comment replies).</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture/development-environment.md</path>
+        <title>Development Environment</title>
+        <section>Setup Commands</section>
+        <snippet>Prerequisites: Node.js 18.18 or higher, PostgreSQL 14 or higher, npm or yarn. Setup commands include: Install Prisma with `npm install prisma @prisma/client`, initialize with `npx prisma init`, configure environment variables, run migrations with `npx prisma migrate dev`, generate client with `npx prisma generate`.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture/decision-summary.md</path>
+        <title>Decision Summary</title>
+        <section>ORM Decision</section>
+        <snippet>ORM: Prisma (Latest). Rationale: Type-safe, good Next.js integration, comprehensive migration system. Affects Epics: Epic 1, 2, 3, 5.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics/epic-1-项目基础架构foundation.md</path>
+        <title>Epic 1: 项目基础架构（Foundation）</title>
+        <section>Story 1.2: 数据库设计和初始化</section>
+        <snippet>As a developer, I want to design and initialize the PostgreSQL database schema, so that I can store users, articles, comments, and other data. Design database schema based on PRD requirements. Use migration tool (Prisma). Create tables: users, articles, categories, tags, article_tags, comments. Set up indexes on frequently queried columns.</snippet>
+      </doc>
+      <doc>
+        <path>.bmad-ephemeral/stories/tech-spec-epic-1.md</path>
+        <title>Epic Technical Specification: 项目基础架构（Foundation）</title>
+        <section>Story 1.2: 数据库设计和初始化</section>
+        <snippet>Epic 1 Story 1.2 establishes the database schema using Prisma. Acceptance criteria include: prisma/schema.prisma file exists with all required table definitions, schema contains User/Article/Category/Tag/ArticleTag/Comment models, all foreign key relationships properly defined, performance indexes created, database migration successfully creates database and tables, migration files generated in prisma/migrations/.</snippet>
+      </doc>
+      <doc>
+        <path>.bmad-ephemeral/stories/tech-spec-epic-1.md</path>
+        <title>Epic Technical Specification: 项目基础架构（Foundation）</title>
+        <section>Data Models and Contracts</section>
+        <snippet>Complete Prisma schema with User, Article, Category, Tag, ArticleTag, and Comment models. All models use cuid() for primary keys. DateTime fields use @default(now()) and @updatedAt. All dates stored in UTC. Foreign key relationships: User → Articles, User → Comments, Article → Category, Article → Tags (via ArticleTag), Article → Comments, Comment → Comment (self-referential).</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD/functional-requirements.md</path>
+        <title>Functional Requirements</title>
+        <section>用户管理能力</section>
+        <snippet>FR-1.3: 用户角色管理 - 系统支持普通用户和管理员（博主）两种角色。普通用户：可以注册、登录、留言。管理员（博主）：可以注册、登录、留言、编辑文章、管理后台。角色权限控制正确.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture/implementation-patterns.md</path>
+        <title>Implementation Patterns</title>
+        <section>Code Documentation</section>
+        <snippet>All public functions, public interfaces, classes, and exported types MUST include JSDoc-style comments. JSDoc must include @param, @returns, @throws tags. Use clear, concise descriptions. Include parameter types and descriptions. Document return types and possible return values. List all possible exceptions/errors.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture/implementation-patterns.md</path>
+        <title>Implementation Patterns</title>
+        <section>Error Handling</section>
+        <snippet>Error Format: Success response `{ success: true, data: T }`, Error response `{ success: false, error: { message: string, code: string } }`. Prisma automatically handles SQL injection via parameterized queries. Database connection errors should be handled gracefully.</snippet>
+      </doc>
+      <doc>
+        <path>.bmad-ephemeral/stories/1-1-项目初始化和基础配置.md</path>
+        <title>Story 1.1: 项目初始化和基础配置</title>
+        <section>Learnings from Previous Story</section>
+        <snippet>From Story 1.1: 项目结构已建立，环境变量模板已创建（.env.example 包含 DATABASE_URL），TypeScript 配置已完成，项目依赖已安装，代码规范（JSDoc）已建立。可复用的文件：.env.example (已包含 DATABASE_URL 模板), package.json (需要添加 Prisma 依赖), tsconfig.json (已配置).</snippet>
+      </doc>
+    </docs>
+    <code>
+      <!-- No existing Prisma code - this story establishes the database schema -->
+      <!-- Story 1.1 established: package.json, tsconfig.json, .env.example -->
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="prisma" version="latest">Prisma ORM for database schema management and migrations</package>
+        <package name="@prisma/client" version="latest">Prisma Client for type-safe database access</package>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>
+      <type>Database ORM Decision</type>
+      <description>Must use Prisma as ORM (architecture decision). Prisma provides type-safe database access. Prisma Migrate handles database migrations. Cannot use other ORMs.</description>
+      <source>docs/architecture/decision-summary.md</source>
+    </constraint>
+    <constraint>
+      <type>Database Schema Design</type>
+      <description>All models must use `cuid()` for primary keys (String type). All DateTime fields must use `@default(now())` for createdAt. All DateTime fields must use `@updatedAt` for updatedAt. All dates must be stored in UTC.</description>
+      <source>docs/architecture/data-architecture.md</source>
+    </constraint>
+    <constraint>
+      <type>Foreign Key Relationships</type>
+      <description>User → Articles: One-to-Many (authorId in Article). User → Comments: One-to-Many (userId in Comment). Article → Category: Many-to-One (categoryId in Article). Article → Tags: Many-to-Many (via ArticleTag junction table). Article → Comments: One-to-Many (articleId in Comment). Comment → Comment: Self-referential for replies (parentId in Comment).</description>
+      <source>docs/architecture/data-architecture.md#Data-Relationships</source>
+    </constraint>
+    <constraint>
+      <type>Performance Indexes</type>
+      <description>Must create indexes on frequently queried columns: articles.publishedAt, articles.slug, articles.authorId, comments.articleId, comments.parentId.</description>
+      <source>docs/architecture/data-architecture.md#Indexes</source>
+    </constraint>
+    <constraint>
+      <type>Code Documentation</type>
+      <description>Prisma schema file should include comments explaining each model. All public functions, interfaces, and classes MUST include JSDoc comments with @param, @returns, @throws tags.</description>
+      <source>docs/architecture/implementation-patterns.md#Code-Documentation</source>
+    </constraint>
+    <constraint>
+      <type>Error Handling</type>
+      <description>Prisma automatically handles SQL injection via parameterized queries. Database connection errors should be handled gracefully.</description>
+      <source>docs/architecture/implementation-patterns.md#Error-Handling</source>
+    </constraint>
+    <constraint>
+      <type>Project Structure</type>
+      <description>Prisma schema file: `prisma/schema.prisma`. Migration files: `prisma/migrations/`. Prisma Client will be generated to `node_modules/.prisma/client/`. Database connection module will be created in Story 1.3: `lib/db/prisma.ts`.</description>
+      <source>docs/architecture/project-structure.md</source>
+    </constraint>
+    <constraint>
+      <type>Environment Variables</type>
+      <description>DATABASE_URL must be configured in `.env.local` for database connection. `.env.example` already contains DATABASE_URL template from Story 1.1.</description>
+      <source>Story Dev Notes</source>
+    </constraint>
+    <constraint>
+      <type>Database Provider</type>
+      <description>Must use PostgreSQL as database provider. Configure `datasource db` with `provider = "postgresql"` in prisma/schema.prisma.</description>
+      <source>docs/architecture/decision-summary.md</source>
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <!-- No existing interfaces - Prisma Client interfaces will be generated after schema definition -->
+    <!-- Prisma Client will provide type-safe interfaces for all models after `npx prisma generate` -->
+  </interfaces>
+
+  <tests>
+    <standards>
+      Testing framework setup will be done in later stories. For this story, focus on verifying schema definition, migration execution, and database table creation. Manual verification is acceptable for this foundational story. Use `npx prisma validate` to validate schema syntax. Use `npx prisma migrate dev` to test migration. Future stories will establish unit testing, integration testing, and E2E testing patterns.
+    </standards>
+    <locations>
+      <!-- Test locations will be established in later stories -->
+      <!-- Expected: Co-located tests (e.g., `prisma.test.ts` next to schema files) -->
+    </locations>
+    <ideas>
+      <test id="AC-1.2.1">Verify `prisma/schema.prisma` file exists and contains all required table definitions</test>
+      <test id="AC-1.2.2">Verify schema contains User, Article, Category, Tag, ArticleTag, Comment models with correct fields</test>
+      <test id="AC-1.2.3">Verify all foreign key relationships are properly defined using @relation directives</test>
+      <test id="AC-1.2.4">Verify performance indexes are created using @@index directives</test>
+      <test id="AC-1.2.5">Run `npx prisma migrate dev` and verify database tables are created successfully</test>
+      <test id="AC-1.2.6">Verify migration files are generated in `prisma/migrations/` directory</test>
+      <test id="AC-1.2.7">Run `npx prisma validate` to verify schema syntax is correct</test>
+      <test id="AC-1.2.8">Run `npx prisma generate` and verify Prisma Client is generated with TypeScript types</test>
+    </ideas>
+  </tests>
+</story-context>
+

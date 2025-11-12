@@ -1,0 +1,268 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1</storyId>
+    <title>项目初始化和基础配置</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-12 15:56:14</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/1-1-项目初始化和基础配置.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>to initialize the Next.js project with Tailwind CSS and configure the development environment</iWant>
+    <soThat>I have a solid foundation to build the blog application</soThat>
+    <tasks>
+      <task id="1" ac="1.1.1">
+        <title>Initialize Next.js Project</title>
+        <subtasks>
+          <subtask>Execute `npx create-next-app@latest travis-blog --typescript --tailwind --app --no-src-dir`</subtask>
+          <subtask>Verify project directory is created</subtask>
+          <subtask>Verify project name is "travis-blog"</subtask>
+          <subtask>Verify TypeScript template is used</subtask>
+          <subtask>Verify Tailwind CSS is included</subtask>
+          <subtask>Verify App Router is used (app/ directory exists)</subtask>
+          <subtask>Verify no src/ directory (--no-src-dir flag)</subtask>
+        </subtasks>
+      </task>
+      <task id="2" ac="1.1.2">
+        <title>Verify Project Structure</title>
+        <subtasks>
+          <subtask>Verify `app/` directory exists</subtask>
+          <subtask>Verify `components/` directory exists (create if missing)</subtask>
+          <subtask>Verify `lib/` directory exists (create if missing)</subtask>
+          <subtask>Verify `public/` directory exists</subtask>
+          <subtask>Verify directory structure matches architecture specification</subtask>
+        </subtasks>
+      </task>
+      <task id="3" ac="1.1.3">
+        <title>Verify Dependencies</title>
+        <subtasks>
+          <subtask>Check `package.json` includes `next` (latest)</subtask>
+          <subtask>Check `package.json` includes `react` and `react-dom` (latest)</subtask>
+          <subtask>Check `package.json` includes `typescript` (latest)</subtask>
+          <subtask>Check `package.json` includes `tailwindcss`, `postcss`, `autoprefixer`</subtask>
+          <subtask>Check `package.json` includes `@types/node` and `@types/react`</subtask>
+          <subtask>Verify all dependencies are latest compatible versions</subtask>
+          <subtask>Run `npm install` to install dependencies</subtask>
+        </subtasks>
+      </task>
+      <task id="4" ac="1.1.4">
+        <title>Configure TypeScript</title>
+        <subtasks>
+          <subtask>Verify `tsconfig.json` exists</subtask>
+          <subtask>Check TypeScript configuration follows Next.js best practices</subtask>
+          <subtask>Verify `strict` mode is enabled (recommended)</subtask>
+          <subtask>Verify path aliases are configured if needed</subtask>
+          <subtask>Run `npx tsc --noEmit` to verify no compilation errors</subtask>
+        </subtasks>
+      </task>
+      <task id="5" ac="1.1.5">
+        <title>Configure Tailwind CSS</title>
+        <subtasks>
+          <subtask>Verify `tailwind.config.js` exists</subtask>
+          <subtask>Check Tailwind configuration includes content paths: `app/**/*.{js,ts,jsx,tsx,mdx}`, `components/**/*.{js,ts,jsx,tsx,mdx}`</subtask>
+          <subtask>Verify `postcss.config.js` exists with Tailwind plugin</subtask>
+          <subtask>Create a test component with Tailwind classes to verify styles work</subtask>
+          <subtask>Verify Tailwind CSS is working in development server</subtask>
+        </subtasks>
+      </task>
+      <task id="6" ac="1.1.6">
+        <title>Set Up Environment Variables</title>
+        <subtasks>
+          <subtask>Create `.env.example` file in project root</subtask>
+          <subtask>Add `DATABASE_URL` template (commented with description)</subtask>
+          <subtask>Add `NEXTAUTH_SECRET` template (commented with description)</subtask>
+          <subtask>Add `NEXTAUTH_URL` template (commented with description)</subtask>
+          <subtask>Add `STORAGE_TYPE` template (default: "local")</subtask>
+          <subtask>Add comments explaining each variable</subtask>
+          <subtask>Create `.env.local` file (gitignored) for local development</subtask>
+        </subtasks>
+      </task>
+      <task id="7" ac="1.1.7">
+        <title>Configure ESLint (Optional but Recommended)</title>
+        <subtasks>
+          <subtask>Verify `.eslintrc.json` or `eslint.config.js` exists</subtask>
+          <subtask>Check ESLint uses `next/core-web-vitals` configuration</subtask>
+          <subtask>Verify ESLint rules are appropriate for TypeScript</subtask>
+          <subtask>Run `npm run lint` to verify ESLint works</subtask>
+          <subtask>Optionally configure Prettier for code formatting</subtask>
+        </subtasks>
+      </task>
+      <task id="8">
+        <title>Testing Setup</title>
+        <subtasks>
+          <subtask>Verify project structure is ready for testing</subtask>
+          <subtask>Note: Actual test framework setup will be done in later stories</subtask>
+          <subtask>Document testing approach for future stories</subtask>
+        </subtasks>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-1.1.1">Execute `npx create-next-app@latest travis-blog --typescript --tailwind --app --no-src-dir` successfully creates the project</criterion>
+    <criterion id="AC-1.1.2">Project contains `app/`, `components/`, `lib/`, `public/` directory structure</criterion>
+    <criterion id="AC-1.1.3">`package.json` includes Next.js, React, TypeScript, Tailwind CSS dependencies</criterion>
+    <criterion id="AC-1.1.4">`tsconfig.json` is configured correctly, TypeScript compilation has no errors</criterion>
+    <criterion id="AC-1.1.5">`tailwind.config.js` is configured correctly, Tailwind CSS styles are working</criterion>
+    <criterion id="AC-1.1.6">`.env.example` file exists, containing required environment variable templates</criterion>
+    <criterion id="AC-1.1.7">ESLint is configured correctly (optional but recommended)</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture/project-initialization.md</path>
+        <title>Project Initialization</title>
+        <section>Project Initialization Command</section>
+        <snippet>First implementation story should execute: `npx create-next-app@latest travis-blog --typescript --tailwind --app --no-src-dir`. This establishes the base architecture with TypeScript support, Tailwind CSS integration, Next.js App Router, ESLint configuration, and project structure following Next.js best practices.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture/project-structure.md</path>
+        <title>Project Structure</title>
+        <section>Directory Structure</section>
+        <snippet>Project structure includes `app/` (Next.js App Router), `components/` (React Components), `lib/` (Utilities and shared code), `prisma/` (Prisma schema and migrations), `public/` (Static assets), and `types/` (TypeScript type definitions). Directory structure must match architecture specification exactly.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture/implementation-patterns.md</path>
+        <title>Implementation Patterns</title>
+        <section>Naming Conventions</section>
+        <snippet>Component files: `PascalCase.tsx` (e.g., `ArticleCard.tsx`). Functions: `camelCase` (e.g., `getArticles`). Constants: `UPPER_SNAKE_CASE` (e.g., `MAX_FILE_SIZE`). All public functions, interfaces, and classes MUST include JSDoc comments with `@param`, `@returns`, `@throws` tags.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture/implementation-patterns.md</path>
+        <title>Implementation Patterns</title>
+        <section>Code Documentation</section>
+        <snippet>All public functions, public interfaces, classes, and exported types MUST include JSDoc-style comments. JSDoc must include `@param`, `@returns`, `@throws` tags. Use clear, concise descriptions. Include parameter types and descriptions. Document return types and possible return values. List all possible exceptions/errors.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture/development-environment.md</path>
+        <title>Development Environment</title>
+        <section>Setup Commands</section>
+        <snippet>Prerequisites: Node.js 18.18 or higher, PostgreSQL 14 or higher, npm or yarn. Setup commands include: Initialize project with `npx create-next-app@latest travis-blog --typescript --tailwind --app --no-src-dir`, install dependencies with `npm install`, configure environment variables, and start development server with `npm run dev`.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics/epic-1-项目基础架构foundation.md</path>
+        <title>Epic 1: 项目基础架构（Foundation）</title>
+        <section>Story 1.1: 项目初始化和基础配置</section>
+        <snippet>As a developer, I want to initialize the Next.js project with Tailwind CSS and configure the development environment, so that I have a solid foundation to build the blog application. Use `create-next-app` with TypeScript template. Configure Tailwind CSS following Next.js documentation. Set up project structure: `app/`, `components/`, `lib/`, `public/`.</snippet>
+      </doc>
+      <doc>
+        <path>.bmad-ephemeral/stories/tech-spec-epic-1.md</path>
+        <title>Epic Technical Specification: 项目基础架构（Foundation）</title>
+        <section>Story 1.1: 项目初始化和基础配置</section>
+        <snippet>Epic 1 is the foundation architecture phase for travis-blog project. Story 1.1 establishes the base architecture with Next.js, TypeScript, Tailwind CSS, and App Router. Acceptance criteria include: Execute project initialization command successfully, project contains required directory structure, package.json includes required dependencies, TypeScript and Tailwind CSS are configured correctly, environment variables are set up.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD/project-classification.md</path>
+        <title>Project Classification</title>
+        <section>Technical Stack</section>
+        <snippet>Technical Type: Web Application. Frontend: Next.js + Tailwind CSS + 组件库（shadcn/ui 或 Headless UI）. Backend: Node.js. Database: PostgreSQL. Deployment: Vercel. Storage: 本地存储（抽象层设计）. Authentication: OAuth + JWT. Editor: Tiptap.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture/implementation-patterns.md</path>
+        <title>Implementation Patterns</title>
+        <section>Error Handling</section>
+        <snippet>Error Format: Success response `{ success: true, data: T }`, Error response `{ success: false, error: { message: string, code: string } }`. Server Actions: Throw errors, catch in error boundaries. API Routes: Return error responses with status codes. Client components: Use try-catch and error boundaries.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture/implementation-patterns.md</path>
+        <title>Implementation Patterns</title>
+        <section>Logging Strategy</section>
+        <snippet>Development: Use `console.log`, `console.error` for debugging. Log level: Verbose. Production: Structured logging (JSON format). Log levels: error, warn, info. Log to console (Vercel handles log aggregation).</snippet>
+      </doc>
+    </docs>
+    <code>
+      <!-- No existing code artifacts - this is the first story establishing the project structure -->
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="next" version="latest">Next.js framework with App Router</package>
+        <package name="react" version="latest">React library</package>
+        <package name="react-dom" version="latest">React DOM renderer</package>
+        <package name="typescript" version="latest">TypeScript compiler</package>
+        <package name="tailwindcss" version="latest">Tailwind CSS utility framework</package>
+        <package name="postcss" version="latest">PostCSS processor for Tailwind</package>
+        <package name="autoprefixer" version="latest">Autoprefixer for CSS vendor prefixes</package>
+        <package name="@types/node" version="latest">TypeScript types for Node.js</package>
+        <package name="@types/react" version="latest">TypeScript types for React</package>
+        <package name="eslint" version="latest">ESLint linter (optional but recommended)</package>
+        <package name="eslint-config-next" version="latest">Next.js ESLint configuration</package>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>
+      <type>Project Initialization Command</type>
+      <description>Must use exact command: `npx create-next-app@latest travis-blog --typescript --tailwind --app --no-src-dir`. This establishes the base architecture with TypeScript, Tailwind CSS, and App Router.</description>
+      <source>docs/architecture/project-initialization.md</source>
+    </constraint>
+    <constraint>
+      <type>Project Structure</type>
+      <description>Must follow Next.js App Router structure with `app/` directory. Directory structure must match architecture specification: `app/` - Next.js App Router pages and routes, `components/` - React components (organized by feature), `lib/` - Utilities and shared code, `public/` - Static assets.</description>
+      <source>docs/architecture/project-structure.md</source>
+    </constraint>
+    <constraint>
+      <type>Naming Conventions</type>
+      <description>Component files: `PascalCase.tsx` (e.g., `ArticleCard.tsx`). Functions: `camelCase` (e.g., `getArticles`). Constants: `UPPER_SNAKE_CASE` (e.g., `MAX_FILE_SIZE`).</description>
+      <source>docs/architecture/implementation-patterns.md#Naming-Conventions</source>
+    </constraint>
+    <constraint>
+      <type>Code Documentation</type>
+      <description>All public functions, interfaces, and classes MUST include JSDoc comments. JSDoc must include `@param`, `@returns`, `@throws` tags. Use clear, concise descriptions. Include parameter types and descriptions. Document return types and possible return values. List all possible exceptions/errors.</description>
+      <source>docs/architecture/implementation-patterns.md#Code-Documentation</source>
+    </constraint>
+    <constraint>
+      <type>Error Handling</type>
+      <description>Use unified error format: `{ success: true, data: T }` or `{ success: false, error: { message: string, code: string } }`.</description>
+      <source>docs/architecture/implementation-patterns.md#Error-Handling</source>
+    </constraint>
+    <constraint>
+      <type>Logging Strategy</type>
+      <description>Development: Use `console.log`, `console.error` for debugging. Production: Structured logging (JSON format).</description>
+      <source>docs/architecture/implementation-patterns.md#Logging-Strategy</source>
+    </constraint>
+    <constraint>
+      <type>TypeScript Configuration</type>
+      <description>TypeScript configuration must follow Next.js best practices. Verify `strict` mode is enabled (recommended). Verify path aliases are configured if needed. Run `npx tsc --noEmit` to verify no compilation errors.</description>
+      <source>Story Dev Notes</source>
+    </constraint>
+    <constraint>
+      <type>Tailwind CSS Configuration</type>
+      <description>Tailwind configuration must include content paths: `app/**/*.{js,ts,jsx,tsx,mdx}`, `components/**/*.{js,ts,jsx,tsx,mdx}`. Verify `postcss.config.js` exists with Tailwind plugin.</description>
+      <source>Story Dev Notes</source>
+    </constraint>
+    <constraint>
+      <type>Environment Variables</type>
+      <description>Create `.env.example` file with templates: `DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `STORAGE_TYPE` (default: "local"). Add comments explaining each variable. Create `.env.local` file (gitignored) for local development.</description>
+      <source>Story Dev Notes</source>
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <!-- No existing interfaces - this is the first story establishing the project structure -->
+  </interfaces>
+
+  <tests>
+    <standards>
+      Testing framework setup will be done in later stories. For this story, focus on verifying project structure, configuration files, and basic functionality. Manual verification is acceptable for this foundational story. Future stories will establish unit testing, integration testing, and E2E testing patterns.
+    </standards>
+    <locations>
+      <!-- Test locations will be established in later stories -->
+      <!-- Expected: Co-located tests (e.g., `Component.test.tsx` next to `Component.tsx`) -->
+    </locations>
+    <ideas>
+      <test id="AC-1.1.1">Verify project initialization command executes successfully and creates expected directory structure</test>
+      <test id="AC-1.1.2">Verify all required directories (`app/`, `components/`, `lib/`, `public/`) exist</test>
+      <test id="AC-1.1.3">Verify `package.json` contains all required dependencies with correct versions</test>
+      <test id="AC-1.1.4">Run `npx tsc --noEmit` to verify TypeScript compilation has no errors</test>
+      <test id="AC-1.1.5">Create a test component with Tailwind classes and verify styles are applied correctly</test>
+      <test id="AC-1.1.6">Verify `.env.example` file exists with all required environment variable templates and comments</test>
+      <test id="AC-1.1.7">Run `npm run lint` to verify ESLint is configured correctly and works</test>
+    </ideas>
+  </tests>
+</story-context>
+

@@ -36,3 +36,7 @@ yarn-error.log*
 next-env.d.ts
 
 /lib/generated/prisma
+
+# uploads (keep directory structure, ignore files)
+/public/uploads/*
+!/public/uploads/.gitkeep

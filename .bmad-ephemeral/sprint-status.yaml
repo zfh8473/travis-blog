@@ -41,13 +41,13 @@ development_status:
   1-1-项目初始化和基础配置: done
   1-2-数据库设计和初始化: done
   1-3-数据库连接和-ORM-配置: done
-  1-4-部署配置和-CI-CD-基础: in-progress
-  1-5-存储抽象层实现: backlog
+  1-4-部署配置和-CI-CD-基础: done
+  1-5-存储抽象层实现: done
   epic-1-retrospective: optional
 
   # Epic 2: 用户认证和授权（User Authentication & Authorization）
-  epic-2: backlog
-  2-1-用户注册功能（邮箱注册）: backlog
+  epic-2: contexted
+  2-1-用户注册功能（邮箱注册）: review
   2-2-OAuth-登录集成（GitHub-和-Google）: backlog
   2-3-用户登录功能（邮箱密码登录）: backlog
   2-4-JWT-认证中间件: backlog

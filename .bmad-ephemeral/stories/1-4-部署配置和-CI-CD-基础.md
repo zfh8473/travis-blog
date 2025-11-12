@@ -1,6 +1,6 @@
 # Story 1.4: 部署配置和 CI/CD 基础
 
-Status: in-progress (需要验证所有接受标准)
+Status: done
 
 ## Story
 
@@ -253,6 +253,20 @@ Based on Epic 1 Story 1.4 and Tech Spec AC-1.4.1 through AC-1.4.6:
 - `docs/verification-steps-1-4.md` - 验证步骤指南
 
 **验证状态：**
-- ⚠️ 需要验证所有接受标准（AC-1.4.1 到 AC-1.4.6）
-- 参考验证步骤指南进行完整验证
+- ✅ 所有接受标准已验证通过（AC-1.4.1 到 AC-1.4.6）
+- 参考验证结果报告：`docs/verification-results-1-4-final.md`
+
+**验证结果：**
+- AC-1.4.1: ✅ **通过** - GitHub 仓库已连接到 Vercel 项目（手动验证）
+- AC-1.4.2: ✅ **通过** - Vercel 自动部署已配置（手动验证）
+- AC-1.4.3: ✅ **通过** - Preview 部署已配置（手动验证，可选）
+- AC-1.4.4: ✅ **通过** - 必需的环境变量已在 Vercel Dashboard 配置（手动验证）
+- AC-1.4.5: ✅ **通过** - 生产环境构建成功（手动验证）
+- AC-1.4.6: ✅ **通过** - 生产环境数据库连接正常（自动验证）
+  - 测试时间：2025-11-12 22:21:23 UTC
+  - HTTP 状态码：200
+  - 响应：`{"success":true,"message":"Database connection successful!","data":{"userCount":0,"articleCount":0,"timestamp":"2025-11-12T22:21:23.540Z","environment":"production"}}`
+  - 验证通过：数据库连接正常，可以成功执行查询
+
+**验证完成时间：** 2025-11-12
 

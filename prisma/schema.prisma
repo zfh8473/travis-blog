@@ -45,9 +45,20 @@ enum ArticleStatus {
  * - One-to-Many with Article (author)
  * - One-to-Many with Comment (commenter)
  */
+/**
+ * User model represents blog users and administrators.
+ * 
+ * Relationships:
+ * - One-to-Many with Article (author)
+ * - One-to-Many with Comment (commenter)
+ * 
+ * Password field is optional to support OAuth users who don't have passwords.
+ * For email/password users, password is stored as bcrypt hash.
+ */
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
+  password  String?  // Optional: bcrypt hashed password (null for OAuth users)
   name      String?
   image     String?
   role      Role     @default(USER)

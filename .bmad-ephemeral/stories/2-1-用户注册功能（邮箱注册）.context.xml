@@ -1,0 +1,158 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.1</storyId>
+    <title>用户注册功能（邮箱注册）</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-12</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/2-1-用户注册功能（邮箱注册）.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>visitor</asA>
+    <iWant>to register an account using my email address</iWant>
+    <soThat>I can access the blog features that require authentication</soThat>
+    <tasks>
+      <task id="1" ac="2.1.1,2.1.3">Install and Configure NextAuth.js</task>
+      <task id="2" ac="2.1.1">Update Prisma Schema for Password Storage</task>
+      <task id="3" ac="2.1.1">Create Registration API Endpoint</task>
+      <task id="4" ac="2.1.1">Implement Password Hashing</task>
+      <task id="5" ac="2.1.1,2.1.5">Implement Input Validation</task>
+      <task id="6" ac="2.1.1,2.1.4">Create Registration Page UI</task>
+      <task id="7" ac="2.1.3">Implement Auto-Login After Registration</task>
+      <task id="8" ac="2.1.4">Implement Redirect After Registration</task>
+      <task id="9" ac="2.1.5">Handle Registration Errors</task>
+      <task id="10" ac="2.1.2">Email Verification (Optional for MVP)</task>
+      <task id="11" ac="all">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="2.1.1">Given I am on the registration page, When I enter a valid email address and password, And I submit the registration form, Then my account is created in the database</ac>
+    <ac id="2.1.2">I receive a confirmation (optional email verification)</ac>
+    <ac id="2.1.3">I am automatically logged in after successful registration</ac>
+    <ac id="2.1.4">I am redirected to the appropriate page after registration</ac>
+    <ac id="2.1.5">Registration errors are handled (duplicate email, invalid input)</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics/epic-2-用户认证和授权user-authentication-authorization.md" title="Epic 2: 用户认证和授权" section="Story 2.1">
+        Story definition with acceptance criteria and technical notes for user registration functionality.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-2.md" title="Epic 2 Technical Specification" section="Detailed Design">
+        Comprehensive technical specification including services, data models, APIs, and workflows for authentication epic.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Authentication">
+        NextAuth.js configuration requirements, JWT session strategy, and authentication architecture patterns.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Security Architecture">
+        Security requirements including password hashing, input validation, and data protection patterns.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Document" section="API Contracts">
+        Unified error response format and HTTP status code standards for API endpoints.
+      </doc>
+      <doc path="docs/architecture/security-architecture.md" title="Security Architecture" section="Authentication">
+        Detailed NextAuth.js configuration with providers, session strategy, and token management.
+      </doc>
+      <doc path="docs/architecture/security-architecture.md" title="Security Architecture" section="Data Protection">
+        Input validation requirements using Zod, SQL injection prevention, and XSS protection.
+      </doc>
+      <doc path="docs/PRD.md" title="Product Requirements Document" section="FR-1.1 用户注册">
+        Functional requirement for user registration with email address.
+      </doc>
+      <doc path="prisma/schema.prisma" title="Prisma Schema" section="User Model">
+        User model definition with required fields. Password field needs to be added (String?, optional).
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Project Structure">
+        Project structure guidelines for API routes, utilities, validations, and pages.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/1-5-存储抽象层实现.md" title="Story 1.5: Storage Abstraction Layer" section="Dev Agent Record">
+        Learnings from previous story including storage abstraction layer patterns and error handling.
+      </doc>
+      <doc path="docs/vercel-env-setup.md" title="Vercel Environment Variables Setup" section="NEXTAUTH_SECRET">
+        Environment variable configuration for NextAuth.js including NEXTAUTH_SECRET and NEXTAUTH_URL.
+      </doc>
+    </docs>
+    <code>
+      <code path="lib/db/prisma.ts" kind="utility" symbol="prisma" lines="1-71" reason="Prisma Client singleton instance for database operations. Use this for creating user records." />
+      <code path="lib/storage/index.ts" kind="utility" symbol="getStorage" lines="35-55" reason="Storage abstraction layer factory function. Not directly used in this story but follows similar pattern for utilities." />
+      <code path="lib/storage/interface.ts" kind="interface" symbol="StorageInterface" reason="Storage interface pattern. Follow similar pattern for auth utilities (interface, implementation, index exports)." />
+      <code path="app/api/test-db/route.ts" kind="api-route" symbol="GET" reason="Example API route pattern. Follow similar structure for registration API endpoint." />
+      <code path="app/api/test-storage/route.ts" kind="api-route" symbol="POST" reason="Example API route with file upload. Reference for error handling and response format patterns." />
+    </code>
+    <dependencies>
+      <dependency ecosystem="node" package="next-auth" version="Latest" reason="Authentication framework for Next.js with OAuth and JWT support" />
+      <dependency ecosystem="node" package="bcryptjs" version="Latest" reason="Password hashing and verification library" />
+      <dependency ecosystem="node" package="@types/bcryptjs" version="Latest" reason="TypeScript type definitions for bcryptjs" />
+      <dependency ecosystem="node" package="zod" version="Latest" reason="Schema validation library for input validation" />
+      <dependency ecosystem="node" package="@prisma/client" version="^6.19.0" reason="Prisma Client for type-safe database access" />
+      <dependency ecosystem="node" package="next" version="16.0.2" reason="Next.js framework with App Router" />
+      <dependency ecosystem="node" package="react" version="19.2.0" reason="React library for UI components" />
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Use NextAuth.js with Credentials provider for email/password authentication</constraint>
+    <constraint>JWT session strategy with httpOnly cookies for token storage (30 days expiration)</constraint>
+    <constraint>All inputs must be validated server-side using Zod schemas</constraint>
+    <constraint>Passwords must be hashed using bcrypt before storage (salt rounds ≥ 10)</constraint>
+    <constraint>Use Prisma parameterized queries (automatic SQL injection prevention)</constraint>
+    <constraint>Return unified error format: { success: false, error: { message: string, code: string } }</constraint>
+    <constraint>Follow Next.js App Router structure: app/api/ for API routes, app/ for pages</constraint>
+    <constraint>Use lib/ directory for shared utilities and validations</constraint>
+    <constraint>Follow naming conventions: kebab-case for files, PascalCase for components</constraint>
+    <constraint>All public functions and interfaces MUST include JSDoc comments</constraint>
+    <constraint>Use Prisma Client singleton from lib/db/prisma.ts for database operations</constraint>
+    <constraint>HTTP Status Codes: 200 (Success), 201 (Created), 400 (Bad Request), 409 (Conflict), 500 (Internal Server Error)</constraint>
+    <constraint>Email verification is optional for MVP - can be deferred to future story</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="POST /api/auth/register" kind="REST endpoint" signature="POST /api/auth/register" path="app/api/auth/register/route.ts">
+      Request: { email: string; password: string; name?: string }
+      Success Response (201): { success: true, data: { user: User, token: string } }
+      Error Responses: 400 (Bad Request), 409 (Conflict), 500 (Internal Server Error)
+    </interface>
+    <interface name="NextAuth.js Credentials Provider" kind="NextAuth provider" signature="CredentialsProvider" path="app/api/auth/[...nextauth]/route.ts">
+      Configure Credentials provider for email/password authentication with NextAuth.js
+    </interface>
+    <interface name="hashPassword" kind="function" signature="hashPassword(password: string): Promise&lt;string&gt;" path="lib/auth/password.ts">
+      Hash password using bcrypt. Returns hashed password string.
+    </interface>
+    <interface name="comparePassword" kind="function" signature="comparePassword(password: string, hash: string): Promise&lt;boolean&gt;" path="lib/auth/password.ts">
+      Compare plain password with hash. Returns true if match, false otherwise.
+    </interface>
+    <interface name="Registration Schema" kind="Zod schema" signature="z.object({ email: z.string().email(), password: z.string().min(8) })" path="lib/validations/auth.ts">
+      Zod validation schema for registration input with email format and password requirements.
+    </interface>
+    <interface name="User Model" kind="Prisma model" signature="model User { id, email, password?, name?, image?, role, createdAt, updatedAt }" path="prisma/schema.prisma">
+      User model with password field (String?, optional) for storing bcrypt hashed passwords.
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Testing should follow established patterns from previous stories. Use unit tests for utilities (password hashing, validation schemas), integration tests for API endpoints, and end-to-end tests for complete registration flow. All acceptance criteria must have corresponding tests. Use Jest or Vitest for unit tests, Next.js API route testing for integration tests.
+    </standards>
+    <locations>
+      Unit tests: Create test files alongside source files (e.g., lib/auth/password.test.ts)
+      Integration tests: Create test files for API routes (e.g., app/api/auth/register/route.test.ts)
+      Test utilities: Follow pattern from app/api/test-storage/route.ts for API testing
+    </locations>
+    <ideas>
+      <test ac="2.1.1">Test successful registration: create user with valid email and password, verify user record in database, verify password is hashed</test>
+      <test ac="2.1.1">Test duplicate email: attempt to register with existing email, verify 409 Conflict error</test>
+      <test ac="2.1.1">Test invalid email format: attempt registration with invalid email, verify 400 Bad Request with validation error</test>
+      <test ac="2.1.1">Test weak password: attempt registration with password less than 8 characters, verify 400 Bad Request</test>
+      <test ac="2.1.2">Test email verification (if implemented): verify token generation and storage</test>
+      <test ac="2.1.3">Test auto-login: after successful registration, verify JWT token is set in httpOnly cookie, verify session is created</test>
+      <test ac="2.1.4">Test redirect: after successful registration, verify redirect to appropriate page (homepage or dashboard)</test>
+      <test ac="2.1.5">Test error handling: test all error scenarios (duplicate email, invalid input, database errors) and verify appropriate error responses</test>
+      <test ac="2.1.1">Test password hashing utility: verify hashPassword generates different hashes for same password (salt), verify comparePassword correctly validates passwords</test>
+      <test ac="2.1.1">Test validation schema: verify Zod schema correctly validates and rejects invalid inputs</test>
+    </ideas>
+  </tests>
+</story-context>
+

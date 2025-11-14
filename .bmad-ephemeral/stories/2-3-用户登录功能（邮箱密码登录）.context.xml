@@ -1,0 +1,143 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.3</storyId>
+    <title>用户登录功能（邮箱密码登录）</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-12</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/2-3-用户登录功能（邮箱密码登录）.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>registered user</asA>
+    <iWant>to log in using my email and password</iWant>
+    <soThat>I can access my account and blog features</soThat>
+    <tasks>
+      <task id="1" ac="2.3.1,2.3.2,2.3.3">Verify NextAuth.js Credentials Provider Configuration</task>
+      <task id="2" ac="2.3.1,2.3.3,2.3.4">Verify Login Page Implementation</task>
+      <task id="3" ac="2.3.1">Implement Input Validation for Login</task>
+      <task id="4" ac="2.3.5">Verify Session Persistence</task>
+      <task id="5" ac="2.3.1,2.3.3">Implement Error Handling</task>
+      <task id="6" ac="2.3.4">Verify Redirect Logic</task>
+      <task id="7" ac="all">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="2.3.1">Given I have a registered account, When I enter my email and password on the login page, And I submit the login form, Then my credentials are validated</ac>
+    <ac id="2.3.2">I receive a JWT token</ac>
+    <ac id="2.3.3">I am logged in successfully</ac>
+    <ac id="2.3.4">I am redirected to the appropriate page</ac>
+    <ac id="2.3.5">My login state persists across page refreshes</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics/epic-2-用户认证和授权user-authentication-authorization.md" title="Epic 2: 用户认证和授权" section="Story 2.3">
+        Story definition with acceptance criteria and technical notes for email/password login functionality. Includes requirements for credential validation, JWT token generation, session persistence, and error handling.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-2.md" title="Epic 2 Technical Specification" section="Email/Password Login Flow">
+        Comprehensive technical specification including login flow steps, credential validation, password comparison using bcrypt, JWT token generation, and session management. Specifies NextAuth.js Credentials provider usage.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-2.md" title="Epic 2 Technical Specification" section="Login API (Credentials)">
+        API specification for login endpoint via NextAuth.js Credentials provider. Includes request/response formats, error handling (401 Unauthorized), and token management.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Authentication">
+        NextAuth.js configuration requirements, JWT session strategy, httpOnly cookie storage, token expiration (30 days), and authentication architecture patterns.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Security Architecture">
+        Security requirements including password hashing with bcrypt, input validation with Zod, SQL injection prevention via Prisma, and XSS prevention.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Document" section="API Contracts">
+        Unified error response format: { success: boolean, error?: { message: string, code: string } }. HTTP status codes: 200 (Success), 401 (Unauthorized), 400 (Bad Request).
+      </doc>
+      <doc path="docs/PRD.md" title="Product Requirements Document" section="FR-1.2 用户登录">
+        Functional requirement for user login: support email/password login, OAuth login, JWT authentication, and login state persistence.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/2-1-用户注册功能（邮箱注册）.md" title="Story 2.1: 用户注册功能" section="Dev Agent Record">
+        Learnings from registration story: NextAuth.js configuration patterns, password hashing utilities, validation schemas, and session management setup.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/2-2-OAuth-登录集成（GitHub-和-Google）.md" title="Story 2.2: OAuth 登录集成" section="Dev Agent Record">
+        Learnings from OAuth story: NextAuth.js Credentials provider already configured, login page already exists with email/password form, validation schemas already implemented.
+      </doc>
+    </docs>
+    <code>
+      <artifact path="app/api/auth/[...nextauth]/route.ts" kind="configuration" symbol="authOptions" lines="40-281" reason="NextAuth.js configuration with Credentials provider. Contains authorize function that validates email/password, compares password hash, and generates JWT token." />
+      <artifact path="app/api/auth/[...nextauth]/route.ts" kind="function" symbol="authorize" lines="48-102" reason="Credentials provider authorize function that validates input, finds user by email, checks password, handles OAuth users, and returns user object for JWT encoding." />
+      <artifact path="app/api/auth/[...nextauth]/route.ts" kind="function" symbol="jwt" lines="225-262" reason="JWT callback that adds user information to token. For Credentials provider, uses user data from authorize function. For OAuth providers, fetches from database." />
+      <artifact path="app/api/auth/[...nextauth]/route.ts" kind="function" symbol="session" lines="264-274" reason="Session callback that attaches user data (id, email, name, image, role) to session object accessible via useSession hook." />
+      <artifact path="app/login/page.tsx" kind="component" symbol="LoginPage" lines="19-304" reason="Login page component with email/password form. Handles form submission, calls signIn('credentials'), displays errors, manages loading states, and implements redirect logic." />
+      <artifact path="app/login/page.tsx" kind="function" symbol="handleSubmit" lines="86-123" reason="Form submission handler that validates input, calls NextAuth.js signIn('credentials'), handles errors, and redirects on success." />
+      <artifact path="lib/auth/password.ts" kind="utility" symbol="comparePassword" lines="52-64" reason="Password comparison utility using bcrypt. Compares plain text password with hashed password from database. Used in NextAuth.js authorize function." />
+      <artifact path="lib/validations/auth.ts" kind="schema" symbol="loginSchema" lines="57-65" reason="Zod validation schema for login input. Validates email format (RFC 5322) and password presence. Used in NextAuth.js authorize function for input validation." />
+      <artifact path="lib/db/prisma.ts" kind="database" symbol="prisma" reason="Prisma Client singleton for database operations. Used to find user by email including password field for credential verification." />
+      <artifact path="prisma/schema.prisma" kind="schema" symbol="User" reason="User model with password field (String?, optional). Password field is optional to support OAuth users who don't have passwords." />
+    </code>
+    <dependencies>
+      <ecosystem name="Node.js">
+        <package name="next" version="16.0.2" />
+        <package name="next-auth" version="^4.24.13" />
+        <package name="bcryptjs" version="^3.0.3" />
+        <package name="@types/bcryptjs" version="^2.4.6" />
+        <package name="zod" version="^4.1.12" />
+        <package name="@prisma/client" version="^6.19.0" />
+        <package name="react" version="19.2.0" />
+        <package name="react-dom" version="19.2.0" />
+      </ecosystem>
+      <ecosystem name="Testing">
+        <package name="jest" version="^30.2.0" />
+        <package name="jest-environment-jsdom" version="^30.2.0" />
+        <package name="ts-jest" version="^29.4.5" />
+        <package name="@testing-library/react" version="^16.3.0" />
+        <package name="@testing-library/jest-dom" version="^6.9.1" />
+        <package name="@testing-library/user-event" version="^14.6.1" />
+        <package name="@playwright/test" version="^1.56.1" />
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="authentication">Must use NextAuth.js Credentials provider for email/password authentication. JWT session strategy with httpOnly cookies required. Token expiration: 30 days (configurable).</constraint>
+    <constraint type="security">All inputs must be validated server-side using Zod. Passwords must be compared using bcrypt comparePassword function. Generic error messages required (no information leakage).</constraint>
+    <constraint type="database">Use Prisma Client singleton from lib/db/prisma.ts. User lookup must include password field for comparison. Handle OAuth users (password is null) with appropriate error message.</constraint>
+    <constraint type="api">Follow unified error response format: { success: boolean, error?: { message: string, code: string } }. Use HTTP status codes: 401 (Unauthorized) for invalid credentials, 400 (Bad Request) for validation errors.</constraint>
+    <constraint type="session">JWT token must be stored in httpOnly cookie (prevents XSS). Session must persist across page refreshes. Session accessible via useSession hook from next-auth/react.</constraint>
+    <constraint type="validation">Email format validation must comply with RFC 5322. Password validation: minimum length check (presence required). Validation must occur in NextAuth.js authorize function using loginSchema.</constraint>
+    <constraint type="error-handling">Invalid credentials must return generic error message ("Invalid email or password"). OAuth users attempting password login must receive specific error message. Account not found must return generic error (same as invalid credentials for security).</constraint>
+    <constraint type="redirect">Default redirect after successful login: homepage ("/"). If callbackUrl provided (from protected routes), redirect to callbackUrl. Use Next.js router for client-side navigation.</constraint>
+    <constraint type="testing">Unit tests required for login validation schema. Integration tests required for login API endpoint (NextAuth.js Credentials provider). E2E tests required for complete login flow including session persistence and redirect logic.</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="NextAuth.js Credentials Provider" kind="authentication-provider" signature="CredentialsProvider({ name: 'Credentials', credentials: { email, password }, authorize: async (credentials) => User })" path="app/api/auth/[...nextauth]/route.ts" />
+    <interface name="NextAuth.js signIn" kind="client-function" signature="signIn('credentials', { email: string, password: string, redirect: boolean }) => Promise&lt;SignInResponse&gt;" path="next-auth/react" />
+    <interface name="useSession Hook" kind="react-hook" signature="useSession() => { data: Session | null, status: 'loading' | 'authenticated' | 'unauthenticated' }" path="next-auth/react" />
+    <interface name="comparePassword" kind="utility-function" signature="comparePassword(password: string, hash: string): Promise&lt;boolean&gt;" path="lib/auth/password.ts" />
+    <interface name="loginSchema" kind="validation-schema" signature="z.object({ email: z.string().email(), password: z.string().min(1) })" path="lib/validations/auth.ts" />
+    <interface name="Prisma User Query" kind="database-query" signature="prisma.user.findUnique({ where: { email }, select: { id, email, password, name, image, role } })" path="lib/db/prisma.ts" />
+  </interfaces>
+
+  <tests>
+    <standards>
+      Testing uses Jest for unit and integration tests, and Playwright for E2E tests. Unit tests should test individual functions (validation schemas, password utilities) in isolation. Integration tests should test API endpoints and database interactions. E2E tests should test complete user flows in real browsers. All tests should follow existing patterns from Story 2.1 and Story 2.2. Test files should be co-located with source files or in tests/ directory structure.
+    </standards>
+    <locations>
+      <location>tests/__tests__/unit/</location>
+      <location>tests/__tests__/integration/</location>
+      <location>tests/e2e/</location>
+      <location>app/api/test-*/route.ts</location>
+    </locations>
+    <ideas>
+      <test ac="2.3.1" type="unit">Test loginSchema validation: valid email/password, invalid email format, missing password, empty email.</test>
+      <test ac="2.3.1" type="integration">Test NextAuth.js authorize function: valid credentials, invalid password, non-existent user, OAuth user attempting password login.</test>
+      <test ac="2.3.2" type="integration">Test JWT token generation: verify token is created after successful login, token contains user information (id, email, name, role).</test>
+      <test ac="2.3.3" type="integration">Test successful login: verify session is created, user data is accessible via useSession hook.</test>
+      <test ac="2.3.4" type="e2e">Test redirect logic: login from homepage redirects to homepage, login from protected route redirects back to protected route.</test>
+      <test ac="2.3.5" type="e2e">Test session persistence: login, refresh page, verify session is still active and user data is accessible.</test>
+      <test ac="2.3.1,2.3.3" type="integration">Test error handling: invalid credentials returns 401, error message is user-friendly, no sensitive information exposed.</test>
+      <test ac="all" type="e2e">Test complete login flow: navigate to login page, enter credentials, submit form, verify redirect, verify session persistence.</test>
+    </ideas>
+  </tests>
+</story-context>
+

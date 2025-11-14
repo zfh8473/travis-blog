@@ -1,0 +1,164 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.2</storyId>
+    <title>OAuth 登录集成（GitHub 和 Google）</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-12</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/2-2-OAuth-登录集成（GitHub-和-Google）.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>visitor</asA>
+    <iWant>to log in using my GitHub or Google account</iWant>
+    <soThat>I can quickly access the blog without creating a new account</soThat>
+    <tasks>
+      <task id="1" ac="2.2.1,2.2.2">Set Up GitHub OAuth App</task>
+      <task id="2" ac="2.2.1,2.2.2">Set Up Google OAuth App</task>
+      <task id="3" ac="2.2.1,2.2.2,2.2.4">Configure NextAuth.js OAuth Providers</task>
+      <task id="4" ac="2.2.3">Implement OAuth User Account Creation/Linking</task>
+      <task id="5" ac="2.2.2,2.2.4,2.2.5">Implement OAuth Callback Handling</task>
+      <task id="6" ac="2.2.1,2.2.5">Create Login Page with OAuth Buttons</task>
+      <task id="7" ac="2.2.5">Handle OAuth Errors</task>
+      <task id="8" ac="all">Update Environment Variables Documentation</task>
+      <task id="9" ac="all">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="2.2.1">Given I am on the login page, When I click the "Login with GitHub" or "Login with Google" button, Then I am redirected to the OAuth provider</ac>
+    <ac id="2.2.2">After authorizing, I am redirected back to the blog</ac>
+    <ac id="2.2.3">My account is created or logged in automatically</ac>
+    <ac id="2.2.4">I receive a JWT token</ac>
+    <ac id="2.2.5">I am logged in successfully</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics/epic-2-用户认证和授权user-authentication-authorization.md" title="Epic 2: 用户认证和授权" section="Story 2.2">
+        Story definition with acceptance criteria and technical notes for OAuth login integration with GitHub and Google.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-2.md" title="Epic 2 Technical Specification" section="OAuth Login">
+        Comprehensive technical specification including OAuth flow, account creation/linking, and JWT token generation for OAuth authentication.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Authentication">
+        NextAuth.js configuration requirements, OAuth provider setup, JWT session strategy, and authentication architecture patterns.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Technology Stack Details">
+        NextAuth.js integration with OAuth providers (GitHub, Google), OAuth callback handling, and session management.
+      </doc>
+      <doc path="docs/architecture/security-architecture.md" title="Security Architecture" section="Authentication">
+        NextAuth.js OAuth configuration, OAuth security best practices, Authorization Code Flow, and CSRF protection.
+      </doc>
+      <doc path="docs/PRD.md" title="Product Requirements Document" section="FR-1.1 用户注册">
+        Functional requirement for OAuth login integration as part of user authentication system.
+      </doc>
+      <doc path="prisma/schema.prisma" title="Prisma Schema" section="User Model">
+        User model definition with optional password field to support OAuth users. OAuth users have null password field.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Project Structure">
+        Project structure guidelines for API routes, authentication pages, and OAuth callback handling.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/2-1-用户注册功能（邮箱注册）.md" title="Story 2.1: User Registration" section="Dev Notes">
+        Learnings from previous story including NextAuth.js configuration patterns, JWT token management, and user model structure.
+      </doc>
+      <doc path="docs/vercel-env-setup.md" title="Vercel Environment Variables Setup" section="OAuth Configuration">
+        Environment variable configuration for OAuth providers including GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET.
+      </doc>
+    </docs>
+    <code>
+      <code path="app/api/auth/[...nextauth]/route.ts" kind="api-route" symbol="authOptions" lines="34-144" reason="NextAuth.js configuration file. Add GitHub and Google OAuth providers to the providers array. Update signIn callback to handle OAuth account creation/linking." />
+      <code path="lib/db/prisma.ts" kind="utility" symbol="prisma" lines="1-71" reason="Prisma Client singleton instance for database operations. Use this for creating/updating OAuth user records and checking existing users by email." />
+      <code path="app/api/auth/register/route.ts" kind="api-route" symbol="POST" reason="Reference for API route structure, error handling patterns, and response format. OAuth flow uses NextAuth.js callbacks instead of separate API endpoint." />
+      <code path="lib/validations/auth.ts" kind="validation" symbol="loginSchema" reason="Validation schema patterns. OAuth validation is handled by NextAuth.js, but email validation may be needed for account linking." />
+      <code path="app/register/page.tsx" kind="page" symbol="RegisterPage" reason="Reference for login page structure and styling patterns. Create similar page for login with OAuth buttons." />
+    </code>
+    <dependencies>
+      <dependency ecosystem="node" package="next-auth" version="Latest" reason="Authentication framework for Next.js with built-in OAuth providers (GitHub, Google) and JWT support" />
+      <dependency ecosystem="node" package="@prisma/client" version="^6.19.0" reason="Prisma Client for type-safe database access to create/update OAuth user records" />
+      <dependency ecosystem="node" package="next" version="16.0.2" reason="Next.js framework with App Router for API routes and pages" />
+      <dependency ecosystem="node" package="react" version="19.2.0" reason="React library for UI components including OAuth login buttons" />
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Use NextAuth.js with GitHub and Google OAuth providers (built-in, no additional packages needed)</constraint>
+    <constraint>JWT session strategy with httpOnly cookies for token storage (30 days expiration, already configured)</constraint>
+    <constraint>OAuth flow uses Authorization Code Flow (PKCE for security, handled by NextAuth.js)</constraint>
+    <constraint>OAuth callback URLs must match exactly: Production: https://travis-blog.vercel.app/api/auth/callback/{provider}, Development: http://localhost:3000/api/auth/callback/{provider}</constraint>
+    <constraint>OAuth users have null password field in User model (password is optional, already supported)</constraint>
+    <constraint>Account linking: If OAuth email matches existing user email, link OAuth account to existing user record</constraint>
+    <constraint>If OAuth email doesn't match existing user, create new user record with OAuth profile data (name, image, email)</constraint>
+    <constraint>New OAuth users default to USER role</constraint>
+    <constraint>Store OAuth profile data (name, image, email) from OAuth provider in User model</constraint>
+    <constraint>Handle OAuth errors gracefully: user denies authorization, network errors, callback errors</constraint>
+    <constraint>Display user-friendly error messages for OAuth failures</constraint>
+    <constraint>Log OAuth errors for debugging (without exposing sensitive data like tokens)</constraint>
+    <constraint>Follow Next.js App Router structure: app/api/auth/ for NextAuth.js routes, app/login/ for login page</constraint>
+    <constraint>Use NextAuth.js signIn() function from client-side to initiate OAuth flow</constraint>
+    <constraint>OAuth buttons should be styled with provider branding (GitHub/Google colors, icons)</constraint>
+    <constraint>All public functions and interfaces MUST include JSDoc comments</constraint>
+    <constraint>Environment variables: GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET must be set</constraint>
+    <constraint>OAuth apps must be configured in GitHub Developer Settings and Google Cloud Console with correct callback URLs</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="NextAuth.js GitHub Provider" kind="NextAuth provider" signature="GitHubProvider" path="app/api/auth/[...nextauth]/route.ts">
+      Configure GitHub OAuth provider with GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET. Import from next-auth/providers/github.
+    </interface>
+    <interface name="NextAuth.js Google Provider" kind="NextAuth provider" signature="GoogleProvider" path="app/api/auth/[...nextauth]/route.ts">
+      Configure Google OAuth provider with GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET. Import from next-auth/providers/google.
+    </interface>
+    <interface name="OAuth Callback" kind="NextAuth callback" signature="signIn callback" path="app/api/auth/[...nextauth]/route.ts">
+      Handle OAuth sign-in callback. Check if user exists by email, create new user or link to existing user, return user object for JWT encoding.
+    </interface>
+    <interface name="GET /api/auth/signin/github" kind="NextAuth route" signature="GET /api/auth/signin/github" path="app/api/auth/[...nextauth]/route.ts">
+      NextAuth.js automatically creates this route. Initiates GitHub OAuth flow, redirects to GitHub authorization page.
+    </interface>
+    <interface name="GET /api/auth/signin/google" kind="NextAuth route" signature="GET /api/auth/signin/google" path="app/api/auth/[...nextauth]/route.ts">
+      NextAuth.js automatically creates this route. Initiates Google OAuth flow, redirects to Google authorization page.
+    </interface>
+    <interface name="GET /api/auth/callback/github" kind="NextAuth route" signature="GET /api/auth/callback/github" path="app/api/auth/[...nextauth]/route.ts">
+      NextAuth.js automatically handles OAuth callback. Exchanges authorization code for access token, fetches user info, creates/updates user, generates JWT.
+    </interface>
+    <interface name="GET /api/auth/callback/google" kind="NextAuth route" signature="GET /api/auth/callback/google" path="app/api/auth/[...nextauth]/route.ts">
+      NextAuth.js automatically handles OAuth callback. Exchanges authorization code for access token, fetches user info, creates/updates user, generates JWT.
+    </interface>
+    <interface name="signIn() Client Function" kind="NextAuth client function" signature="signIn(provider: string)" path="app/login/page.tsx">
+      Client-side function from next-auth/react to initiate OAuth flow. Call signIn("github") or signIn("google") on button click.
+    </interface>
+    <interface name="User Model" kind="Prisma model" signature="model User { id, email, password?, name?, image?, role, createdAt, updatedAt }" path="prisma/schema.prisma">
+      User model supports OAuth users with optional password field. OAuth users have null password, email from OAuth provider, name and image from OAuth profile.
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Testing should follow established patterns from previous stories. Use integration tests for OAuth flow, end-to-end tests for complete OAuth login flow, and unit tests for account linking logic. All acceptance criteria must have corresponding tests. Use Next.js API route testing for integration tests, Playwright or Cypress for E2E tests (optional).
+    </standards>
+    <locations>
+      Integration tests: Create test files for OAuth callback handling (e.g., app/api/auth/[...nextauth]/route.test.ts)
+      E2E tests: Create test files for complete OAuth flow (e.g., tests/e2e/oauth-login.spec.ts)
+      Test utilities: Follow pattern from app/api/test-storage/route.ts for API testing
+    </locations>
+    <ideas>
+      <test ac="2.2.1">Test GitHub OAuth redirect: Click "Login with GitHub" button, verify redirect to GitHub authorization page with correct parameters</test>
+      <test ac="2.2.1">Test Google OAuth redirect: Click "Login with Google" button, verify redirect to Google authorization page with correct parameters</test>
+      <test ac="2.2.2">Test OAuth callback: After authorization, verify redirect back to blog with correct callback URL</test>
+      <test ac="2.2.3">Test new account creation: OAuth login with new email, verify new user record created in database with OAuth profile data</test>
+      <test ac="2.2.3">Test account linking: Register with email/password, then OAuth login with same email, verify accounts are linked (same user record)</test>
+      <test ac="2.2.3">Test existing OAuth user login: OAuth login with existing OAuth user email, verify user is logged in (no duplicate user created)</test>
+      <test ac="2.2.4">Test JWT token generation: After OAuth login, verify JWT token is generated and stored in httpOnly cookie</test>
+      <test ac="2.2.5">Test successful login: After OAuth login, verify user session is created, verify user can access protected routes</test>
+      <test ac="2.2.5">Test OAuth error handling: Test user denies authorization, verify error message displayed, verify redirect to login page</test>
+      <test ac="2.2.5">Test network errors: Simulate OAuth provider network error, verify error handling and user-friendly error message</test>
+      <test ac="2.2.5">Test callback errors: Test invalid state parameter, token exchange failures, verify error handling</test>
+      <test ac="2.2.3">Test OAuth profile data: Verify name, image, email from OAuth provider are correctly stored in User model</test>
+      <test ac="2.2.3">Test default role: Verify new OAuth users are assigned USER role by default</test>
+      <test ac="2.2.1">Test OAuth button UI: Verify OAuth buttons are displayed correctly with provider branding (GitHub/Google colors, icons)</test>
+      <test ac="2.2.1">Test loading states: Verify loading states are displayed during OAuth redirect</test>
+    </ideas>
+  </tests>
+</story-context>
+

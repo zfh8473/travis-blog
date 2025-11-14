@@ -47,17 +47,17 @@ development_status:
 
   # Epic 2: 用户认证和授权（User Authentication & Authorization）
   epic-2: contexted
-  2-1-用户注册功能（邮箱注册）: review
-  2-2-OAuth-登录集成（GitHub-和-Google）: backlog
-  2-3-用户登录功能（邮箱密码登录）: backlog
-  2-4-JWT-认证中间件: backlog
-  2-5-用户角色和权限管理: backlog
-  2-6-用户资料管理: backlog
+  2-1-用户注册功能（邮箱注册）: done
+  2-2-OAuth-登录集成（GitHub-和-Google）: done
+  2-3-用户登录功能（邮箱密码登录）: done
+  2-4-JWT-认证中间件: done
+  2-5-用户角色和权限管理: done
+  2-6-用户资料管理: done
   epic-2-retrospective: optional
 
   # Epic 3: 内容创作和管理（Content Creation & Management）
-  epic-3: backlog
-  3-1-文章数据模型和基础-API: backlog
+  epic-3: contexted
+  3-1-文章数据模型和基础-API: done
   3-2-Tiptap-编辑器集成: backlog
   3-3-文章创建功能: backlog
   3-4-文章编辑功能: backlog

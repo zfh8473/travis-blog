@@ -28,12 +28,16 @@ import { registrationSchema } from "@/lib/validations/auth";
  * ```
  */
 export async function POST(request: Request) {
+  // Parse request body once and store for reuse
+  let body: unknown;
+  let validationResult: ReturnType<typeof registrationSchema.safeParse> | undefined;
+
   try {
     // Parse request body
-    const body = await request.json();
+    body = await request.json();
 
     // Validate input
-    const validationResult = registrationSchema.safeParse(body);
+    validationResult = registrationSchema.safeParse(body);
 
     if (!validationResult.success) {
       return NextResponse.json(
@@ -102,7 +106,24 @@ export async function POST(request: Request) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Registration error:", error);
+    // Enhanced error logging with context (without sensitive data)
+    const errorContext: {
+      error: string;
+      errorType: string;
+      timestamp: string;
+      email?: string;
+    } = {
+      error: error instanceof Error ? error.message : "Unknown error",
+      errorType: error instanceof Error ? error.constructor.name : typeof error,
+      timestamp: new Date().toISOString(),
+    };
+
+    // Include email if validation was successful (body already parsed)
+    if (validationResult && validationResult.success) {
+      errorContext.email = validationResult.data.email;
+    }
+
+    console.error("Registration error:", errorContext, error);
 
     // Handle database errors
     if (error instanceof Error) {

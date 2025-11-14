@@ -1,0 +1,233 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.1</storyId>
+    <title>文章数据模型和基础 API</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-12</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/3-1-文章数据模型和基础-API.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>to create the article data model and basic CRUD APIs</iWant>
+    <soThat>articles can be stored and retrieved from the database</soThat>
+    <tasks>
+      <task id="1" ac="3.1.1,3.1.2">Verify Article Data Model in Prisma Schema</task>
+      <task id="2" ac="3.1.1,3.1.3">Create Article Validation Schema</task>
+      <task id="3" ac="3.1.1">Create Slug Generation Utility</task>
+      <task id="4" ac="3.1.2">Create Article List API Endpoint</task>
+      <task id="5" ac="3.1.2">Create Article Detail API Endpoint</task>
+      <task id="6" ac="3.1.1">Create Article Creation API Endpoint</task>
+      <task id="7" ac="3.1.3">Create Article Update API Endpoint</task>
+      <task id="8" ac="3.1.4">Create Article Deletion API Endpoint</task>
+      <task id="9" ac="all">Implement Error Handling</task>
+      <task id="10" ac="all">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="3.1.1">Given the database is set up, When I create an article through the API, Then the article is saved to the database with all required fields (title, content, author, status, etc.)</ac>
+    <ac id="3.1.2">When I retrieve an article by ID, Then the article data is returned correctly with all fields</ac>
+    <ac id="3.1.3">When I update an article, Then the article is updated in the database and updatedAt timestamp is refreshed</ac>
+    <ac id="3.1.4">When I delete an article, Then the article is removed from the database and related data (tags, comments) are handled appropriately</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics/epic-3-内容创作和管理content-creation-management.md" title="Epic 3: 内容创作和管理" section="Story 3.1">
+        Story definition with acceptance criteria and technical notes for article data model and CRUD APIs. Includes requirements for article creation, retrieval, update, deletion, input validation, database indexes, and error handling.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-3.md" title="Tech Spec Epic 3" section="Data Models and Contracts">
+        Article model specification: Article data model with title, content, excerpt, slug, status, categoryId, authorId, publishedAt, createdAt, updatedAt. Relationships: Many-to-One with User (author), Many-to-One with Category (optional), Many-to-Many with Tag (via ArticleTag), One-to-Many with Comment. Database indexes on publishedAt, slug, authorId.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-3.md" title="Tech Spec Epic 3" section="APIs and Interfaces">
+        Article CRUD API endpoints specification: POST /api/articles (create), GET /api/articles (list with pagination), GET /api/articles/[id] (detail), PUT /api/articles/[id] (update), DELETE /api/articles/[id] (delete). All endpoints require ADMIN role except GET detail for published articles (public access). Unified error response format and HTTP status codes.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-3.md" title="Tech Spec Epic 3" section="Slug Generation">
+        Slug generation specification: Generate URL-friendly slugs from article titles. Ensure slug uniqueness (append number if conflict). Store slug in database for article lookup.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Document" section="API Contracts">
+        Unified error response format: { success: boolean, error?: { message: string, code: string } }. HTTP status codes: 200 (Success), 201 (Created), 400 (Bad Request), 401 (Unauthorized), 403 (Forbidden), 404 (Not Found), 500 (Internal Server Error). Use Next.js API Routes for article endpoints.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Input Validation">
+        Server-side validation for all inputs. Use Zod for schema validation. Sanitize user inputs. All API endpoints must validate input data. Return validation errors in unified format.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Project Structure">
+        API routes in app/api/ directory. Article API: app/api/articles/route.ts (GET, POST), app/api/articles/[id]/route.ts (GET, PUT, DELETE). Validation schemas: lib/validations/article.ts. Utilities: lib/utils/slug.ts. Database access: lib/db/prisma.ts.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Data Architecture">
+        Article model already exists in Prisma schema with all required fields. Use Prisma ORM for all database operations. Database indexes already defined for performance. Cascade deletes configured for ArticleTag and Comment. Category relation is set to null (onDelete: SetNull).
+      </doc>
+      <doc path=".bmad-ephemeral/stories/2-6-用户资料管理.md" title="Story 2.6: 用户资料管理" section="Dev Agent Record">
+        Learnings: Permission check functions (requireAuth, requireAdmin, getUserFromHeaders) are available. Middleware attaches user information to request headers. Unified error response format. Functions return appropriate HTTP status codes (401, 403). Validation pattern using Zod schemas.
+      </doc>
+    </docs>
+    <code>
+      <artifact path="prisma/schema.prisma" kind="schema" symbol="Article" lines="118-140" reason="Article model definition. Contains all required fields: id, title, content, excerpt, slug, status, categoryId, authorId, publishedAt, createdAt, updatedAt. Relationships: Many-to-One with User (author), Many-to-One with Category (optional), Many-to-Many with Tag (via ArticleTag), One-to-Many with Comment. Database indexes on publishedAt, slug, authorId. Cascade deletes configured." />
+      <artifact path="prisma/schema.prisma" kind="schema" symbol="Category" lines="81-90" reason="Category model definition. Contains id, name, slug, createdAt, updatedAt. One-to-Many relationship with Article. Use for category selection in article creation/update." />
+      <artifact path="prisma/schema.prisma" kind="schema" symbol="Tag" lines="98-107" reason="Tag model definition. Contains id, name, slug, createdAt, updatedAt. Many-to-Many relationship with Article via ArticleTag junction table. Use for tag management in article creation/update." />
+      <artifact path="prisma/schema.prisma" kind="schema" symbol="ArticleTag" lines="145-153" reason="ArticleTag junction table for Many-to-Many relationship between Article and Tag. Composite primary key on articleId and tagId. Cascade deletes configured for both relations." />
+      <artifact path="prisma/schema.prisma" kind="enum" symbol="ArticleStatus" lines="32-35" reason="ArticleStatus enum: DRAFT, PUBLISHED. Use for article status field in Article model." />
+      <artifact path="lib/db/prisma.ts" kind="singleton" symbol="prisma" lines="65-71" reason="Prisma Client singleton instance. Use this for all database operations. Prevents multiple instances during Next.js development hot-reload. Validates DATABASE_URL environment variable." />
+      <artifact path="lib/auth/middleware.ts" kind="function" symbol="getUserFromHeaders" lines="55-76" reason="Helper function to extract user information from request headers. Returns user object with id, email, name, role. Use this in API routes to get authenticated user. Returns null if user not authenticated." />
+      <artifact path="lib/auth/permissions.ts" kind="function" symbol="requireAuth" lines="86-100" reason="Permission check function. Returns 401 Unauthorized if user is not authenticated. Returns null if user is authenticated. Use this to protect article API endpoints." />
+      <artifact path="lib/auth/permissions.ts" kind="function" symbol="requireAdmin" lines="121-143" reason="Permission check function. Returns 401 Unauthorized if user is not authenticated. Returns 403 Forbidden if user is authenticated but not admin. Returns null if user is admin. Use this to protect article management operations." />
+      <artifact path="lib/validations/auth.ts" kind="schema" symbol="registrationSchema" lines="25-42" reason="Zod validation schema example. Shows pattern for creating validation schemas. Use similar pattern for article validation schemas (createArticleSchema, updateArticleSchema)." />
+      <artifact path="lib/validations/profile.ts" kind="schema" symbol="profileUpdateSchema" lines="24-39" reason="Zod validation schema example for partial updates. Shows pattern for optional fields and empty string handling. Use similar pattern for updateArticleSchema (all fields optional)." />
+      <artifact path="app/api/profile/route.ts" kind="function" symbol="GET" lines="23-79" reason="API route handler example. Shows pattern: getUserFromHeaders, requireAuth, Prisma query, unified error response format. Use similar pattern for GET /api/articles and GET /api/articles/[id]." />
+      <artifact path="app/api/profile/route.ts" kind="function" symbol="PUT" lines="106-189" reason="API route handler example for updates. Shows pattern: getUserFromHeaders, requireAuth, parse body, validate input, partial update, unified error response format. Use similar pattern for PUT /api/articles/[id]." />
+      <artifact path="app/api/auth/register/route.ts" kind="function" symbol="POST" lines="30-157" reason="API route handler example for creation. Shows pattern: parse body, validate input, check for duplicates, create record, return created object, error handling with unified format. Use similar pattern for POST /api/articles." />
+      <artifact path="app/api/protected/route.ts" kind="function" symbol="GET" lines="12-42" reason="Protected API route example. Shows pattern for using getUserFromHeaders and returning unified error response format. Demonstrates authentication check pattern." />
+    </code>
+    <dependencies>
+      <ecosystem name="Node.js">
+        <package name="next" version="16.0.2" />
+        <package name="react" version="19.2.0" />
+        <package name="react-dom" version="19.2.0" />
+        <package name="next-auth" version="^4.24.13" />
+        <package name="zod" version="^4.1.12" />
+        <package name="@prisma/client" version="^6.19.0" />
+        <package name="prisma" version="^6.19.0" />
+        <package name="typescript" version="^5" />
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>
+      <name>API Architecture</name>
+      <description>Use Next.js API Routes for article endpoints. Follow RESTful conventions: /api/articles (collection), /api/articles/[id] (resource). Use HTTP methods: GET (read), POST (create), PUT (update), DELETE (delete). Return unified error format: { success: false, error: { message: string, code: string } }.</description>
+      <source>docs/architecture.md#API-Contracts</source>
+    </constraint>
+    <constraint>
+      <name>Database Architecture</name>
+      <description>Article model already exists in Prisma schema with all required fields. Use Prisma ORM for all database operations. Database indexes already defined for performance. Cascade deletes configured for ArticleTag and Comment. Category relation is set to null (onDelete: SetNull).</description>
+      <source>prisma/schema.prisma#Article-model</source>
+    </constraint>
+    <constraint>
+      <name>Authentication and Authorization</name>
+      <description>All article management operations require ADMIN role. Use getUserFromHeaders from middleware to get authenticated user. Use requireAdmin from permissions to verify ADMIN role. Reference: lib/auth/middleware.ts#getUserFromHeaders, lib/auth/permissions.ts#requireAdmin.</description>
+      <source>docs/architecture.md#Security-Architecture</source>
+    </constraint>
+    <constraint>
+      <name>Input Validation</name>
+      <description>All inputs must be validated server-side using Zod. Create validation schemas in lib/validations/article.ts. Return validation errors in unified format. Reference: docs/architecture.md#Input-Validation, lib/validations/auth.ts (for pattern).</description>
+      <source>docs/architecture.md#Input-Validation</source>
+    </constraint>
+    <constraint>
+      <name>Slug Generation</name>
+      <description>Generate URL-friendly slugs from article titles. Ensure slug uniqueness (append number if conflict). Store slug in database for article lookup. Reference: .bmad-ephemeral/stories/tech-spec-epic-3.md#Slug-Generation.</description>
+      <source>.bmad-ephemeral/stories/tech-spec-epic-3.md#Slug-Generation</source>
+    </constraint>
+    <constraint>
+      <name>Error Handling</name>
+      <description>Handle validation errors (400 Bad Request), authentication errors (401 Unauthorized), authorization errors (403 Forbidden), not found errors (404 Not Found), database errors (500 Internal Server Error). Return unified error format. Log errors for debugging (without exposing sensitive data).</description>
+      <source>docs/architecture.md#Error-Handling</source>
+    </constraint>
+    <constraint>
+      <name>Pagination</name>
+      <description>Default page size: 20 items. Maximum page size: 50 items. Return pagination metadata (page, limit, total, totalPages). Use Prisma skip and take for pagination.</description>
+      <source>.bmad-ephemeral/stories/tech-spec-epic-3.md#APIs-and-Interfaces</source>
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>POST /api/articles</name>
+      <kind>REST endpoint</kind>
+      <signature>POST /api/articles
+Authentication: Required (ADMIN role)
+Request Body: { title: string, content: string, excerpt?: string, categoryId?: string, tagIds?: string[], status: "DRAFT" | "PUBLISHED" }
+Response (201): { success: true, data: ArticleResponse }
+Error Responses: 400 (Validation), 401 (Unauthorized), 403 (Forbidden), 500 (Internal Server Error)</signature>
+      <path>app/api/articles/route.ts</path>
+    </interface>
+    <interface>
+      <name>GET /api/articles</name>
+      <kind>REST endpoint</kind>
+      <signature>GET /api/articles?status=DRAFT|PUBLISHED&amp;categoryId=string&amp;tagId=string&amp;page=number&amp;limit=number
+Authentication: Required (ADMIN role)
+Response (200): { success: true, data: { articles: ArticleResponse[], pagination: { page, limit, total, totalPages } } }
+Error Responses: 401 (Unauthorized), 403 (Forbidden), 500 (Internal Server Error)</signature>
+      <path>app/api/articles/route.ts</path>
+    </interface>
+    <interface>
+      <name>GET /api/articles/[id]</name>
+      <kind>REST endpoint</kind>
+      <signature>GET /api/articles/[id]
+Authentication: Required (ADMIN role for draft articles, public for published)
+Response (200): { success: true, data: ArticleResponse }
+Error Responses: 401 (Unauthorized), 403 (Forbidden), 404 (Not Found), 500 (Internal Server Error)</signature>
+      <path>app/api/articles/[id]/route.ts</path>
+    </interface>
+    <interface>
+      <name>PUT /api/articles/[id]</name>
+      <kind>REST endpoint</kind>
+      <signature>PUT /api/articles/[id]
+Authentication: Required (ADMIN role)
+Request Body: { title?: string, content?: string, excerpt?: string, categoryId?: string, tagIds?: string[], status?: "DRAFT" | "PUBLISHED" } (all fields optional)
+Response (200): { success: true, data: ArticleResponse }
+Error Responses: 400 (Validation), 401 (Unauthorized), 403 (Forbidden), 404 (Not Found), 500 (Internal Server Error)</signature>
+      <path>app/api/articles/[id]/route.ts</path>
+    </interface>
+    <interface>
+      <name>DELETE /api/articles/[id]</name>
+      <kind>REST endpoint</kind>
+      <signature>DELETE /api/articles/[id]
+Authentication: Required (ADMIN role)
+Response (200): { success: true, message: "Article deleted successfully" }
+Error Responses: 401 (Unauthorized), 403 (Forbidden), 404 (Not Found), 500 (Internal Server Error)</signature>
+      <path>app/api/articles/[id]/route.ts</path>
+    </interface>
+    <interface>
+      <name>getUserFromHeaders</name>
+      <kind>function signature</kind>
+      <signature>function getUserFromHeaders(headers: Headers): { id: string, email: string, name: string | null, role: string } | null</signature>
+      <path>lib/auth/middleware.ts</path>
+    </interface>
+    <interface>
+      <name>requireAdmin</name>
+      <kind>function signature</kind>
+      <signature>function requireAdmin(user: UserInfo | null): NextResponse | null</signature>
+      <path>lib/auth/permissions.ts</path>
+    </interface>
+    <interface>
+      <name>createArticleSchema</name>
+      <kind>Zod schema</kind>
+      <signature>z.object({ title: z.string().min(1).max(200), content: z.string().min(1), excerpt: z.string().max(500).optional(), categoryId: z.string().uuid().optional(), tagIds: z.array(z.string().uuid()).optional(), status: z.enum(["DRAFT", "PUBLISHED"]) })</signature>
+      <path>lib/validations/article.ts</path>
+    </interface>
+    <interface>
+      <name>updateArticleSchema</name>
+      <kind>Zod schema</kind>
+      <signature>z.object({ title: z.string().min(1).max(200).optional(), content: z.string().min(1).optional(), excerpt: z.string().max(500).optional(), categoryId: z.string().uuid().optional(), tagIds: z.array(z.string().uuid()).optional(), status: z.enum(["DRAFT", "PUBLISHED"]).optional() })</signature>
+      <path>lib/validations/article.ts</path>
+    </interface>
+    <interface>
+      <name>generateSlug</name>
+      <kind>function signature</kind>
+      <signature>function generateSlug(title: string): string</signature>
+      <path>lib/utils/slug.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use Jest for unit tests and integration tests. Use Playwright for E2E tests. Test files should be in tests/__tests__/unit/, tests/__tests__/integration/, and tests/e2e/ directories. Follow existing test patterns from Epic 2 stories. Use unified error response format in test assertions. Test authentication and authorization for all endpoints. Test validation errors, not found errors, and database errors.
+    </standards>
+    <locations>
+      <location>tests/__tests__/unit/</location>
+      <location>tests/__tests__/integration/</location>
+      <location>tests/e2e/</location>
+    </locations>
+    <ideas>
+      <test ac="3.1.1">Test article creation with all required fields. Test slug generation and uniqueness. Test category and tag associations. Test validation errors (empty title, invalid categoryId, etc.). Test authentication and authorization (401, 403).</test>
+      <test ac="3.1.2">Test article retrieval by ID. Test article list with pagination. Test filtering by status, category, tag. Test draft articles require ADMIN role. Test published articles allow public access. Test article not found (404).</test>
+      <test ac="3.1.3">Test article update with partial fields. Test slug regeneration when title changes. Test publishedAt update when status changes. Test updatedAt timestamp refresh. Test validation errors. Test article not found (404).</test>
+      <test ac="3.1.4">Test article deletion. Test cascade deletes (ArticleTag, Comment). Test category relation set to null. Test article not found (404). Test authentication and authorization (401, 403).</test>
+    </ideas>
+  </tests>
+</story-context>
+

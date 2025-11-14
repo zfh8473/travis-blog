@@ -1,0 +1,137 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.5</storyId>
+    <title>用户角色和权限管理</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-12</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/2-5-用户角色和权限管理.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>to implement user roles and permission system</iWant>
+    <soThat>different users have different access levels</soThat>
+    <tasks>
+      <task id="1" ac="2.5.1">Verify Role Field in Database Schema</task>
+      <task id="2" ac="2.5.2,2.5.3,2.5.4,2.5.5,2.5.6">Create Permission Check Functions</task>
+      <task id="3" ac="2.5.2,2.5.3,2.5.4,2.5.5,2.5.6">Enhance Middleware for Role-Based Access Control</task>
+      <task id="4" ac="2.5.3,2.5.4,2.5.5,2.5.6">Protect Admin API Routes</task>
+      <task id="5" ac="2.5.3,2.5.4,2.5.5,2.5.6">Protect Admin Pages</task>
+      <task id="6" ac="2.5.3,2.5.4">Implement Role-Based UI Rendering</task>
+      <task id="7" ac="2.5.1">Create Admin User Seed Script</task>
+      <task id="8" ac="all">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="2.5.1">Given users exist in the database, When a user is created, Then the user is assigned a default role (user or admin)</ac>
+    <ac id="2.5.2">Role-based permissions are enforced</ac>
+    <ac id="2.5.3">Admin users can access admin features</ac>
+    <ac id="2.5.4">Regular users cannot access admin features</ac>
+    <ac id="2.5.5">When an admin tries to access admin features, Then access is granted</ac>
+    <ac id="2.5.6">When a regular user tries to access admin features, Then access is denied with 403 Forbidden</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics/epic-2-用户认证和授权user-authentication-authorization.md" title="Epic 2: 用户认证和授权" section="Story 2.5">
+        Story definition with acceptance criteria and technical notes for user roles and permission system. Includes requirements for role assignment, permission enforcement, admin route protection, and role-based UI rendering.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Authorization">
+        Role-based access control requirements. Roles: USER (default), ADMIN. Admin routes protected with middleware. Admin actions check role before execution. Specifies 403 Forbidden for permission failures.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Document" section="API Contracts">
+        Unified error response format: { success: boolean, error?: { message: string, code: string } }. HTTP status codes: 200 (Success), 401 (Unauthorized), 403 (Forbidden), 400 (Bad Request).
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Security Architecture">
+        Security architecture requirements including role-based access control, middleware protection for admin routes, and permission checks before admin actions.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/2-4-JWT-认证中间件.md" title="Story 2.4: JWT 认证中间件" section="Dev Agent Record">
+        Learnings from middleware story: User role is already included in JWT token and request headers. Middleware attaches user role to request headers (x-user-role). Helper functions getUserFromRequest and getUserFromHeaders are available. 403 Forbidden was mentioned but not implemented (Story 2.5 scope).
+      </doc>
+      <doc path=".bmad-ephemeral/stories/2-4-JWT-认证中间件.md" title="Story 2.4: JWT 认证中间件" section="Senior Developer Review">
+        Review findings: Story 2.4 was approved. Task 4.4 mentioned 403 Forbidden for role-based access but was marked as future enhancement (Story 2.5 scope). This story should implement the 403 Forbidden functionality.
+      </doc>
+    </docs>
+    <code>
+      <artifact path="prisma/schema.prisma" kind="schema" symbol="Role" lines="22-25" reason="Role enumeration definition with USER and ADMIN values. Used for type safety in role checks." />
+      <artifact path="prisma/schema.prisma" kind="schema" symbol="User" lines="58-72" reason="User model with role field. Role field has default value USER. Role is included in user creation and registration." />
+      <artifact path="app/api/auth/register/route.ts" kind="function" symbol="POST" lines="80-95" reason="User registration endpoint. Sets role to 'USER' during user creation. Role field is included in user data creation." />
+      <artifact path="middleware.ts" kind="middleware-function" symbol="middleware" lines="15-112" reason="JWT authentication middleware. Attaches user role to request headers (x-user-role). Currently checks authentication but does not check role for admin routes. Needs enhancement for role-based access control." />
+      <artifact path="middleware.ts" kind="configuration" symbol="protectedApiRoutes" lines="19-20" reason="Protected routes definition. Admin routes (/api/admin/*) and admin pages (/admin/*) are defined but not yet protected by role checks." />
+      <artifact path="lib/auth/middleware.ts" kind="function" symbol="getUserFromHeaders" lines="55-76" reason="Helper function to extract user information from request headers. Returns user object with role field. Can be used for permission checks in API routes." />
+      <artifact path="lib/auth/middleware.ts" kind="function" symbol="getUserFromRequest" lines="22-35" reason="Helper function to extract user information from JWT token. Returns JWT token with role field. Can be used for permission checks." />
+      <artifact path="app/admin/page.tsx" kind="component" symbol="AdminPage" lines="13-46" reason="Admin page component. Currently checks authentication but does not check admin role. Needs role check enhancement to restrict access to ADMIN users only." />
+      <artifact path="app/admin/page.tsx" kind="function" symbol="getServerSession" lines="16" reason="Uses getServerSession to get user session with role information. Session includes user.role field from NextAuth.js." />
+      <artifact path="types/next-auth.d.ts" kind="type-definition" symbol="Session" reason="TypeScript type definitions for NextAuth.js Session. Includes role field in user object. Used for type safety in role checks." />
+      <artifact path="types/next-auth.d.ts" kind="type-definition" symbol="JWT" reason="TypeScript type definitions for NextAuth.js JWT token. Includes role field. Used for type safety in middleware and permission checks." />
+      <artifact path="app/providers.tsx" kind="component" symbol="Providers" reason="SessionProvider wrapper component. Enables useSession hook in client components. Can be used to get user role for UI rendering." />
+    </code>
+    <dependencies>
+      <ecosystem name="Node.js">
+        <package name="next" version="16.0.2" />
+        <package name="next-auth" version="^4.24.13" />
+        <package name="react" version="19.2.0" />
+        <package name="react-dom" version="19.2.0" />
+      </ecosystem>
+      <ecosystem name="Database">
+        <package name="@prisma/client" version="^6.19.0" />
+        <package name="prisma" version="^6.19.0" />
+      </ecosystem>
+      <ecosystem name="Testing">
+        <package name="jest" version="^30.2.0" />
+        <package name="jest-environment-jsdom" version="^30.2.0" />
+        <package name="ts-jest" version="^29.4.5" />
+        <package name="@testing-library/react" version="^16.3.0" />
+        <package name="@testing-library/jest-dom" version="^6.9.1" />
+        <package name="@playwright/test" version="^1.56.1" />
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="database">Role enum already exists in Prisma schema (USER, ADMIN). User model already has role field with default value USER. No database migration needed. Role is already included in user creation and registration.</constraint>
+    <constraint type="authentication">User role is already available in JWT token from Story 2.4. Role is attached to request headers as x-user-role by middleware. Can use getUserFromHeaders or getServerSession to access user role.</constraint>
+    <constraint type="permission-checks">Create reusable permission check functions in lib/auth/permissions.ts. Functions should work with both API routes and Server Components. Return 401 Unauthorized if user not authenticated. Return 403 Forbidden if user lacks required role.</constraint>
+    <constraint type="middleware">Enhance existing middleware to check user role for admin routes. Admin routes: /api/admin/*, /admin/*. Check if user role is ADMIN before allowing access. Return 403 Forbidden if user is authenticated but not admin. Log permission denials for security monitoring.</constraint>
+    <constraint type="api">Follow unified error response format: { success: boolean, error?: { message: string, code: string } }. Use HTTP status codes: 401 (Unauthorized) for authentication failures, 403 (Forbidden) for permission failures.</constraint>
+    <constraint type="ui-rendering">Use useSession hook from next-auth/react to get user role in client components. Conditionally render admin links/buttons based on role. Hide admin navigation for non-admin users. Show appropriate error messages for permission denials.</constraint>
+    <constraint type="admin-creation">Create seed script or manual process to create first admin user. Can use environment variable or database migration. Document the process for setting up admin users.</constraint>
+    <constraint type="testing">Unit tests required for permission check functions. Integration tests required for role-based access control (admin user access, regular user denial, unauthenticated user denial). Test middleware role checks. Test admin API routes and pages with different roles. Test role-based UI rendering. Use Jest for unit/integration tests, Playwright for E2E tests.</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="Permission Check Functions" kind="utility-functions" signature="requireAuth(user): void | NextResponse, requireAdmin(user): void | NextResponse, hasRole(user, role): boolean" path="lib/auth/permissions.ts" />
+    <interface name="getUserFromHeaders" kind="utility-function" signature="getUserFromHeaders(headers: Headers): { id: string, email: string, name: string | null, role: string } | null" path="lib/auth/middleware.ts" />
+    <interface name="getServerSession" kind="utility-function" signature="getServerSession(authOptions): Promise&lt;Session | null&gt;" path="next-auth" />
+    <interface name="useSession" kind="hook" signature="useSession(): { data: Session | null, status: string }" path="next-auth/react" />
+    <interface name="Role Enum" kind="enum" signature="enum Role { USER, ADMIN }" path="prisma/schema.prisma" />
+    <interface name="User with Role" kind="type" signature="{ id: string, email: string, name: string | null, role: Role }" path="types/next-auth.d.ts" />
+  </interfaces>
+
+  <tests>
+    <standards>
+      Testing uses Jest for unit and integration tests, and Playwright for E2E tests. Unit tests should test permission check functions in isolation. Integration tests should test role-based access control with real Next.js request/response objects. E2E tests should test complete user flows including admin route access with different roles. All tests should follow existing patterns from Story 2.4. Test files should be co-located with source files or in tests/ directory structure.
+    </standards>
+    <locations>
+      <location>tests/__tests__/unit/</location>
+      <location>tests/__tests__/integration/</location>
+      <location>tests/e2e/</location>
+    </locations>
+    <ideas>
+      <test ac="2.5.1" type="unit">Test role assignment during user creation: verify new users are assigned USER role by default, verify role field is included in user creation.</test>
+      <test ac="2.5.2" type="unit">Test permission check functions: test requireAuth returns 401 if user not authenticated, test requireAdmin returns 403 if user not admin, test hasRole helper function.</test>
+      <test ac="2.5.2" type="integration">Test middleware role checks: verify middleware allows ADMIN users to access admin routes, verify middleware blocks USER users from admin routes (403).</test>
+      <test ac="2.5.3" type="integration">Test admin user access: verify admin user can access /api/admin/* routes (200 OK), verify admin user can access /admin/* pages.</test>
+      <test ac="2.5.4" type="integration">Test regular user denial: verify regular user cannot access /api/admin/* routes (403 Forbidden), verify regular user cannot access /admin/* pages (redirect or 403).</test>
+      <test ac="2.5.5" type="integration">Test admin access granted: verify admin user accessing admin features returns 200 OK, verify admin user can perform admin actions.</test>
+      <test ac="2.5.6" type="integration">Test regular user 403 response: verify regular user accessing admin routes returns 403 Forbidden with correct error format, verify error response follows API contract.</test>
+      <test ac="2.5.3,2.5.4" type="e2e">Test role-based UI rendering: verify admin links are visible to ADMIN users, verify admin links are hidden from USER users.</test>
+      <test ac="2.5.1" type="integration">Test admin user creation: verify seed script creates admin user with ADMIN role, verify admin user can access admin features.</test>
+      <test ac="all" type="e2e">Test complete role-based access flow: login as regular user, attempt to access admin route, verify 403 response, login as admin user, access admin route, verify 200 OK.</test>
+    </ideas>
+  </tests>
+</story-context>
+

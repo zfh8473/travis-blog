@@ -1,0 +1,270 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.6</storyId>
+    <title>用户资料管理</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-12</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/2-6-用户资料管理.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>registered user</asA>
+    <iWant>to manage my profile information (avatar, bio)</iWant>
+    <soThat>other users can see my profile details</soThat>
+    <tasks>
+      <task id="1" ac="2.6.4,2.6.5">Add Bio Field to Database Schema</task>
+      <task id="2" ac="2.6.1,2.6.4,2.6.5">Create Profile API Endpoints</task>
+      <task id="3" ac="2.6.2,2.6.3">Create Avatar Upload API Endpoint</task>
+      <task id="4" ac="2.6.4,2.6.5">Create Profile Validation Schema</task>
+      <task id="5" ac="2.6.1,2.6.3,2.6.5">Create Profile Page UI</task>
+      <task id="6" ac="2.6.2,2.6.3">Implement Avatar Upload UI</task>
+      <task id="7" ac="2.6.1,2.6.5">Update NextAuth Types for Bio Field</task>
+      <task id="8" ac="all">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="2.6.1">Given I am logged in, When I navigate to my profile page, Then I can see my current profile information</ac>
+    <ac id="2.6.2">When I update my avatar, Then the avatar is uploaded and saved</ac>
+    <ac id="2.6.3">When I update my avatar, Then the new avatar is displayed</ac>
+    <ac id="2.6.4">When I update my bio, Then the bio is saved to the database</ac>
+    <ac id="2.6.5">When I update my bio, Then the updated bio is displayed</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics/epic-2-用户认证和授权user-authentication-authorization.md" title="Epic 2: 用户认证和授权" section="Story 2.6">
+        Story definition with acceptance criteria and technical notes for user profile management. Includes requirements for profile API endpoints, avatar upload, profile page UI, and validation.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-2.md" title="Tech Spec Epic 2" section="Profile Service">
+        Profile Service specification: User profile management with user ID and profile data, returns updated user profile. Profile Update Schema: name (optional string), bio (optional string), image (optional string - file path from upload API).
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-2.md" title="Tech Spec Epic 2" section="Storage Service">
+        Storage Service specification: Avatar file upload with file object input, returns file path. Storage abstraction layer already implemented (Story 1.5).
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Document" section="API Contracts">
+        Unified error response format: { success: boolean, error?: { message: string, code: string } }. HTTP status codes: 200 (Success), 401 (Unauthorized), 400 (Bad Request), 413 (Payload Too Large), 500 (Internal Server Error).
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Input Validation">
+        Server-side validation for all inputs. Use Zod or similar for schema validation. Sanitize user inputs. All API endpoints must validate input data.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Project Structure">
+        API routes in app/api/ directory. Profile API: app/api/profile/route.ts. Avatar upload API: app/api/profile/avatar/route.ts. Profile page: app/profile/page.tsx. Validation schemas: lib/validations/profile.ts.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/2-5-用户角色和权限管理.md" title="Story 2.5: 用户角色和权限管理" section="Dev Agent Record">
+        Learnings: Permission check functions (requireAuth, getUserFromHeaders) are available. Middleware attaches user information to request headers. Unified error response format. Functions return appropriate HTTP status codes (401, 403).
+      </doc>
+      <doc path=".bmad-ephemeral/stories/1-5-存储抽象层实现.md" title="Story 1.5: 存储抽象层实现" section="Dev Agent Record">
+        Storage abstraction layer fully implemented. Use getStorage() from lib/storage. Storage interface: upload(file, path?), delete(path), list(prefix?), getUrl(path). Local storage stores files in public/uploads/. Files accessible via HTTP at /uploads/{filename}.
+      </doc>
+    </docs>
+    <code>
+      <artifact path="prisma/schema.prisma" kind="schema" symbol="User" lines="58-72" reason="User model definition. Already has image field (String?). Need to add bio field (String?, optional). Role field exists with default USER." />
+      <artifact path="lib/storage/index.ts" kind="function" symbol="getStorage" lines="35-55" reason="Storage factory function. Returns storage instance based on STORAGE_TYPE environment variable. Defaults to local storage. Use this to get storage instance for avatar uploads." />
+      <artifact path="lib/storage/interface.ts" kind="interface" symbol="StorageInterface" lines="45-124" reason="Storage interface definition. Methods: upload(file, path?), delete(path), list(prefix?), getUrl(path). All storage implementations must implement this interface." />
+      <artifact path="lib/storage/local.ts" kind="class" symbol="LocalStorage" lines="21-260" reason="Local storage implementation. Stores files in public/uploads/ directory. Generates unique filenames. Files accessible via HTTP at /uploads/{filename}. Implements StorageInterface." />
+      <artifact path="lib/auth/middleware.ts" kind="function" symbol="getUserFromHeaders" lines="55-76" reason="Helper function to extract user information from request headers. Returns user object with id, email, name, role. Use this in API routes to get authenticated user." />
+      <artifact path="lib/auth/permissions.ts" kind="function" symbol="requireAuth" lines="85-99" reason="Permission check function. Returns 401 Unauthorized if user is not authenticated. Returns null if user is authenticated. Use this to protect profile API endpoints." />
+      <artifact path="lib/validations/auth.ts" kind="schema" symbol="registrationSchema" lines="25-42" reason="Zod validation schema example. Shows pattern for creating validation schemas. Use similar pattern for profile validation schemas." />
+      <artifact path="app/api/auth/register/route.ts" kind="function" symbol="POST" lines="30-157" reason="Registration API endpoint example. Shows pattern for API route handlers: parse request, validate input, check authentication, perform operation, return response. Follow unified error response format." />
+      <artifact path="app/api/protected/route.ts" kind="function" symbol="GET" lines="12-42" reason="Protected API route example. Uses getUserFromHeaders to get authenticated user. Returns 401 if user not authenticated. Shows pattern for authenticated API routes." />
+      <artifact path="app/admin/page.tsx" kind="component" symbol="AdminPage" lines="14-53" reason="Server Component example. Uses getServerSession to get current user. Redirects if not authenticated. Shows pattern for protected pages." />
+      <artifact path="app/login/page.tsx" kind="component" symbol="LoginPageContent" lines="19-317" reason="Client Component form example. Shows form handling pattern: useState for form data, form validation, form submission, error handling. Use similar pattern for profile update form." />
+      <artifact path="types/next-auth.d.ts" kind="type-definition" symbol="Session" lines="18-26" reason="NextAuth.js Session type definition. Currently includes id, email, name, image, role. May need to add bio field if bio should be available in session." />
+      <artifact path="app/api/auth/[...nextauth]/route.ts" kind="function" symbol="callbacks" lines="140-287" reason="NextAuth.js callbacks. signIn callback handles OAuth account creation/linking. jwt callback adds user data to JWT token. session callback adds user data to session. May need to update to include bio field." />
+    </code>
+    <dependencies>
+      <ecosystem name="Node.js">
+        <package name="next" version="16.0.2" />
+        <package name="next-auth" version="^4.24.13" />
+        <package name="react" version="19.2.0" />
+        <package name="react-dom" version="19.2.0" />
+      </ecosystem>
+      <ecosystem name="Database">
+        <package name="@prisma/client" version="^6.19.0" />
+        <package name="prisma" version="^6.19.0" />
+      </ecosystem>
+      <ecosystem name="Validation">
+        <package name="zod" version="^3.24.1" />
+      </ecosystem>
+      <ecosystem name="Testing">
+        <package name="jest" version="^30.2.0" />
+        <package name="jest-environment-jsdom" version="^30.2.0" />
+        <package name="ts-jest" version="^29.4.5" />
+        <package name="@testing-library/react" version="^16.3.0" />
+        <package name="@testing-library/jest-dom" version="^6.9.1" />
+        <package name="@playwright/test" version="^1.56.1" />
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="database">User model already has image field (String?). Need to add bio field (String?, optional) to User model. Create Prisma migration to add bio field. No migration needed for image field (already exists).</constraint>
+    <constraint type="storage">Storage abstraction layer already implemented (Story 1.5). Use getStorage() from lib/storage to get storage instance. Use storage.upload(file) to upload avatar. Use storage.delete(path) to delete old avatar. Use storage.getUrl(path) to get avatar URL. Files stored in public/uploads/ and accessible via HTTP at /uploads/{filename}.</constraint>
+    <constraint type="authentication">Use getUserFromHeaders from lib/auth/middleware to get authenticated user in API routes. Use requireAuth from lib/auth/permissions to ensure authentication. Middleware attaches user information to request headers (x-user-id, x-user-email, x-user-name, x-user-role).</constraint>
+    <constraint type="api">Follow unified error response format: { success: boolean, error?: { message: string, code: string } }. Use HTTP status codes: 200 (Success), 401 (Unauthorized), 400 (Bad Request), 413 (Payload Too Large), 500 (Internal Server Error). All API endpoints must validate input using Zod schemas.</constraint>
+    <constraint type="validation">Create Zod validation schemas in lib/validations/profile.ts. Profile update schema: name (optional string, max 100 chars), bio (optional string, max 500 chars), image (optional string - file path). Avatar upload schema: file (File object), validate file type (images only: jpg, jpeg, png, gif, webp), validate file size (max 5MB).</constraint>
+    <constraint type="ui">Profile page: Server Component for initial render, Client Component for form interactions. Use getServerSession for Server Component, useSession for Client Component. Display current profile information. Form for updating profile (name, bio, avatar). Real-time avatar preview. Success/error message handling.</constraint>
+    <constraint type="file-upload">Avatar upload: Accept multipart/form-data. Validate file type (images only). Validate file size (max 5MB). Use storage abstraction layer for upload. Update user's image field in database. Delete old avatar file if exists (cleanup). Return file path/URL in response.</constraint>
+    <constraint type="nextauth">Check if bio field needs to be added to NextAuth types. Update types/next-auth.d.ts if needed. Update NextAuth callbacks to include bio in session if bio should be available in session.user. Verify bio is available in session.user if needed.</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="GET /api/profile" kind="REST endpoint">
+      <signature>GET /api/profile</signature>
+      <description>Get current user's profile information. Requires authentication. Returns user profile data (id, email, name, image, bio, role).</description>
+      <response>
+        <success status="200">
+          {
+            "success": true,
+            "data": {
+              "id": "string",
+              "email": "string",
+              "name": "string | null",
+              "image": "string | null",
+              "bio": "string | null",
+              "role": "USER | ADMIN"
+            }
+          }
+        </success>
+        <error status="401">
+          {
+            "success": false,
+            "error": {
+              "message": "Authentication required",
+              "code": "UNAUTHORIZED"
+            }
+          }
+        </error>
+      </response>
+    </interface>
+    <interface name="PUT /api/profile" kind="REST endpoint">
+      <signature>PUT /api/profile</signature>
+      <description>Update current user's profile information. Requires authentication. Accepts name, bio, image (file path) fields. All fields optional.</description>
+      <request>
+        {
+          "name"?: "string",
+          "bio"?: "string",
+          "image"?: "string"
+        }
+      </request>
+      <response>
+        <success status="200">
+          {
+            "success": true,
+            "data": {
+              "id": "string",
+              "email": "string",
+              "name": "string | null",
+              "image": "string | null",
+              "bio": "string | null",
+              "role": "USER | ADMIN"
+            }
+          }
+        </success>
+        <error status="400">
+          {
+            "success": false,
+            "error": {
+              "message": "Invalid input data",
+              "code": "VALIDATION_ERROR",
+              "details": [...]
+            }
+          }
+        </error>
+        <error status="401">
+          {
+            "success": false,
+            "error": {
+              "message": "Authentication required",
+              "code": "UNAUTHORIZED"
+            }
+          }
+        </error>
+      </response>
+    </interface>
+    <interface name="POST /api/profile/avatar" kind="REST endpoint">
+      <signature>POST /api/profile/avatar</signature>
+      <description>Upload avatar file. Requires authentication. Accepts multipart/form-data with file field. Validates file type (images only) and size (max 5MB). Returns file path/URL.</description>
+      <request>
+        Content-Type: multipart/form-data
+        file: File (image file: jpg, jpeg, png, gif, webp, max 5MB)
+      </request>
+      <response>
+        <success status="200">
+          {
+            "success": true,
+            "data": {
+              "path": "string",
+              "url": "string"
+            }
+          }
+        </success>
+        <error status="400">
+          {
+            "success": false,
+            "error": {
+              "message": "Invalid file type or size",
+              "code": "VALIDATION_ERROR"
+            }
+          }
+        </error>
+        <error status="401">
+          {
+            "success": false,
+            "error": {
+              "message": "Authentication required",
+              "code": "UNAUTHORIZED"
+            }
+          }
+        </error>
+        <error status="413">
+          {
+            "success": false,
+            "error": {
+              "message": "File too large",
+              "code": "PAYLOAD_TOO_LARGE"
+            }
+          }
+        </error>
+      </response>
+    </interface>
+    <interface name="StorageInterface" kind="TypeScript interface">
+      <signature>interface StorageInterface { upload(file: File | Buffer, path?: string): Promise&lt;string&gt;; delete(path: string): Promise&lt;void&gt;; list(prefix?: string): Promise&lt;FileMetadata[]&gt;; getUrl(path: string): Promise&lt;string&gt;; }</signature>
+      <description>Storage abstraction layer interface. All storage implementations must implement this interface. Use getStorage() to get storage instance.</description>
+    </interface>
+    <interface name="getUserFromHeaders" kind="TypeScript function">
+      <signature>function getUserFromHeaders(headers: Headers): { id: string; email: string; name: string | null; role: string; } | null</signature>
+      <description>Extract user information from request headers (set by middleware). Returns user object or null if not authenticated. Use in API routes to get authenticated user.</description>
+    </interface>
+    <interface name="requireAuth" kind="TypeScript function">
+      <signature>function requireAuth(user: UserInfo | null): NextResponse | null</signature>
+      <description>Requires authentication. Returns 401 Unauthorized response if user is not authenticated. Returns null if user is authenticated. Use in API routes to protect endpoints.</description>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      <standard>Unit tests: Test validation schemas, API route handlers, and utility functions. Use Jest with ts-jest. Mock dependencies (Prisma, storage, NextAuth). Test error cases and edge cases.</standard>
+      <standard>Integration tests: Test complete API flows (GET /api/profile, PUT /api/profile, POST /api/profile/avatar). Test with authenticated and unauthenticated users. Test file upload flow.</standard>
+      <standard>E2E tests: Test complete user flows using Playwright. Test profile page access, profile update, avatar upload, and profile display. Test error cases (unauthorized, invalid input, file too large).</standard>
+      <standard>Test coverage: Aim for 80%+ coverage for critical paths. Test all acceptance criteria. Test error handling. Test edge cases (empty bio, very long bio, invalid file types, file size limits).</standard>
+    </standards>
+    <locations>
+      <location path="tests/__tests__/unit/profile-validation.test.ts" type="unit">Unit tests for profile validation schemas (profileUpdateSchema, avatarUploadSchema).</location>
+      <location path="tests/__tests__/unit/profile-api.test.ts" type="unit">Unit tests for profile API endpoints (GET /api/profile, PUT /api/profile, POST /api/profile/avatar).</location>
+      <location path="tests/__tests__/integration/profile-update.test.ts" type="integration">Integration tests for profile update flow (get profile, update profile, upload avatar, verify updates).</location>
+      <location path="tests/e2e/profile-page.spec.ts" type="e2e">E2E tests for profile page (view profile, update profile, upload avatar, verify profile updates persist).</location>
+    </locations>
+    <ideas>
+      <idea>Test profile update with all fields (name, bio, image). Test profile update with partial fields (only name, only bio, only image). Test profile update with empty values (clear bio, clear name).</idea>
+      <idea>Test avatar upload with different file types (jpg, jpeg, png, gif, webp). Test avatar upload with invalid file types (pdf, txt, etc.). Test avatar upload with file too large (&gt; 5MB). Test avatar upload replaces old avatar (cleanup).</idea>
+      <idea>Test unauthenticated access to profile API endpoints (should return 401). Test profile page redirects to login if not authenticated. Test profile update with invalid input (name too long, bio too long).</idea>
+      <idea>Test bio field in database (add bio, update bio, clear bio). Test bio field in NextAuth session (if bio is added to session). Test profile display shows current bio. Test profile update updates bio in database and displays updated bio.</idea>
+      <idea>Test file upload error handling (storage failure, file system errors). Test profile update error handling (database errors, validation errors). Test concurrent profile updates (race conditions).</idea>
+    </ideas>
+  </tests>
+</story-context>
+

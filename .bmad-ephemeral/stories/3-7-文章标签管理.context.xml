@@ -1,0 +1,166 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.7</storyId>
+    <title>文章标签管理</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-14</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/3-7-文章标签管理.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>blog author</asA>
+    <iWant>to add tags to articles</iWant>
+    <soThat>articles can be organized and discovered by tags</soThat>
+    <tasks>
+      <task id="1" ac="3.7.1">Verify Tag Data Model</task>
+      <task id="2" ac="3.7.1">Create Tags API Endpoint</task>
+      <task id="3" ac="3.7.1">Implement Tag Selection in Article Form</task>
+      <task id="4" ac="3.7.1">Update Article API to Handle Tags</task>
+      <task id="5" ac="3.7.2">Display Tags on Article Detail Page</task>
+      <task id="6" ac="3.7.3">Create Tag Filter Page</task>
+      <task id="7" ac="3.7.3">Implement Tag Filtering in Article List API</task>
+      <task id="8" ac="3.7.3">Add Tag Navigation/Links</task>
+      <task id="9" ac="all">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="3.7.1">Given I am logged in as an admin, When I create or edit an article, Then I can add multiple tags, And tags are saved with the article</ac>
+    <ac id="3.7.2">When I view an article on the frontend, Then all tags are displayed</ac>
+    <ac id="3.7.3">When I click on a tag, Then I see all articles with that tag</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics.md" title="Epic 3: 内容创作和管理" section="Story 3.7">
+        Story definition with acceptance criteria and technical notes for tag management. Includes requirements for tag selection in article form, tag display on frontend, and tag filtering functionality. Tags support many-to-many relationship with articles.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Project Structure">
+        Project structure patterns: Frontend pages in app/ directory, article pages in app/articles/ directory, dynamic routes using [slug] pattern. Tag filter page should be at app/articles/tag/[slug]/page.tsx, similar to category filter page.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="API Contracts">
+        API response format standards: Unified response format with success, data, and error fields. HTTP status codes: 200 (Success), 404 (Not Found), 500 (Internal Server Error). Tags API is public (no auth required for GET), but POST requires admin.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Data Architecture">
+        Database schema patterns: Tag model with id, name, slug, createdAt, updatedAt. ArticleTag junction table for many-to-many relationship. Relationship: Article has Many-to-Many relationship with Tag via ArticleTag (onDelete: Cascade).
+      </doc>
+      <doc path=".bmad-ephemeral/stories/3-6-文章分类管理.md" title="Story 3.6: 文章分类管理" section="Tasks">
+        Similar implementation pattern for category management. Category filter page implementation at app/articles/category/[slug]/page.tsx can be used as reference for tag filter page. Category display and navigation patterns can be adapted for tags.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/3-3-文章创建功能.md" title="Story 3.3: 文章创建功能" section="Task 3">
+        Tag selection implementation: Tag checkbox list is already implemented in article creation form. Tags are loaded from GET /api/tags endpoint. Tag selection is saved when creating article. Tags can be multiple (array of tagIds).
+      </doc>
+      <doc path=".bmad-ephemeral/stories/3-4-文章编辑功能.md" title="Story 3.4: 文章编辑功能" section="Prerequisites">
+        Tag selection in edit form: Tag checkbox list is already implemented in article edit form. Tags are loaded from GET /api/tags endpoint. Tag selection is saved when editing article. Tags can be multiple (array of tagIds).
+      </doc>
+      <doc path=".bmad-ephemeral/stories/3-1-文章数据模型和基础-API.md" title="Story 3.1: 文章数据模型和基础 API" section="Task 5">
+        Article API tag support: POST /api/articles and PUT /api/articles/[id] endpoints support tagIds parameter for associating tags with articles. ArticleTag junction table is updated when saving article. Tags are included in article GET response.
+      </doc>
+    </docs>
+    <code>
+      <artifact path="prisma/schema.prisma" kind="schema" symbol="Tag" lines="98-107" reason="Tag model definition. Fields: id (cuid), name (unique), slug (unique), createdAt, updatedAt. Relationship: Many-to-Many with Article via ArticleTag junction table." />
+      <artifact path="prisma/schema.prisma" kind="schema" symbol="ArticleTag" lines="145-153" reason="ArticleTag junction table for Many-to-Many relationship between Article and Tag. Composite primary key: [articleId, tagId]. Both foreign keys have onDelete: Cascade." />
+      <artifact path="prisma/schema.prisma" kind="schema" symbol="Article" lines="118-140" reason="Article model with tags relationship. tags field is ArticleTag[] relation. Tags are included in article queries via include: { tags: { include: { tag: true } } }." />
+      <artifact path="app/api/tags/route.ts" kind="api" symbol="GET" lines="30-56" reason="Tags API endpoint. GET /api/tags returns all tags (public, no auth required). Returns JSON with success and data fields. Tags are ordered by name ascending. POST endpoint not yet implemented." />
+      <artifact path="app/api/articles/route.ts" kind="api" symbol="POST" lines="206-282" reason="Article creation API endpoint. POST /api/articles accepts tagIds parameter (array of tag IDs). Creates ArticleTag records in transaction. Tags are included in response via include: { tags: { include: { tag: true } } }." />
+      <artifact path="app/api/articles/[id]/route.ts" kind="api" symbol="PUT" lines="200-350" reason="Article update API endpoint. PUT /api/articles/[id] accepts tagIds parameter (array of tag IDs). Updates ArticleTag records by deleting existing and creating new ones. Tags are included in response." />
+      <artifact path="app/api/articles/public/route.ts" kind="api" symbol="GET" lines="78-112" reason="Public article list API endpoint. GET /api/articles/public supports tagId and tagSlug query parameters for filtering. Tag filtering uses Prisma where.tags.some pattern. Returns articles with tags included." />
+      <artifact path="app/api/articles/public/[slug]/route.ts" kind="api" symbol="GET" lines="18-95" reason="Public article detail API endpoint. GET /api/articles/public/[slug] returns single published article with tags included. Tags are transformed to simple array format: tags: article.tags.map((at) => at.tag)." />
+      <artifact path="app/admin/articles/new/page.tsx" kind="component" symbol="NewArticlePage" lines="446-477" reason="Article creation page component. Tag selection checkbox list is implemented. Tags are loaded from GET /api/tags on component mount. Tag selection is stored in tagIds state (array). Multiple tags can be selected. Needs improvement: autocomplete, create new tags on the fly, better UI (badges/chips)." />
+      <artifact path="app/admin/articles/[id]/edit/page.tsx" kind="component" symbol="EditArticlePage" lines="600-650" reason="Article edit page component. Tag selection checkbox list is implemented. Tags are loaded from GET /api/tags on component mount. Tag selection is pre-filled from article data and can be updated. Multiple tags can be selected. Needs improvement: autocomplete, create new tags on the fly, better UI (badges/chips)." />
+      <artifact path="app/articles/[slug]/page.tsx" kind="component" symbol="ArticleDetailPage" lines="222-234" reason="Article detail page component. Tags are displayed as badges/chips. Tags are shown in article.tags array. Currently tags are not clickable. Needs: make tags clickable (link to tag filter page)." />
+      <artifact path="app/articles/category/[slug]/page.tsx" kind="component" symbol="CategoryFilterPage" lines="1-270" reason="Category filter page component. Can be used as reference for tag filter page implementation. Fetches category by slug, then fetches articles filtered by category. Displays category name and list of articles. Handles empty state." />
+      <artifact path="lib/utils/slug.ts" kind="utility" symbol="generateSlug" lines="29-43" reason="Slug generation utility function. Converts title to URL-friendly slug. Preserves Chinese characters. Can be used for tag slug generation when creating new tags." />
+      <artifact path="lib/utils/slug.ts" kind="utility" symbol="generateUniqueSlug" lines="64-90" reason="Unique slug generation utility function. Checks for conflicts in database and appends number if needed. Currently checks Article table, but can be adapted for Tag table to ensure unique tag slugs." />
+    </code>
+    <dependencies>
+      <dependency ecosystem="node" package="next" version="16.0.2" />
+      <dependency ecosystem="node" package="react" version="19.2.0" />
+      <dependency ecosystem="node" package="react-dom" version="19.2.0" />
+      <dependency ecosystem="node" package="@prisma/client" version="^6.19.0" />
+      <dependency ecosystem="node" package="date-fns" version="latest" />
+      <dependency ecosystem="node" package="@testing-library/react" version="^16.3.0" />
+      <dependency ecosystem="node" package="@testing-library/jest-dom" version="^6.9.1" />
+      <dependency ecosystem="node" package="jest" version="^30.2.0" />
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Tag selection in article form is already implemented (Story 3.3 and 3.4) as checkbox list. Task 3 is to improve the UI (autocomplete, create new tags on the fly, badges/chips display) rather than create from scratch.</constraint>
+    <constraint>Tags API endpoint (GET /api/tags) is public (no auth required). POST endpoint needs to be created and should require admin authentication.</constraint>
+    <constraint>Article API already supports tagIds parameter for creating/updating articles. Tag creation on the fly should create tags first, then use their IDs in tagIds array.</constraint>
+    <constraint>Tag filtering must support both query parameter (?tagId=[id] or ?tagSlug=[slug]) and slug-based route (/articles/tag/[slug]) for SEO-friendly URLs.</constraint>
+    <constraint>Tag display must handle empty tags array (article has no tags). Display nothing or "无标签", not an error.</constraint>
+    <constraint>Tag links must be clickable and navigate to tag filter page. Use Next.js Link component for client-side navigation.</constraint>
+    <constraint>All UI text must be in Chinese: "标签", "无标签", "查看所有文章", "该标签下暂无文章", etc.</constraint>
+    <constraint>Tag display styling should be consistent with category display. Use badge or link style, make it visually distinct but not too prominent.</constraint>
+    <constraint>Tag input component should support autocomplete for existing tags (type to search/filter). Should allow creating new tags on the fly (if tag name doesn't exist, create it).</constraint>
+    <constraint>Tag slug generation should use generateSlug utility function. Tag names should be normalized (trim, lowercase for comparison, but preserve original case for display).</constraint>
+    <constraint>Tag filtering should work with category filtering (combine filters). Both tagId/tagSlug and categoryId/categorySlug can be used together in /api/articles/public query parameters.</constraint>
+    <constraint>All public functions, interfaces, and components must include JSDoc comments per architecture standards.</constraint>
+    <constraint>File paths must follow Next.js App Router conventions: app/articles/tag/[slug]/page.tsx for tag filter page, similar to app/articles/category/[slug]/page.tsx.</constraint>
+    <constraint>Error handling must follow unified error response format: { success: false, error: { message, code, details } }.</constraint>
+    <constraint>Empty state handling: When no articles with tag, display friendly message "该标签下暂无文章" or "No articles with this tag".</constraint>
+    <constraint>Tag creation on the fly: When user types a new tag name that doesn't exist, create tag via POST /api/tags, then add to selected tags. Handle duplicate tag names (case-insensitive comparison).</constraint>
+    <constraint>Tag autocomplete: Filter existing tags as user types. Show matching tags in dropdown. Allow selecting from dropdown or creating new tag.</constraint>
+    <constraint>Selected tags display: Show selected tags as removable badges/chips. Each badge should have remove button (X icon). Clicking remove should deselect the tag.</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="Tag" path="prisma/schema.prisma">
+      <field name="id" type="string" required="true" description="Tag unique identifier (cuid)" />
+      <field name="name" type="string" required="true" description="Tag name (unique)" />
+      <field name="slug" type="string" required="true" description="Tag URL-friendly slug (unique)" />
+      <field name="createdAt" type="DateTime" required="true" description="Tag creation timestamp" />
+      <field name="updatedAt" type="DateTime" required="true" description="Tag last update timestamp" />
+    </interface>
+    <interface name="ArticleTag" path="prisma/schema.prisma">
+      <field name="articleId" type="string" required="true" description="Article ID (foreign key)" />
+      <field name="tagId" type="string" required="true" description="Tag ID (foreign key)" />
+      <field name="article" type="Article" required="true" description="Article relation" />
+      <field name="tag" type="Tag" required="true" description="Tag relation" />
+    </interface>
+    <interface name="Article" path="prisma/schema.prisma">
+      <field name="tags" type="ArticleTag[]" required="true" description="Tags relation (Many-to-Many via ArticleTag)" />
+    </interface>
+  </interfaces>
+
+  <patterns>
+    <pattern name="Tag Filter Page" reference="app/articles/category/[slug]/page.tsx">
+      Similar to category filter page. Fetch tag by slug from GET /api/tags, then fetch articles filtered by tagSlug from GET /api/articles/public?tagSlug=[slug]. Display tag name and list of articles. Handle empty state.
+    </pattern>
+    <pattern name="Tag Display" reference="app/articles/[slug]/page.tsx">
+      Tags are displayed as badges/chips. Need to make them clickable (Link to /articles/tag/[slug]). Style consistently with category badges.
+    </pattern>
+    <pattern name="Tag Input Component" reference="app/admin/articles/new/page.tsx">
+      Currently checkbox list. Should be improved to: autocomplete input, create new tags on the fly, display selected tags as removable badges/chips.
+    </pattern>
+    <pattern name="Tag API Creation" reference="app/api/categories/route.ts">
+      POST /api/tags should follow similar pattern: require admin authentication, validate input (name required, generate slug), create tag, return created tag.
+    </pattern>
+    <pattern name="Tag Slug Generation" reference="lib/utils/slug.ts">
+      Use generateSlug function for tag slug generation. For unique tag slugs, check Tag table instead of Article table in generateUniqueSlug.
+    </pattern>
+  </patterns>
+
+  <references>
+    <reference type="story" id="3.6" title="文章分类管理" path=".bmad-ephemeral/stories/3-6-文章分类管理.md">
+      Similar implementation pattern. Category filter page, category display, category navigation can be used as reference for tag implementation.
+    </reference>
+    <reference type="story" id="3.3" title="文章创建功能" path=".bmad-ephemeral/stories/3-3-文章创建功能.md">
+      Tag selection checkbox list is already implemented in article creation form.
+    </reference>
+    <reference type="story" id="3.4" title="文章编辑功能" path=".bmad-ephemeral/stories/3-4-文章编辑功能.md">
+      Tag selection checkbox list is already implemented in article edit form.
+    </reference>
+    <reference type="api" path="app/api/articles/public/route.ts" method="GET">
+      Public article list API already supports tagId and tagSlug query parameters for filtering articles by tag.
+    </reference>
+    <reference type="component" path="app/articles/category/[slug]/page.tsx">
+      Category filter page implementation can be used as template for tag filter page.
+    </reference>
+  </references>
+</story-context>
+

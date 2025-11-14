@@ -1,0 +1,141 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.4</storyId>
+    <title>文章编辑功能</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-14</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/3-4-文章编辑功能.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>blog author</asA>
+    <iWant>to edit existing articles</iWant>
+    <soThat>I can update and improve my content</soThat>
+    <tasks>
+      <task id="1" ac="3.4.1">Create Article Edit Page Component</task>
+      <task id="2" ac="3.4.1">Load Existing Article Data</task>
+      <task id="3" ac="3.4.1">Integrate Tiptap Editor</task>
+      <task id="4" ac="3.4.1">Load Categories and Tags</task>
+      <task id="5" ac="3.4.2,3.4.4">Implement Form Submission</task>
+      <task id="6" ac="3.4.3,3.4.4">Implement Error Handling</task>
+      <task id="7" ac="3.4.2">Implement Success Handling</task>
+      <task id="8" ac="3.4.4">Add Form Validation</task>
+      <task id="9" ac="3.4.5">Handle Slug Regeneration</task>
+      <task id="10" ac="all">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="3.4.1">Given I am logged in as an admin, And an article exists, When I navigate to the article edit page, Then I see the article content pre-filled in the editor</ac>
+    <ac id="3.4.2">When I make changes to the article, And I save the changes, Then the article is updated in the database, And the updated_at timestamp is refreshed, And I see a success message</ac>
+    <ac id="3.4.3">When I try to edit an article that does not exist, Then I see an error message indicating the article was not found</ac>
+    <ac id="3.4.4">When I submit the form with invalid data, Then I see validation error messages, And the article is not updated</ac>
+    <ac id="3.4.5">When I update the article title, Then the slug is automatically regenerated to match the new title</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics/epic-3-内容创作和管理content-creation-management.md" title="Epic 3: 内容创作和管理" section="Story 3.4">
+        Story definition with acceptance criteria and technical notes for article editing functionality. Includes requirements for article edit page, loading existing article data, pre-filling editor, updating article, handling errors, and showing success messages.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-3.md" title="Tech Spec Epic 3" section="APIs and Interfaces">
+        Article update API specification: PUT /api/articles/[id] for updating articles, requires ADMIN role, accepts partial updates (all fields optional), validates input, regenerates slug when title changes, updates updatedAt timestamp, returns updated article with relations.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-3.md" title="Tech Spec Epic 3" section="Article Detail API">
+        Article detail API specification: GET /api/articles/[id] for fetching single article, requires ADMIN role for draft articles, returns article with all relations (author, category, tags), returns 404 if article not found.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Project Structure">
+        Project structure patterns: Admin pages in app/admin/ directory, article pages in app/admin/articles/ directory, dynamic routes using [id] pattern, kebab-case for files, PascalCase for components.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="API Contracts">
+        API response format standards: Unified error response format with success, error, code, and details fields. HTTP status codes: 200 (Success), 400 (Bad Request), 401 (Unauthorized), 403 (Forbidden), 404 (Not Found), 500 (Internal Server Error).
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Code Documentation">
+        JSDoc comment standards: All public functions, interfaces, and components must include JSDoc comments with descriptions, parameters, return types, examples, and error conditions.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/3-3-文章创建功能.md" title="Story 3.3: 文章创建功能" section="Learnings from Previous Story">
+        Article creation page structure and patterns: Form structure with title, content editor, excerpt, category, tags, status fields. Client-side validation with UUID validation. Success message display pattern. Error handling with explicit 401/403 checks. API validation error field mapping.
+      </doc>
+    </docs>
+    <code>
+      <artifact path="app/admin/articles/new/page.tsx" kind="component" symbol="NewArticlePage" lines="1-551" reason="Reference implementation for article form structure, validation logic, error handling, and success message display. Can be reused with modifications for edit page." />
+      <artifact path="components/editor/TiptapEditor.tsx" kind="component" symbol="TiptapEditor" lines="1-416" reason="Rich text editor component with initialContent prop for pre-filling existing article content. Supports onChange callback for content updates." />
+      <artifact path="app/api/articles/[id]/route.ts" kind="api" symbol="GET" lines="24-100" reason="Article detail API endpoint for fetching existing article data. Returns article with all relations (author, category, tags). Handles 404 for article not found." />
+      <artifact path="app/api/articles/[id]/route.ts" kind="api" symbol="PUT" lines="102-344" reason="Article update API endpoint. Supports partial updates (all fields optional). Automatically regenerates slug when title changes. Updates updatedAt timestamp. Handles tag relationships." />
+      <artifact path="lib/validations/article.ts" kind="validation" symbol="updateArticleSchema" lines="83-111" reason="Zod validation schema for article updates. All fields optional. Validates UUID format for categoryId and tagIds. Validates status enum (DRAFT, PUBLISHED)." />
+      <artifact path="app/api/categories/route.ts" kind="api" symbol="GET" lines="1-50" reason="Category list API endpoint. Returns all categories as JSON array. Public endpoint, no authentication required." />
+      <artifact path="app/api/tags/route.ts" kind="api" symbol="GET" lines="1-50" reason="Tag list API endpoint. Returns all tags as JSON array. Public endpoint, no authentication required." />
+      <artifact path="lib/utils/slug.ts" kind="utility" symbol="generateUniqueSlug" lines="1-50" reason="Slug generation utility. Automatically called by PUT /api/articles/[id] when title is updated. Ensures unique slugs." />
+      <artifact path="lib/auth/middleware.ts" kind="middleware" symbol="getUserFromHeaders" lines="1-50" reason="Authentication middleware helper. Extracts user information from request headers. Used by API endpoints for authentication." />
+      <artifact path="lib/auth/permissions.ts" kind="middleware" symbol="requireAdmin" lines="1-50" reason="Permission check function. Validates user has ADMIN role. Returns error response if not authorized." />
+    </code>
+    <dependencies>
+      <dependency ecosystem="node" package="next" version="16.0.2" />
+      <dependency ecosystem="node" package="react" version="19.2.0" />
+      <dependency ecosystem="node" package="react-dom" version="19.2.0" />
+      <dependency ecosystem="node" package="@tiptap/react" version="^3.10.7" />
+      <dependency ecosystem="node" package="@tiptap/starter-kit" version="^3.10.7" />
+      <dependency ecosystem="node" package="@tiptap/extension-image" version="^3.10.7" />
+      <dependency ecosystem="node" package="@tiptap/extension-placeholder" version="^3.10.7" />
+      <dependency ecosystem="node" package="zod" version="^4.1.12" />
+      <dependency ecosystem="node" package="next-auth" version="^4.24.13" />
+      <dependency ecosystem="node" package="@prisma/client" version="^6.19.0" />
+      <dependency ecosystem="node" package="@testing-library/react" version="^16.3.0" />
+      <dependency ecosystem="node" package="@testing-library/jest-dom" version="^6.9.1" />
+      <dependency ecosystem="node" package="jest" version="^30.2.0" />
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Page must be protected with ADMIN role authentication. Use middleware or page-level auth check.</constraint>
+    <constraint>Form structure should reuse patterns from Story 3.3's article creation page for consistency.</constraint>
+    <constraint>All API calls must include authentication headers (cookies) for NextAuth.js session.</constraint>
+    <constraint>Error handling must follow unified error response format: { success: false, error: { message, code, details } }.</constraint>
+    <constraint>Client-side validation must match server-side validation schema (updateArticleSchema).</constraint>
+    <constraint>UUID validation for categoryId and tagIds must use regex pattern: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i</constraint>
+    <constraint>Success message display must use green banner pattern: bg-green-50 border border-green-200 text-green-800.</constraint>
+    <constraint>Error messages must be user-friendly and in Chinese: "文章不存在", "请先登录", "权限不足，需要管理员权限".</constraint>
+    <constraint>Slug regeneration is handled automatically by PUT /api/articles/[id] endpoint - no client-side implementation needed.</constraint>
+    <constraint>All public functions, interfaces, and components must include JSDoc comments per architecture standards.</constraint>
+    <constraint>File paths must follow Next.js App Router conventions: app/admin/articles/[id]/edit/page.tsx for dynamic routes.</constraint>
+    <constraint>Next.js 16 dynamic route params are Promise objects - must await params before destructuring.</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="GET /api/articles/[id]" kind="REST endpoint" signature="GET /api/articles/[id]: Promise&lt;NextResponse&lt;{ success: true, data: ArticleResponse } | { success: false, error: { message: string, code: string } }&gt;&gt;" path="app/api/articles/[id]/route.ts" />
+    <interface name="PUT /api/articles/[id]" kind="REST endpoint" signature="PUT /api/articles/[id]: Promise&lt;NextResponse&lt;{ success: true, data: ArticleResponse } | { success: false, error: { message: string, code: string, details?: ZodIssue[] } }&gt;&gt;" path="app/api/articles/[id]/route.ts" />
+    <interface name="GET /api/categories" kind="REST endpoint" signature="GET /api/categories: Promise&lt;NextResponse&lt;{ success: true, data: Category[] } | { success: false, error: { message: string, code: string } }&gt;&gt;" path="app/api/categories/route.ts" />
+    <interface name="GET /api/tags" kind="REST endpoint" signature="GET /api/tags: Promise&lt;NextResponse&lt;{ success: true, data: Tag[] } | { success: false, error: { message: string, code: string } }&gt;&gt;" path="app/api/tags/route.ts" />
+    <interface name="TiptapEditorProps" kind="TypeScript interface" signature="interface TiptapEditorProps { initialContent?: string; onChange?: (content: string) => void; onSave?: (content: string) => void; placeholder?: string; readOnly?: boolean; }" path="components/editor/TiptapEditor.tsx" />
+    <interface name="updateArticleSchema" kind="Zod schema" signature="z.object({ title?: z.string().min(1).max(200), content?: z.string().min(1), excerpt?: z.string().max(500).optional(), categoryId?: z.string().uuid().optional(), tagIds?: z.array(z.string().uuid()).optional(), status?: z.enum(['DRAFT', 'PUBLISHED']).optional() })" path="lib/validations/article.ts" />
+    <interface name="getUserFromHeaders" kind="function" signature="getUserFromHeaders(headers: Headers): User | null" path="lib/auth/middleware.ts" />
+    <interface name="requireAdmin" kind="function" signature="requireAdmin(user: User | null): NextResponse | null" path="lib/auth/permissions.ts" />
+  </interfaces>
+
+  <tests>
+    <standards>
+      Testing uses Jest with React Testing Library for unit tests and integration tests. Tests should be co-located with source files or in tests/__tests__/ directory. Unit tests cover component rendering, form validation, state management, and user interactions. Integration tests cover API endpoints, authentication, authorization, and error handling. All tests must use proper mocking for Next.js router, API calls, and Prisma client. Test files follow naming convention: *.test.tsx for components, *.test.ts for utilities and APIs.
+    </standards>
+    <locations>
+      tests/__tests__/unit/ - Unit tests for components and utilities
+      tests/__tests__/integration/ - Integration tests for API endpoints
+      tests/e2e/ - End-to-end tests using Playwright
+    </locations>
+    <ideas>
+      <test ac="3.4.1">Test article edit page renders with loading state, then displays pre-filled form fields with article data. Mock GET /api/articles/[id] API call.</test>
+      <test ac="3.4.1">Test TiptapEditor receives initialContent prop with article HTML content and displays it correctly.</test>
+      <test ac="3.4.1">Test category and tag dropdowns are pre-selected with article's current category and tags.</test>
+      <test ac="3.4.2">Test form submission with valid data calls PUT /api/articles/[id] with correct request body. Verify success message is displayed.</test>
+      <test ac="3.4.2">Test updatedAt timestamp is refreshed after successful update (verify in API response).</test>
+      <test ac="3.4.3">Test article not found error (404) displays user-friendly error message: "文章不存在".</test>
+      <test ac="3.4.4">Test form validation displays inline error messages for invalid title, content, excerpt, categoryId, tagIds, status.</test>
+      <test ac="3.4.4">Test API validation errors (400) are mapped to form fields and displayed inline.</test>
+      <test ac="3.4.4">Test authentication errors (401, 403) display appropriate error messages.</test>
+      <test ac="3.4.5">Test slug regeneration when title is updated - verify PUT endpoint handles this automatically (integration test).</test>
+      <test ac="all">Test complete edit flow: load article, modify fields, submit, verify update, check success message.</test>
+    </ideas>
+  </tests>
+</story-context>
+

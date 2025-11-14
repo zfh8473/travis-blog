@@ -1,0 +1,226 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.3</storyId>
+    <title>文章创建功能</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-14</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/3-3-文章创建功能.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>blog author</asA>
+    <iWant>to create a new article</iWant>
+    <soThat>I can publish content on my blog</soThat>
+    <tasks>
+      <task id="1" ac="3.3.1">Create Article Creation Page Component</task>
+      <task id="2" ac="3.3.1">Integrate Tiptap Editor</task>
+      <task id="3" ac="3.3.2">Implement Category Selection</task>
+      <task id="4" ac="3.3.2">Implement Tag Selection</task>
+      <task id="5" ac="3.3.2,3.3.3">Implement Draft/Publish Status Toggle</task>
+      <task id="6" ac="3.3.2,3.3.3,3.3.4">Implement Form Submission</task>
+      <task id="7" ac="3.3.4">Implement Error Handling</task>
+      <task id="8" ac="3.3.5">Implement Success Handling and Navigation</task>
+      <task id="9" ac="3.3.4">Add Form Validation</task>
+      <task id="10" ac="all">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="3.3.1">Given I am logged in as an admin, When I navigate to the article creation page, Then I see the article creation form with title, content editor, category selection, tag selection, and status toggle</ac>
+    <ac id="3.3.2">When I enter article title and content, And I select a category and add tags, And I click "Save as Draft", Then the article is saved as a draft, And the article is not visible on the frontend</ac>
+    <ac id="3.3.3">When I click "Publish", Then the article status changes to "published", And the article becomes visible on the frontend, And the published_at timestamp is set</ac>
+    <ac id="3.3.4">When I submit the form with invalid data, Then I see validation error messages, And the article is not saved</ac>
+    <ac id="3.3.5">When the article is successfully created, Then I am redirected to the article list or article detail page, And I see a success message</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics/epic-3-内容创作和管理content-creation-management.md" title="Epic 3: 内容创作和管理" section="Story 3.3">
+        Story definition with acceptance criteria and technical notes for article creation functionality. Includes requirements for article creation page, form with Tiptap editor, category and tag selection, draft/publish status toggle, form validation, and success/error handling.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-3.md" title="Tech Spec Epic 3" section="Article Creation Workflow">
+        Article creation workflow specification: User navigates to /admin/articles/new, fills form with Tiptap editor, selects category and tags, chooses status, submits form, server validates and creates article, client redirects to article list or detail page.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-3.md" title="Tech Spec Epic 3" section="APIs and Interfaces">
+        Article CRUD API endpoints specification: POST /api/articles for creating articles, requires ADMIN role, accepts title, content, excerpt, categoryId, tagIds, status, validates input, generates unique slug, returns created article with relations.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-3.md" title="Tech Spec Epic 3" section="Tag Management API">
+        Tag management API endpoints: GET /api/tags to fetch all tags, POST /api/tags to create new tags, authentication optional for GET, ADMIN required for POST.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Project Structure">
+        Next.js App Router structure: Admin pages in app/admin/ directory, article pages in app/admin/articles/ directory, use "use client" directive for client components, follow kebab-case for files and PascalCase for components.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Form Handling">
+        Form handling patterns: Use React useState for form fields, use controlled components for inputs, handle form submission with async/await, validate before submission, show loading state during submission.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Error Handling">
+        Error handling patterns: Follow unified error format, display user-friendly error messages, handle validation errors inline, show toast notifications for success/error, handle authentication errors (401, 403), handle network errors.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Navigation Patterns">
+        Navigation patterns: Use Next.js router (useRouter from next/navigation) for client-side navigation, redirect after successful operations, use router.push() for navigation.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/3-2-Tiptap-编辑器集成.md" title="Story 3.2: Tiptap Editor Integration" section="Dev Notes">
+        TiptapEditor component is available at components/editor/TiptapEditor.tsx with props: initialContent, onChange, onSave, placeholder, readOnly. onChange callback provides HTML content. Editor supports all formatting options and image upload.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/3-1-文章数据模型和基础-API.md" title="Story 3.1: Article Data Model and Basic API" section="Dev Notes">
+        Article API endpoint POST /api/articles is available, requires ADMIN role, validates input using createArticleSchema, generates unique slug automatically, returns created article with all relations.
+      </doc>
+    </docs>
+    <code>
+      <artifact path="components/editor/TiptapEditor.tsx" kind="component" symbol="TiptapEditor" lines="1-500" reason="Rich text editor component for article content. Provides onChange callback to get HTML content, supports all formatting options, image upload integrated." />
+      <artifact path="app/api/articles/route.ts" kind="controller" symbol="POST" lines="175-350" reason="Article creation API endpoint. Handles POST requests, validates input, creates article with tags, returns created article. Requires ADMIN role." />
+      <artifact path="app/api/upload/route.ts" kind="controller" symbol="POST" lines="1-150" reason="Image upload API endpoint for Tiptap editor. Validates file type and size, uploads to storage abstraction layer, returns image URL." />
+      <artifact path="lib/validations/article.ts" kind="validation" symbol="createArticleSchema" lines="38-62" reason="Zod validation schema for article creation. Validates title, content, excerpt, categoryId, tagIds, status. Returns detailed error messages." />
+      <artifact path="lib/utils/slug.ts" kind="utility" symbol="generateUniqueSlug" lines="1-100" reason="Slug generation utility. Generates URL-friendly slugs from titles, ensures uniqueness, handles Chinese characters." />
+      <artifact path="lib/auth/middleware.ts" kind="middleware" symbol="getUserFromHeaders" lines="1-50" reason="Middleware helper function to get authenticated user from request headers. Used for authentication checks." />
+      <artifact path="lib/auth/permissions.ts" kind="middleware" symbol="requireAdmin" lines="1-50" reason="Permission check function for ADMIN role. Returns NextResponse error or null. Used for authorization checks." />
+      <artifact path="prisma/schema.prisma" kind="schema" symbol="Article" lines="118-140" reason="Article data model definition. Includes all fields: id, title, content, excerpt, slug, status, categoryId, authorId, publishedAt, and relations." />
+      <artifact path="prisma/schema.prisma" kind="schema" symbol="Category" lines="81-90" reason="Category data model definition. Includes id, name, slug, and relation to articles." />
+      <artifact path="prisma/schema.prisma" kind="schema" symbol="Tag" lines="98-107" reason="Tag data model definition. Includes id, name, slug, and relation to articles via ArticleTag junction table." />
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="next" version="16.0.2" />
+        <package name="react" version="19.2.0" />
+        <package name="react-dom" version="19.2.0" />
+        <package name="@tiptap/react" version="^3.10.7" />
+        <package name="@tiptap/starter-kit" version="^3.10.7" />
+        <package name="@tiptap/extension-image" version="^3.10.7" />
+        <package name="@tiptap/extension-placeholder" version="^3.10.7" />
+        <package name="zod" version="^4.1.12" />
+        <package name="@prisma/client" version="^6.19.0" />
+        <package name="next-auth" version="^4.24.13" />
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>
+      <name>Next.js App Router</name>
+      <description>Use Next.js App Router structure for pages. Page component should be at app/admin/articles/new/page.tsx. Use "use client" directive for client-side form components. Follow Next.js 16 patterns.</description>
+      <source>docs/architecture.md#Project-Structure</source>
+    </constraint>
+    <constraint>
+      <name>Form Handling</name>
+      <description>Use React useState for form fields. Use controlled components for inputs. Handle form submission with async/await. Validate before submission. Show loading state during submission.</description>
+      <source>docs/architecture.md#Form-Handling</source>
+    </constraint>
+    <constraint>
+      <name>API Pattern</name>
+      <description>Use existing POST /api/articles endpoint. Follow unified error response format. Use fetch API with cookies for authentication. Handle 201 status for successful creation.</description>
+      <source>docs/architecture.md#API-Contracts</source>
+    </constraint>
+    <constraint>
+      <name>Error Handling</name>
+      <description>Follow unified error format. Display user-friendly error messages. Handle validation errors inline. Show toast notifications for success/error. Handle authentication errors (401, 403). Handle network errors.</description>
+      <source>docs/architecture.md#Error-Handling</source>
+    </constraint>
+    <constraint>
+      <name>Navigation</name>
+      <description>Use Next.js router (useRouter from next/navigation) for client-side navigation. Redirect to /admin/articles or /admin/articles/[id] after successful creation. Use router.push() for navigation.</description>
+      <source>docs/architecture.md#Navigation-Patterns</source>
+    </constraint>
+    <constraint>
+      <name>Authentication</name>
+      <description>Page should be protected (admin only). Use middleware or page-level auth check. Redirect to login if not authenticated. All API calls require ADMIN role.</description>
+      <source>lib/auth/middleware.ts</source>
+    </constraint>
+    <constraint>
+      <name>Validation</name>
+      <description>Validate form data client-side before submission. Use createArticleSchema for validation. Validate title (required, max 200 chars), content (required), excerpt (optional, max 500 chars), categoryId (optional, UUID), tagIds (optional, array of UUIDs), status (required, DRAFT or PUBLISHED). Display validation errors inline.</description>
+      <source>lib/validations/article.ts#createArticleSchema</source>
+    </constraint>
+    <constraint>
+      <name>TiptapEditor Integration</name>
+      <description>Use TiptapEditor component from components/editor/TiptapEditor.tsx. Handle editor content changes via onChange callback. Store editor HTML content in form state. Editor supports all formatting options and image upload.</description>
+      <source>components/editor/TiptapEditor.tsx</source>
+    </constraint>
+    <constraint>
+      <name>Category Selection</name>
+      <description>Category is stored in database table (not enum). May need to create GET /api/categories endpoint to fetch categories. Support optional category (allow empty selection). Display categories in select dropdown.</description>
+      <source>prisma/schema.prisma#Category-model</source>
+    </constraint>
+    <constraint>
+      <name>Tag Selection</name>
+      <description>Tags are stored in database table. May need to create GET /api/tags endpoint to fetch all tags. Support multiple tag selection. Display tags in multi-select component. Tag creation on the fly is optional (can be deferred to Story 3.7).</description>
+      <source>prisma/schema.prisma#Tag-model</source>
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>POST /api/articles</name>
+      <kind>REST endpoint</kind>
+      <signature>POST /api/articles
+Authentication: Required (ADMIN role)
+Request Body: { title: string, content: string, excerpt?: string, categoryId?: string, tagIds?: string[], status: "DRAFT" | "PUBLISHED" }
+Response (201): { success: true, data: ArticleResponse }
+Error Responses: 400 (Validation), 401 (Unauthorized), 403 (Forbidden), 500 (Internal Server Error)</signature>
+      <path>app/api/articles/route.ts</path>
+    </interface>
+    <interface>
+      <name>TiptapEditor Component</name>
+      <kind>React Component</kind>
+      <signature>TiptapEditor(props: TiptapEditorProps)
+Props: { initialContent?: string, onChange?: (content: string) => void, onSave?: (content: string) => void, placeholder?: string, readOnly?: boolean }
+onChange callback provides HTML content string</signature>
+      <path>components/editor/TiptapEditor.tsx</path>
+    </interface>
+    <interface>
+      <name>createArticleSchema</name>
+      <kind>Zod Schema</kind>
+      <signature>createArticleSchema: z.object({ title: z.string().min(1).max(200), content: z.string().min(1), excerpt?: z.string().max(500), categoryId?: z.string().uuid(), tagIds?: z.array(z.string().uuid()), status: z.enum(["DRAFT", "PUBLISHED"]) })
+Returns validation result with error details</signature>
+      <path>lib/validations/article.ts</path>
+    </interface>
+    <interface>
+      <name>generateUniqueSlug</name>
+      <kind>Utility Function</kind>
+      <signature>generateUniqueSlug(title: string, excludeId?: string): Promise&lt;string&gt;
+Generates URL-friendly slug from title, ensures uniqueness, handles Chinese characters</signature>
+      <path>lib/utils/slug.ts</path>
+    </interface>
+    <interface>
+      <name>GET /api/categories</name>
+      <kind>REST endpoint</kind>
+      <signature>GET /api/categories (may need to be created)
+Authentication: Optional (ADMIN for all, public for published)
+Response (200): { success: true, data: Category[] }
+Returns list of all categories</signature>
+      <path>app/api/categories/route.ts (to be created)</path>
+    </interface>
+    <interface>
+      <name>GET /api/tags</name>
+      <kind>REST endpoint</kind>
+      <signature>GET /api/tags (may need to be created)
+Authentication: Optional (public for published articles, ADMIN for all)
+Response (200): { success: true, data: Tag[] }
+Returns list of all tags</signature>
+      <path>app/api/tags/route.ts (to be created)</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Testing uses Jest for unit and integration tests, Playwright for E2E tests. Test files should be in tests/__tests__/unit/ for unit tests, tests/__tests__/integration/ for integration tests, and tests/e2e/ for E2E tests. Follow existing test patterns from Story 3.1 and 3.2. Use React Testing Library for component tests. Mock API calls in tests. Test form validation, submission, error handling, and success navigation.</standards>
+    <locations>
+      <location>tests/__tests__/unit/</location>
+      <location>tests/__tests__/integration/</location>
+      <location>tests/e2e/</location>
+    </locations>
+    <ideas>
+      <test ac="3.3.1">Test article creation page renders with all form fields (title, content editor, category select, tag select, status toggle)</test>
+      <test ac="3.3.1">Test TiptapEditor is integrated and onChange callback works correctly</test>
+      <test ac="3.3.2">Test form submission with valid data saves article as draft</test>
+      <test ac="3.3.2">Test category and tag selection works correctly</test>
+      <test ac="3.3.3">Test form submission with PUBLISHED status sets publishedAt timestamp</test>
+      <test ac="3.3.4">Test form validation displays error messages for invalid data</test>
+      <test ac="3.3.4">Test API validation errors are displayed correctly</test>
+      <test ac="3.3.5">Test successful creation redirects to article list or detail page</test>
+      <test ac="3.3.5">Test success message is displayed after creation</test>
+      <test ac="all">E2E test: Complete article creation flow from navigation to success redirect</test>
+    </ideas>
+  </tests>
+</story-context>
+

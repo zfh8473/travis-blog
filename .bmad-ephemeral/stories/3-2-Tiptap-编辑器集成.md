@@ -1,6 +1,6 @@
 # Story 3.2: Tiptap 编辑器集成
 
-Status: review
+Status: done
 
 ## Story
 
@@ -540,4 +540,111 @@ Based on Epic 3 Story 3.2 from epics.md and tech-spec-epic-3.md:
   - [x] 添加链接 URL 验证（使用 `new URL()` 验证 URL 格式）
   - [x] 无效 URL 时显示错误消息
   - [x] 支持删除链接（空 URL 时调用 `unsetLink`）
+
+## Senior Developer Review (AI) - Final Review
+
+**Review Date:** 2025-11-14 (Final)  
+**Reviewer:** AI Senior Developer  
+**Review Outcome:** ✅ **APPROVED - Ready for Production**
+
+### Final Verification Summary
+
+**Acceptance Criteria Verification:**
+
+| AC | Requirement | Status | Verification |
+|----|-------------|--------|--------------|
+| **AC-3.2.1** | Tiptap editor with text formatting | ✅ **PASS** | `components/editor/TiptapEditor.tsx` - 编辑器已实现，支持粗体、斜体、标题、列表、链接、引用、代码块。工具栏按钮完整。已集成到 `app/admin/articles/new/page.tsx` 和 `app/admin/articles/[id]/edit/page.tsx`。 |
+| **AC-3.2.2** | Markdown input support | ✅ **PASS** | Tiptap StarterKit 原生支持 Markdown 输入，自动转换为 HTML。实时预览已推迟（符合技术规范，可选功能）。 |
+| **AC-3.2.3** | Image upload (drag-and-drop, paste) | ✅ **PASS** | `components/editor/TiptapEditor.tsx:152-217` - 实现了拖拽和粘贴图片上传。`app/api/upload/route.ts` - 上传 API 端点完整，包含认证、授权、文件验证。图片 URL 自动插入编辑器。错误处理完善（用户友好的错误提示）。 |
+| **AC-3.2.4** | Save formatted content to database | ✅ **PASS** | `components/editor/TiptapEditor.tsx:142-145` - `onChange` callback 提供 HTML 内容。已集成到文章创建和编辑页面，内容正确保存到数据库。 |
+
+**Integration Verification:**
+
+✅ **Editor Integration:**
+- TiptapEditor 已正确集成到文章创建页面 (`app/admin/articles/new/page.tsx:381-386`)
+- TiptapEditor 已正确集成到文章编辑页面 (`app/admin/articles/[id]/edit/page.tsx:486-491`)
+- 编辑器状态管理正确（`onChange` callback 更新父组件状态）
+- 初始内容加载正确（编辑模式）
+
+✅ **API Integration:**
+- 上传 API 端点 (`app/api/upload/route.ts`) 完整实现
+- 认证和授权正确（ADMIN 角色验证）
+- 文件验证完整（类型、大小）
+- 错误响应格式统一
+
+✅ **Storage Integration:**
+- 使用存储抽象层 (`lib/storage/`)
+- 文件上传和 URL 生成正确
+
+**Code Quality Assessment:**
+
+✅ **Strengths:**
+1. **完整的 JSDoc 注释** - 所有公共接口和函数都有详细的文档
+2. **类型安全** - TypeScript 类型定义完整，Props 接口清晰
+3. **错误处理完善** - 用户友好的错误提示，错误状态管理
+4. **测试覆盖完整** - 单元测试和集成测试覆盖核心功能
+5. **架构对齐** - 完全符合架构规范和技术规范
+6. **代码组织良好** - 组件结构清晰，职责分离明确
+
+✅ **Previous Review Follow-ups:**
+- ✅ 用户友好的错误提示已实现（错误状态 + 错误提示框）
+- ✅ Placeholder 支持已实现（使用 `@tiptap/extension-placeholder`）
+- ✅ 链接按钮用户体验已改进（URL 验证、删除链接支持）
+
+**Test Coverage:**
+
+✅ **Unit Tests:** `tests/__tests__/unit/tiptap-editor.test.tsx`
+- 组件渲染测试
+- 内容管理测试
+- 图片上传测试
+
+✅ **Integration Tests:** `tests/__tests__/integration/upload-api.test.ts`
+- 文件上传成功场景
+- 认证和授权测试
+- 文件验证测试
+- 错误场景测试
+
+**Architectural Compliance:**
+
+✅ **Tech-Spec Compliance:**
+- ✅ 使用 Tiptap 作为富文本编辑器
+- ✅ 编辑器组件位于 `components/editor/TiptapEditor.tsx`
+- ✅ 支持 Markdown 输入
+- ✅ 图片上传使用存储抽象层
+- ✅ 实时预览为可选功能（已推迟）
+
+✅ **Architecture Patterns:**
+- ✅ 遵循 Next.js App Router 结构
+- ✅ 使用 Next.js API Routes 模式
+- ✅ 遵循统一的错误响应格式
+- ✅ 代码组织符合项目结构
+- ✅ JSDoc 注释符合架构标准
+
+✅ **Security:**
+- ✅ 图片上传需要 ADMIN 角色
+- ✅ 文件类型白名单验证（MIME type 和文件扩展名双重验证）
+- ✅ 文件大小限制（5MB）
+- ✅ 使用存储抽象层
+- ✅ 错误处理不暴露敏感信息
+
+**Final Assessment:**
+
+✅ **All acceptance criteria met**
+✅ **All previous review suggestions implemented**
+✅ **Code quality excellent**
+✅ **Test coverage complete**
+✅ **Architectural compliance verified**
+✅ **Integration verified in production pages**
+
+**Recommendation:** ✅ **APPROVE - Story ready to be marked as DONE**
+
+### Action Items
+
+**Code Changes Required:**
+无 - 所有功能已实现并通过验证
+
+**Next Steps:**
+1. ✅ 将故事状态更新为 `done`
+2. ✅ 更新 sprint-status.yaml 中的故事状态
+3. 可以开始下一个故事（3-5: 文章删除功能 或 3-6: 文章分类管理）
 

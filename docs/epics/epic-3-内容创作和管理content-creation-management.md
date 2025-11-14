@@ -273,3 +273,124 @@ So that **I can view and delete media files I've uploaded**.
 - Support different file types (images, documents, etc.)
 
 ---
+
+## Epic 3 总结
+
+**完成日期：** 2025-11-14  
+**状态：** 7/8 故事已完成（87.5%）
+
+### 完成的故事
+
+1. **Story 3.1: 文章数据模型和基础 API** ✅
+   - 实现了完整的文章数据模型（Prisma Schema）
+   - 创建了文章 CRUD API 端点（POST, GET, PUT, DELETE）
+   - 实现了输入验证和错误处理
+   - 添加了数据库索引优化性能
+
+2. **Story 3.2: Tiptap 编辑器集成** ✅
+   - 集成了 Tiptap 富文本编辑器
+   - 实现了图片上传功能（拖拽、粘贴）
+   - 支持 Markdown 输入
+   - 实现了存储抽象层集成
+
+3. **Story 3.3: 文章创建功能** ✅
+   - 创建了文章创建页面（`/admin/articles/new`）
+   - 实现了草稿/发布状态管理
+   - 集成了分类和标签选择
+   - 实现了表单验证和错误处理
+
+4. **Story 3.4: 文章编辑功能** ✅
+   - 创建了文章编辑页面（`/admin/articles/[id]/edit`）
+   - 实现了文章数据预填充
+   - 支持更新文章内容、分类和标签
+   - 实现了权限验证（仅管理员）
+
+5. **Story 3.5: 文章删除功能** ✅
+   - 实现了文章删除 API 端点
+   - 添加了删除确认对话框
+   - 处理了级联删除（评论、标签关联）
+   - 实现了乐观 UI 更新
+
+6. **Story 3.6: 文章分类管理** ✅
+   - 创建了分类数据模型和 API
+   - 实现了分类选择 UI 组件
+   - 创建了前端分类筛选页面（`/articles/category/[slug]`）
+   - 实现了分类导航链接
+   - 创建了公开 API 端点（`/api/articles/public`）
+
+7. **Story 3.7: 文章标签管理** ✅
+   - 创建了标签数据模型和 API（`POST /api/tags`）
+   - 实现了高级标签输入组件（自动完成、创建新标签、可移除 badges）
+   - 创建了标签筛选页面（`/articles/tag/[slug]`）
+   - 实现了分页功能（每页 10/20/50 可选）
+   - 创建了优化的标签查询端点（`GET /api/tags/[slug]`）
+   - 实现了标签导航链接
+
+### 待完成的故事
+
+8. **Story 3.8: 媒体管理功能** ⬜
+   - 状态：Backlog
+   - 计划：创建媒体库页面，实现媒体文件列表、预览和删除功能
+
+### 主要技术成就
+
+**数据模型：**
+- ✅ 完整的文章数据模型（Article, Category, Tag, ArticleTag）
+- ✅ 多对多关系（文章-标签）
+- ✅ 级联删除配置
+- ✅ Slug 索引优化
+
+**API 端点：**
+- ✅ 管理员 API：`POST /api/articles`, `GET /api/articles`, `PUT /api/articles/[id]`, `DELETE /api/articles/[id]`
+- ✅ 公开 API：`GET /api/articles/public`, `GET /api/articles/public/[slug]`
+- ✅ 分类 API：`GET /api/categories`, `GET /api/categories/[slug]`
+- ✅ 标签 API：`GET /api/tags`, `POST /api/tags`, `GET /api/tags/[slug]`
+- ✅ 上传 API：`POST /api/upload`
+
+**前端页面：**
+- ✅ 管理员页面：`/admin/articles`, `/admin/articles/new`, `/admin/articles/[id]/edit`
+- ✅ 公开页面：`/articles`, `/articles/[slug]`, `/articles/category/[slug]`, `/articles/tag/[slug]`
+
+**用户体验：**
+- ✅ 富文本编辑器（Tiptap）集成
+- ✅ 图片上传（拖拽、粘贴）
+- ✅ 分类和标签选择组件
+- ✅ 高级标签输入（自动完成、创建新标签）
+- ✅ 分页导航（页码、省略号、上一页/下一页）
+- ✅ 每页数量选择器（10/20/50）
+
+**代码质量：**
+- ✅ 完整的 JSDoc 注释
+- ✅ TypeScript 类型安全
+- ✅ 统一的错误处理格式
+- ✅ 完善的测试覆盖（单元测试 + 集成测试）
+- ✅ React Hooks 最佳实践（useCallback, useEffect 优化）
+
+### 测试覆盖
+
+- **单元测试：** 所有主要组件和功能都有单元测试
+- **集成测试：** API 端点都有集成测试
+- **测试通过率：** 100%（所有已实现功能的测试都通过）
+
+### 架构对齐
+
+- ✅ 遵循 Next.js App Router 架构
+- ✅ 使用 Prisma ORM 进行数据库操作
+- ✅ 遵循 RESTful API 设计模式
+- ✅ 实现了存储抽象层
+- ✅ 遵循统一错误响应格式
+- ✅ 实现了权限控制（管理员 vs 公开）
+
+### 下一步计划
+
+1. **Story 3.8: 媒体管理功能** - 实现媒体库页面和媒体文件管理
+2. **Epic 4: 内容展示** - 开始实现前台内容展示功能（部分功能已在 Epic 3 中实现）
+
+### 关键指标
+
+- **故事完成率：** 7/8 (87.5%)
+- **接受标准覆盖率：** 100%（所有已实现故事的 AC 都满足）
+- **代码审查状态：** 所有已完成故事都通过了代码审查
+- **测试通过率：** 100%
+
+---

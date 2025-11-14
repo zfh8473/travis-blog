@@ -1,0 +1,135 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.5</storyId>
+    <title>文章删除功能</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-14</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/3-5-文章删除功能.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>blog author</asA>
+    <iWant>to delete articles</iWant>
+    <soThat>I can remove unwanted content</soThat>
+    <tasks>
+      <task id="1" ac="3.5.1">Create Article List Page (if not exists)</task>
+      <task id="2" ac="3.5.1">Add Delete Button to Article List</task>
+      <task id="3" ac="3.5.1,3.5.3">Implement Delete Confirmation Dialog</task>
+      <task id="4" ac="3.5.2">Implement Delete API Call</task>
+      <task id="5" ac="3.5.2">Implement Success Handling</task>
+      <task id="6" ac="3.5.4,3.5.5">Implement Error Handling</task>
+      <task id="7" ac="3.5.1">Add Delete Button to Article Detail/Edit Page</task>
+      <task id="8" ac="3.5.2">Handle Cascading Deletes</task>
+      <task id="9" ac="all">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="3.5.1">Given I am logged in as an admin, And an article exists, When I click the delete button, Then I see a confirmation dialog</ac>
+    <ac id="3.5.2">When I confirm the deletion, Then the article is removed from the database, the article is no longer visible anywhere, and I see a success message</ac>
+    <ac id="3.5.3">When I cancel the deletion in the confirmation dialog, Then the article is not deleted, and I remain on the current page</ac>
+    <ac id="3.5.4">When I try to delete an article that does not exist, Then I see an error message indicating the article was not found</ac>
+    <ac id="3.5.5">When I try to delete an article without admin permissions, Then I see an error message indicating insufficient permissions</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics/epic-3-内容创作和管理content-creation-management.md" title="Epic 3: 内容创作和管理" section="Story 3.5">
+        Story definition with acceptance criteria and technical notes for article deletion functionality. Includes requirements for delete button, confirmation dialog, delete API endpoint, cascading deletes, permission validation, and error handling.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-3.md" title="Tech Spec Epic 3" section="APIs and Interfaces">
+        Article deletion API specification: DELETE /api/articles/[id] for deleting articles, requires ADMIN role, handles cascading deletes (ArticleTag, Comment), returns 404 if article not found, returns 200 with success message on successful deletion.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-3.md" title="Tech Spec Epic 3" section="Article Deletion Workflow">
+        Article deletion workflow: User clicks delete button, confirmation dialog appears, user confirms, client sends DELETE request, server validates authentication and authorization, checks if article exists, deletes ArticleTag and Comment records (cascade), deletes Article record, returns success response, client removes article from UI.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Project Structure">
+        Project structure patterns: Admin pages in app/admin/ directory, article pages in app/admin/articles/ directory, dynamic routes using [id] pattern, kebab-case for files, PascalCase for components. Article list page may need to be created at app/admin/articles/page.tsx.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="API Contracts">
+        API response format standards: Unified error response format with success, error, code, and details fields. HTTP status codes: 200 (Success), 401 (Unauthorized), 403 (Forbidden), 404 (Not Found), 500 (Internal Server Error).
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Error Handling">
+        Error handling patterns: Unified error response format, user-friendly error messages in Chinese, explicit status code checks (401, 403, 404), proper error logging without exposing sensitive data.
+      </doc>
+      <doc path="docs/epics/epic-6-后台管理界面admin-dashboard.md" title="Epic 6: 后台管理界面" section="Story 6.2">
+        Article list page requirements: Display all articles (published and drafts), show title, status, publish date, author, add edit and delete action buttons, filter by status, search by title, add "New Article" button. Full implementation in Story 6.2, but basic list needed for Story 3.5.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/3-4-文章编辑功能.md" title="Story 3.4: 文章编辑功能" section="Learnings from Previous Story">
+        Article edit page patterns: Error handling patterns (401, 403, 404), success message display pattern (green banner), API call patterns with authentication headers. Can reference for delete button placement and error handling.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/3-1-文章数据模型和基础-API.md" title="Story 3.1: 文章数据模型和基础 API" section="Task 8">
+        Delete API endpoint implementation details: DELETE /api/articles/[id] endpoint fully implemented, handles authentication and authorization, checks if article exists before deletion, performs cascading deletes (ArticleTag, Comment), returns appropriate error responses.
+      </doc>
+    </docs>
+    <code>
+      <artifact path="app/api/articles/[id]/route.ts" kind="api" symbol="DELETE" lines="346-422" reason="Article deletion API endpoint. Requires ADMIN role, checks if article exists, performs cascading deletes (ArticleTag, Comment automatically deleted, Category relation set to null), returns 200 with success message or appropriate error responses (401, 403, 404, 500)." />
+      <artifact path="app/api/articles/route.ts" kind="api" symbol="GET" lines="1-140" reason="Article list API endpoint for fetching all articles. Returns paginated list with optional filtering by status, category, or tag. Requires ADMIN role. Can be used to populate article list page for delete functionality." />
+      <artifact path="app/admin/articles/[id]/edit/page.tsx" kind="component" symbol="EditArticlePage" lines="1-100" reason="Article edit page component. Can be referenced for delete button placement in page header or action area. Shows error handling patterns (401, 403, 404) and success message display pattern (green banner)." />
+      <artifact path="prisma/schema.prisma" kind="schema" symbol="Article" lines="118-140" reason="Article model with cascade delete configuration. ArticleTag records are automatically deleted (onDelete: Cascade), Comment records are automatically deleted (onDelete: Cascade), Category relation is set to null (onDelete: SetNull). No additional code needed for cascading deletes." />
+      <artifact path="prisma/schema.prisma" kind="schema" symbol="ArticleTag" lines="145-151" reason="ArticleTag junction table with cascade delete. ArticleTag records are automatically deleted when Article is deleted (onDelete: Cascade)." />
+      <artifact path="lib/auth/middleware.ts" kind="middleware" symbol="getUserFromHeaders" lines="1-50" reason="Authentication middleware helper. Extracts user information from request headers. Used by DELETE API endpoint for authentication." />
+      <artifact path="lib/auth/permissions.ts" kind="middleware" symbol="requireAdmin" lines="1-50" reason="Permission check function. Validates user has ADMIN role. Returns error response if not authorized. Used by DELETE API endpoint." />
+      <artifact path="tests/__tests__/integration/article-api.test.ts" kind="test" symbol="DELETE /api/articles/[id]" lines="531-609" reason="Integration tests for DELETE API endpoint. Tests successful deletion, article not found (404), unauthenticated user (401), and admin permission requirements. Can be referenced for test implementation." />
+    </code>
+    <dependencies>
+      <dependency ecosystem="node" package="next" version="16.0.2" />
+      <dependency ecosystem="node" package="react" version="19.2.0" />
+      <dependency ecosystem="node" package="react-dom" version="19.2.0" />
+      <dependency ecosystem="node" package="next-auth" version="^4.24.13" />
+      <dependency ecosystem="node" package="@prisma/client" version="^6.19.0" />
+      <dependency ecosystem="node" package="@testing-library/react" version="^16.3.0" />
+      <dependency ecosystem="node" package="@testing-library/jest-dom" version="^6.9.1" />
+      <dependency ecosystem="node" package="jest" version="^30.2.0" />
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Delete functionality must be protected with ADMIN role authentication. Use middleware or page-level auth check.</constraint>
+    <constraint>All API calls must include authentication headers (cookies) for NextAuth.js session.</constraint>
+    <constraint>Error handling must follow unified error response format: { success: false, error: { message, code, details } }.</constraint>
+    <constraint>Success message display must use green banner pattern: bg-green-50 border border-green-200 text-green-800.</constraint>
+    <constraint>Error messages must be user-friendly and in Chinese: "文章不存在", "请先登录", "权限不足，需要管理员权限".</constraint>
+    <constraint>Cascading deletes are handled automatically by Prisma schema - no additional code needed. ArticleTag and Comment records are automatically deleted, Category relation is set to null.</constraint>
+    <constraint>All public functions, interfaces, and components must include JSDoc comments per architecture standards.</constraint>
+    <constraint>File paths must follow Next.js App Router conventions: app/admin/articles/page.tsx for list page, app/admin/articles/[id]/edit/page.tsx for edit page.</constraint>
+    <constraint>Confirmation dialog should be accessible with keyboard navigation (ESC to cancel, Enter to confirm) and ARIA attributes.</constraint>
+    <constraint>Delete button should be clearly visible but not too prominent (danger action styling, e.g., red color, trash icon).</constraint>
+    <constraint>After successful deletion, article should be removed from UI immediately (optimistic update) or list should be refreshed from API.</constraint>
+    <constraint>Article list page may need to be created if it doesn't exist. Can create minimal version now, full implementation in Story 6.2.</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="DELETE /api/articles/[id]" kind="REST endpoint" signature="DELETE /api/articles/[id]: Promise&lt;NextResponse&lt;{ success: true, message: string } | { success: false, error: { message: string, code: string } }&gt;&gt;" path="app/api/articles/[id]/route.ts" />
+    <interface name="GET /api/articles" kind="REST endpoint" signature="GET /api/articles?status=DRAFT|PUBLISHED&amp;categoryId=string&amp;tagId=string&amp;page=number&amp;limit=number: Promise&lt;NextResponse&lt;{ success: true, data: { articles: ArticleResponse[], pagination: { page, limit, total, totalPages } } } | { success: false, error: { message: string, code: string } }&gt;&gt;" path="app/api/articles/route.ts" />
+    <interface name="getUserFromHeaders" kind="function" signature="getUserFromHeaders(headers: Headers): User | null" path="lib/auth/middleware.ts" />
+    <interface name="requireAdmin" kind="function" signature="requireAdmin(user: User | null): NextResponse | null" path="lib/auth/permissions.ts" />
+  </interfaces>
+
+  <tests>
+    <standards>
+      Testing uses Jest with React Testing Library for unit tests and integration tests. Tests should be co-located with source files or in tests/__tests__/ directory. Unit tests cover component rendering, delete button interaction, confirmation dialog display and interaction, state management, and user interactions. Integration tests cover DELETE API endpoint, authentication, authorization, error handling, and cascading deletes. All tests must use proper mocking for Next.js router, API calls, and Prisma client. Test files follow naming convention: *.test.tsx for components, *.test.ts for utilities and APIs.
+    </standards>
+    <locations>
+      tests/__tests__/unit/ - Unit tests for components and utilities
+      tests/__tests__/integration/ - Integration tests for API endpoints
+      tests/e2e/ - End-to-end tests using Playwright
+    </locations>
+    <ideas>
+      <test ac="3.5.1">Test delete button renders in article list page and article edit page. Verify button is only visible to admin users.</test>
+      <test ac="3.5.1">Test confirmation dialog displays when delete button is clicked. Verify dialog shows article title in confirmation message.</test>
+      <test ac="3.5.3">Test cancel action in confirmation dialog closes dialog and does not delete article. Verify user remains on current page.</test>
+      <test ac="3.5.2">Test delete API call with valid article ID calls DELETE /api/articles/[id] with correct request body. Verify success message is displayed and article is removed from UI.</test>
+      <test ac="3.5.2">Test article removal from UI after successful deletion. Verify article is removed from list immediately or list is refreshed from API.</test>
+      <test ac="3.5.4">Test delete API call with invalid article ID (404) displays user-friendly error message: "文章不存在".</test>
+      <test ac="3.5.5">Test delete API call without authentication (401) displays error message: "请先登录".</test>
+      <test ac="3.5.5">Test delete API call without admin permissions (403) displays error message: "权限不足，需要管理员权限".</test>
+      <test ac="3.5.2">Test cascading deletes - verify ArticleTag and Comment records are automatically deleted when Article is deleted (integration test).</test>
+      <test ac="all">Test complete delete flow: click delete button, see confirmation dialog, confirm deletion, verify article removed, check success message.</test>
+      <test ac="all">Test delete functionality from article list page and article edit page. Verify redirect to list page after deletion from edit page.</test>
+    </ideas>
+  </tests>
+</story-context>
+

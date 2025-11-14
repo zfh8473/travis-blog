@@ -1,0 +1,141 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.6</storyId>
+    <title>文章分类管理</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-14</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/3-6-文章分类管理.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>blog author</asA>
+    <iWant>to assign categories to articles</iWant>
+    <soThat>articles can be organized and filtered by category</soThat>
+    <tasks>
+      <task id="1" ac="3.6.1">Verify Category Selection in Article Form</task>
+      <task id="2" ac="3.6.2">Create Article Detail Page (Frontend)</task>
+      <task id="3" ac="3.6.2">Display Category on Article Detail Page</task>
+      <task id="4" ac="3.6.3">Create Category Filter Page</task>
+      <task id="5" ac="3.6.3">Implement Category Filtering in Article List API</task>
+      <task id="6" ac="3.6.3">Add Category Navigation/Links</task>
+      <task id="7" ac="3.6.3">Create Article List Page (Frontend)</task>
+      <task id="8" ac="all">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="3.6.1">Given I am logged in as an admin, When I create or edit an article, Then I can select a category (技术、生活、旅行), And the category is saved with the article</ac>
+    <ac id="3.6.2">When I view an article on the frontend, Then the category is displayed</ac>
+    <ac id="3.6.3">When I click on a category, Then I see all articles in that category</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics.md" title="Epic 3: 内容创作和管理" section="Story 3.6">
+        Story definition with acceptance criteria and technical notes for category management. Includes requirements for category selection in article form, category display on frontend, and category filtering functionality.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Project Structure">
+        Project structure patterns: Frontend pages in app/ directory, article pages in app/articles/ directory, dynamic routes using [slug] or [id] pattern. Article detail page should be at app/articles/[slug]/page.tsx or app/articles/[id]/page.tsx. Category filter page should be at app/articles/category/[slug]/page.tsx.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="API Contracts">
+        API response format standards: Unified response format with success, data, and error fields. HTTP status codes: 200 (Success), 404 (Not Found), 500 (Internal Server Error). Category API is public (no auth required).
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Data Architecture">
+        Database schema patterns: Category model with id, name, slug, createdAt, updatedAt. Article model with optional categoryId foreign key. Relationship: Article has optional Many-to-One relationship with Category (onDelete: SetNull).
+      </doc>
+      <doc path=".bmad-ephemeral/stories/3-3-文章创建功能.md" title="Story 3.3: 文章创建功能" section="Task 3">
+        Category selection implementation: Category dropdown is already implemented in article creation form. Categories are loaded from GET /api/categories endpoint. Category selection is saved when creating article. Category can be optional (allow empty selection).
+      </doc>
+      <doc path=".bmad-ephemeral/stories/3-4-文章编辑功能.md" title="Story 3.4: 文章编辑功能" section="Prerequisites">
+        Category selection in edit form: Category dropdown is already implemented in article edit form. Categories are loaded from GET /api/categories endpoint. Category selection is saved when editing article. Category can be optional (allow empty selection).
+      </doc>
+      <doc path=".bmad-ephemeral/stories/3-1-文章数据模型和基础-API.md" title="Story 3.1: 文章数据模型和基础 API" section="Task 5">
+        Article API filtering: GET /api/articles endpoint supports categoryId query parameter for filtering articles by category. Filtering logic returns only articles with matching categoryId. API requires ADMIN role for access.
+      </doc>
+    </docs>
+    <code>
+      <artifact path="prisma/schema.prisma" kind="schema" symbol="Category" lines="81-90" reason="Category model definition. Fields: id (cuid), name (unique), slug (unique), createdAt, updatedAt. Relationship: One-to-Many with Article (articles field)." />
+      <artifact path="prisma/schema.prisma" kind="schema" symbol="Article" lines="118-140" reason="Article model with categoryId field. categoryId is optional (String?), foreign key to Category. Relationship: Many-to-One with Category (onDelete: SetNull). Category relation is included in Article model." />
+      <artifact path="app/api/categories/route.ts" kind="api" symbol="GET" lines="1-56" reason="Category API endpoint. GET /api/categories returns all categories (public, no auth required). Returns JSON with success and data fields. Categories are ordered by name ascending." />
+      <artifact path="app/api/articles/route.ts" kind="api" symbol="GET" lines="31-140" reason="Article list API endpoint. GET /api/articles supports categoryId query parameter for filtering. Requires ADMIN role. Returns paginated list with category relation included. Can be used for category filtering on frontend (may need public version)." />
+      <artifact path="app/api/articles/[id]/route.ts" kind="api" symbol="GET" lines="24-100" reason="Article detail API endpoint. GET /api/articles/[id] returns single article with category relation included. Draft articles require ADMIN role, published articles allow public access. Category data is included in response." />
+      <artifact path="app/admin/articles/new/page.tsx" kind="component" symbol="NewArticlePage" lines="51-116" reason="Article creation page component. Category selection dropdown is implemented. Categories are loaded from GET /api/categories on component mount. Category selection is stored in categoryId state. Category can be optional (empty string)." />
+      <artifact path="app/admin/articles/[id]/edit/page.tsx" kind="component" symbol="EditArticlePage" lines="64-183" reason="Article edit page component. Category selection dropdown is implemented. Categories are loaded from GET /api/categories on component mount. Category selection is pre-filled from article data and can be updated. Category can be optional (empty string)." />
+    </code>
+    <dependencies>
+      <dependency ecosystem="node" package="next" version="16.0.2" />
+      <dependency ecosystem="node" package="react" version="19.2.0" />
+      <dependency ecosystem="node" package="react-dom" version="19.2.0" />
+      <dependency ecosystem="node" package="@prisma/client" version="^6.19.0" />
+      <dependency ecosystem="node" package="@testing-library/react" version="^16.3.0" />
+      <dependency ecosystem="node" package="@testing-library/jest-dom" version="^6.9.1" />
+      <dependency ecosystem="node" package="jest" version="^30.2.0" />
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Category selection in article form is already implemented (Story 3.3 and 3.4). Task 1 is to verify existing implementation, not create new functionality.</constraint>
+    <constraint>Category API endpoint (GET /api/articles) is public (no auth required). Frontend can fetch categories without authentication.</constraint>
+    <constraint>Article list API (GET /api/articles) requires ADMIN role. For frontend public access, may need to create public version or modify existing endpoint to allow public access for published articles only.</constraint>
+    <constraint>Category filtering must support both query parameter (?categoryId=[id]) and slug-based route (/articles/category/[slug]) for SEO-friendly URLs.</constraint>
+    <constraint>Category display must handle null categoryId (article has no category). Display "未分类" or nothing, not an error.</constraint>
+    <constraint>Category links must be clickable and navigate to category filter page. Use Next.js Link component for client-side navigation.</constraint>
+    <constraint>All UI text must be in Chinese: "分类", "未分类", "查看所有文章", etc.</constraint>
+    <constraint>Category display styling should be consistent with design system. Use badge or link style, make it visually distinct but not too prominent.</constraint>
+    <constraint>Article list page may overlap with Epic 4 (Content Display). Can create basic list page here or defer to Epic 4. Check if article list page already exists.</constraint>
+    <constraint>All public functions, interfaces, and components must include JSDoc comments per architecture standards.</constraint>
+    <constraint>File paths must follow Next.js App Router conventions: app/articles/[slug]/page.tsx for article detail, app/articles/category/[slug]/page.tsx for category filter, app/articles/page.tsx for article list.</constraint>
+    <constraint>Error handling must follow unified error response format: { success: false, error: { message, code, details } }.</constraint>
+    <constraint>Empty state handling: When no articles in category, display friendly message "该分类下暂无文章" or "No articles in this category".</constraint>
+    <constraint>Pagination: Article list should support pagination if there are many articles. Use page and limit query parameters, display pagination controls.</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="Category" path="prisma/schema.prisma">
+      <field name="id" type="string" required="true" description="Category unique identifier (cuid)" />
+      <field name="name" type="string" required="true" description="Category name (unique)" />
+      <field name="slug" type="string" required="true" description="Category URL-friendly slug (unique)" />
+      <field name="createdAt" type="DateTime" required="true" description="Category creation timestamp" />
+      <field name="updatedAt" type="DateTime" required="true" description="Category last update timestamp" />
+    </interface>
+    <interface name="ArticleWithCategory" path="app/api/articles/[id]/route.ts">
+      <field name="id" type="string" required="true" description="Article unique identifier" />
+      <field name="title" type="string" required="true" description="Article title" />
+      <field name="content" type="string" required="true" description="Article content (HTML)" />
+      <field name="categoryId" type="string | null" required="false" description="Category ID (optional)" />
+      <field name="category" type="Category | null" required="false" description="Category object (optional, included in API response)" />
+      <field name="slug" type="string" required="true" description="Article URL-friendly slug" />
+      <field name="status" type="'DRAFT' | 'PUBLISHED'" required="true" description="Article status" />
+      <field name="publishedAt" type="DateTime | null" required="false" description="Publication timestamp" />
+      <field name="author" type="User" required="true" description="Article author" />
+      <field name="tags" type="Tag[]" required="false" description="Article tags" />
+    </interface>
+    <interface name="CategoryAPIResponse" path="app/api/categories/route.ts">
+      <field name="success" type="boolean" required="true" description="Request success status" />
+      <field name="data" type="Category[]" required="true" description="Array of categories" />
+      <field name="error" type="ErrorObject" required="false" description="Error object (if success is false)" />
+    </interface>
+    <interface name="ArticleListAPIResponse" path="app/api/articles/route.ts">
+      <field name="success" type="boolean" required="true" description="Request success status" />
+      <field name="data" type="Article[]" required="true" description="Array of articles" />
+      <field name="pagination" type="PaginationObject" required="false" description="Pagination information" />
+      <field name="error" type="ErrorObject" required="false" description="Error object (if success is false)" />
+    </interface>
+  </interfaces>
+
+  <testIdeas>
+    <test>Test category selection dropdown in article creation form: Verify categories are loaded from API, dropdown displays all categories, selection is saved when creating article, empty selection is allowed.</test>
+    <test>Test category selection dropdown in article edit form: Verify categories are loaded from API, dropdown displays all categories, current category is pre-selected, selection can be changed, selection is saved when updating article.</test>
+    <test>Test category display on article detail page: Verify category is displayed when article has category, category name and/or slug is shown, category is styled as badge or link, category link navigates to category filter page, "未分类" or nothing is shown when article has no category.</test>
+    <test>Test category filter page: Verify category is fetched by slug or ID, articles are filtered by categoryId, category name is displayed as page title, article list shows articles in that category, empty state is shown when no articles in category.</test>
+    <test>Test category filtering API: Verify GET /api/articles?categoryId=[id] returns only articles with matching categoryId, filtering works correctly, empty result is handled properly, pagination works with category filter.</test>
+    <test>Test category navigation links: Verify category link in article detail page navigates to category filter page, category link in article list page navigates to category filter page, links use correct URL format (/articles/category/[slug] or ?categoryId=[id]).</test>
+    <test>Test article list page: Verify articles are fetched from API, category filter via query parameter works, articles are displayed in card or list layout, article title, excerpt, category, tags, publish date, author are shown, pagination works if needed, loading and error states are handled.</test>
+    <test>Test empty states: Verify empty state when no articles in category, empty state when no articles at all, empty state message is user-friendly and in Chinese.</test>
+    <test>Test error handling: Verify 404 error when category not found, 500 error when API fails, network errors are handled, error messages are user-friendly and in Chinese.</test>
+    <test>Integration test: Test complete flow from article creation with category, viewing article detail with category, clicking category link, viewing category filter page with articles.</test>
+  </testIdeas>
+</story-context>
+

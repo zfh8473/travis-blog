@@ -370,7 +370,7 @@ describe("Article API Integration Tests", () => {
       const { NextRequest } = await import("next/server");
       const request = new NextRequest("http://localhost/api/articles/article-123");
 
-      const response = await GET_DETAIL(request, { params: { id: "article-123" } });
+      const response = await GET_DETAIL(request, { params: Promise.resolve({ id: "article-123" }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -405,7 +405,7 @@ describe("Article API Integration Tests", () => {
       const { NextRequest } = await import("next/server");
       const request = new NextRequest("http://localhost/api/articles/article-123");
 
-      const response = await GET_DETAIL(request, { params: { id: "article-123" } });
+      const response = await GET_DETAIL(request, { params: Promise.resolve({ id: "article-123" }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -419,7 +419,7 @@ describe("Article API Integration Tests", () => {
       const { NextRequest } = await import("next/server");
       const request = new NextRequest("http://localhost/api/articles/non-existent");
 
-      const response = await GET_DETAIL(request, { params: { id: "non-existent" } });
+      const response = await GET_DETAIL(request, { params: Promise.resolve({ id: "non-existent" }) });
       const data = await response.json();
 
       expect(response.status).toBe(404);
@@ -482,7 +482,7 @@ describe("Article API Integration Tests", () => {
         }),
       });
 
-      const response = await PUT(request, { params: { id: "article-123" } });
+      const response = await PUT(request, { params: Promise.resolve({ id: "article-123" }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -515,7 +515,7 @@ describe("Article API Integration Tests", () => {
         }),
       });
 
-      const response = await PUT(request, { params: { id: "non-existent" } });
+      const response = await PUT(request, { params: Promise.resolve({ id: "non-existent" }) });
       const data = await response.json();
 
       expect(response.status).toBe(404);
@@ -551,7 +551,7 @@ describe("Article API Integration Tests", () => {
         method: "DELETE",
       });
 
-      const response = await DELETE(request, { params: { id: "article-123" } });
+      const response = await DELETE(request, { params: Promise.resolve({ id: "article-123" }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -579,7 +579,7 @@ describe("Article API Integration Tests", () => {
         method: "DELETE",
       });
 
-      const response = await DELETE(request, { params: { id: "non-existent" } });
+      const response = await DELETE(request, { params: Promise.resolve({ id: "non-existent" }) });
       const data = await response.json();
 
       expect(response.status).toBe(404);
@@ -602,7 +602,7 @@ describe("Article API Integration Tests", () => {
         method: "DELETE",
       });
 
-      const response = await DELETE(request, { params: { id: "article-123" } });
+      const response = await DELETE(request, { params: Promise.resolve({ id: "article-123" }) });
 
       expect(response.status).toBe(401);
       expect(prisma.article.delete).not.toHaveBeenCalled();

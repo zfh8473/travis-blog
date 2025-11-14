@@ -341,6 +341,9 @@ Based on Epic 3 Story 3.2 from epics.md and tech-spec-epic-3.md:
 **修改文件:**
 - `package.json` - 添加了 Tiptap 相关依赖（包括 `@tiptap/extension-placeholder`）
 - `components/editor/TiptapEditor.tsx` - 添加了错误状态管理、placeholder 支持和改进的链接按钮
+- `app/api/articles/[id]/route.ts` - 更新了动态路由 params 以支持 Next.js 16 Promise 类型（GET, PUT, DELETE）
+- `lib/validations/article.ts` - 修复了 Zod 4.x enum API 兼容性问题（使用 `message` 替代 `required_error`/`invalid_type_error`）
+- `tests/__tests__/integration/article-api.test.ts` - 更新了测试以使用 Promise-based params
 
 ## Change Log
 
@@ -365,6 +368,12 @@ Based on Epic 3 Story 3.2 from epics.md and tech-spec-epic-3.md:
   - Implemented placeholder support using `@tiptap/extension-placeholder` package
   - Improved link button UX with URL validation, error handling, and support for removing links
   - All review follow-up items completed
+
+- **2025-11-14**: Fixed Next.js 16 compatibility issues for Vercel deployment
+  - Updated dynamic route params to handle Promise type (Next.js 16 breaking change)
+  - Fixed Zod 4.x enum validation API (replaced `required_error`/`invalid_type_error` with `message`)
+  - Updated integration tests to use Promise-based params
+  - Build now passes successfully
 
 ## Senior Developer Review (AI)
 

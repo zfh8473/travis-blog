@@ -23,9 +23,10 @@ import { generateUniqueSlug } from "@/lib/utils/slug";
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const articleId = params.id;
+  const { id } = await params;
+  const articleId = id;
 
   try {
     // Query article from database
@@ -132,9 +133,10 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const articleId = params.id;
+  const { id } = await params;
+  const articleId = id;
 
   // Get user information from request headers (set by middleware)
   const user = getUserFromHeaders(request.headers);
@@ -360,9 +362,10 @@ export async function PUT(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const articleId = params.id;
+  const { id } = await params;
+  const articleId = id;
 
   // Get user information from request headers (set by middleware)
   const user = getUserFromHeaders(request.headers);

@@ -57,8 +57,7 @@ export const createArticleSchema = z.object({
     .array(z.string().uuid("Tag ID must be a valid UUID"))
     .optional(),
   status: z.enum(["DRAFT", "PUBLISHED"], {
-    required_error: "Status is required",
-    invalid_type_error: "Status must be either DRAFT or PUBLISHED",
+    message: "Status must be either DRAFT or PUBLISHED",
   }),
 });
 
@@ -106,7 +105,7 @@ export const updateArticleSchema = z.object({
     .optional(),
   status: z
     .enum(["DRAFT", "PUBLISHED"], {
-      invalid_type_error: "Status must be either DRAFT or PUBLISHED",
+      message: "Status must be either DRAFT or PUBLISHED",
     })
     .optional(),
 });

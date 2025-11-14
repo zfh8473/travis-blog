@@ -58,7 +58,7 @@ development_status:
   # Epic 3: 内容创作和管理（Content Creation & Management）
   epic-3: contexted
   3-1-文章数据模型和基础-API: done
-  3-2-Tiptap-编辑器集成: backlog
+  3-2-Tiptap-编辑器集成: review
   3-3-文章创建功能: backlog
   3-4-文章编辑功能: backlog
   3-5-文章删除功能: backlog

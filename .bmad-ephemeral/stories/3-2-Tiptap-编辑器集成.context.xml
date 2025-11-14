@@ -1,0 +1,179 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.2</storyId>
+    <title>Tiptap 编辑器集成</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-14</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/3-2-Tiptap-编辑器集成.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>blog author</asA>
+    <iWant>to use Tiptap editor to create and edit articles</iWant>
+    <soThat>I can write rich text content with formatting options</soThat>
+    <tasks>
+      <task id="1" ac="3.2.1">Install and Configure Tiptap</task>
+      <task id="2" ac="3.2.1">Implement Basic Text Formatting</task>
+      <task id="3" ac="3.2.2">Implement Markdown Support</task>
+      <task id="4" ac="3.2.2">Implement Real-time Preview</task>
+      <task id="5" ac="3.2.3">Create Image Upload API Endpoint</task>
+      <task id="6" ac="3.2.3">Integrate Image Upload with Tiptap</task>
+      <task id="7" ac="3.2.4">Implement Editor State Management</task>
+      <task id="8" ac="all">Create Editor Component Props Interface</task>
+      <task id="9" ac="all">Testing</task>
+      <task id="10" ac="all">Error Handling and Validation</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="3.2.1">Given I am logged in as an admin, When I navigate to the article creation page, Then I see the Tiptap editor, And I can type and format text (bold, italic, headings, lists, etc.)</ac>
+    <ac id="3.2.2">When I use the editor, Then I can see a real-time preview, And the editor supports Markdown input</ac>
+    <ac id="3.2.3">When I upload an image by dragging and dropping or pasting, Then the image is uploaded to the storage layer, And the image URL is inserted into the editor, And the image is displayed in the editor</ac>
+    <ac id="3.2.4">When I save the article, Then the formatted content (including images) is saved to the database</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics/epic-3-内容创作和管理content-creation-management.md" title="Epic 3: 内容创作和管理" section="Story 3.2">
+        Story definition with acceptance criteria and technical notes for Tiptap editor integration. Includes requirements for editor setup, text formatting, Markdown support, real-time preview, and image upload functionality.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-3.md" title="Tech Spec Epic 3" section="Tiptap Editor Component">
+        Tiptap editor component specification: Create editor component in `components/editor/TiptapEditor.tsx`, support Markdown input and output, integrate image upload with storage abstraction layer, real-time preview is optional.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-3.md" title="Tech Spec Epic 3" section="Image Upload API">
+        Image upload API endpoint specification: POST /api/upload, requires ADMIN role, validates file type (jpg, png, gif, webp) and size (max 5MB), uses storage abstraction layer, returns image URL in unified response format.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-3.md" title="Tech Spec Epic 3" section="Image Upload Workflow">
+        Image upload workflow: User drags/pastes image, Tiptap extension calls upload handler, handler calls POST /api/upload, server validates and uploads to storage, returns image URL, editor inserts URL and displays image.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Editor Architecture">
+        Editor architecture patterns: Use Tiptap as rich text editor, create component in `components/editor/TiptapEditor.tsx`, support Markdown input/output, integrate with storage abstraction layer.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="API Contracts">
+        API response format standards: Unified error format `{ success: false, error: { message: string, code: string } }`, HTTP status codes (200, 400, 401, 403, 413, 500), Next.js API Routes pattern.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Component Organization">
+        Component organization patterns: React components in `components/` directory, use TypeScript for type safety, add JSDoc comments for public props and methods, follow PascalCase naming for components.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Code Documentation">
+        JSDoc comment standards: All public functions, interfaces, classes, and exported types must include JSDoc-style comments with @param, @returns, @throws, @example tags.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Project Structure">
+        Project structure: Editor components in `components/editor/`, API routes in `app/api/`, storage abstraction in `lib/storage/`, follow naming conventions (PascalCase for components, kebab-case for files).
+      </doc>
+      <doc path="tests/README.md" title="Testing Documentation" section="Test Structure">
+        Test structure: Unit tests in `tests/__tests__/unit/`, integration tests in `tests/__tests__/integration/`, E2E tests in `tests/e2e/`, use Jest for unit/integration, Playwright for E2E.
+      </doc>
+    </docs>
+    <code>
+      <artifact path="lib/storage/index.ts" kind="service" symbol="getStorage" lines="35-55" reason="Storage abstraction layer factory function - returns storage implementation for file uploads">
+        Factory function that returns storage implementation based on STORAGE_TYPE environment variable. Defaults to LocalStorage. Used by upload API endpoint.
+      </artifact>
+      <artifact path="lib/storage/interface.ts" kind="interface" symbol="StorageInterface" lines="45-124" reason="Storage interface definition - defines contract for file upload, delete, getUrl, list operations">
+        Interface defining storage operations: upload(file, path?), delete(path), getUrl(path), list(prefix?). All storage implementations must implement this interface.
+      </artifact>
+      <artifact path="lib/storage/local.ts" kind="service" symbol="LocalStorage" lines="21-260" reason="Local storage implementation - stores files in public/uploads/ directory, accessible via HTTP at /uploads/{filename}">
+        Local file system storage implementation. Stores files in `public/uploads/` directory. Files accessible via HTTP at `/uploads/{filename}`. Implements StorageInterface with upload, delete, getUrl, list methods.
+      </artifact>
+      <artifact path="lib/storage/local.ts" kind="method" symbol="upload" lines="87-119" reason="File upload method - accepts File or Buffer, generates unique filename, stores file, returns relative path">
+        Uploads file to local storage. Generates unique filename with timestamp and random string. Returns relative path from public directory (e.g., "uploads/filename.jpg").
+      </artifact>
+      <artifact path="lib/auth/middleware.ts" kind="service" symbol="getUserFromHeaders" reason="Middleware helper function - extracts user information from request headers set by NextAuth.js middleware">
+        Extracts authenticated user from request headers. Used by API routes to get current user information for authorization checks.
+      </artifact>
+      <artifact path="lib/auth/permissions.ts" kind="service" symbol="requireAdmin" reason="Permission check function - verifies user has ADMIN role, returns NextResponse with 401/403 or null if authorized">
+        Checks if user has ADMIN role. Returns NextResponse with 401 (unauthorized) or 403 (forbidden) if check fails, or null if authorized. Used by all admin-only API endpoints.
+      </artifact>
+      <artifact path="app/api/articles/route.ts" kind="controller" symbol="POST" lines="175-350" reason="Article creation API endpoint - pattern to follow for upload API endpoint (authentication, validation, error handling)">
+        Article creation endpoint pattern: Uses getUserFromHeaders and requireAdmin for authentication, validates input with Zod schema, handles errors with unified format, returns 201 on success.
+      </artifact>
+      <artifact path="lib/validations/article.ts" kind="validation" symbol="createArticleSchema" lines="38-63" reason="Article validation schema - content field accepts HTML format from Tiptap editor">
+        Zod validation schema for article creation. Content field accepts HTML string (from Tiptap editor). Used to validate article data before saving to database.
+      </artifact>
+      <artifact path="components/TestTailwind.tsx" kind="component" symbol="TestTailwind" lines="9-23" reason="Example React component - shows component structure, JSDoc comments, TypeScript usage, Tailwind CSS styling">
+        Example React component showing structure: JSDoc comments, TypeScript, Tailwind CSS classes, component export pattern.
+      </artifact>
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="next" version="16.0.2" />
+        <package name="react" version="19.2.0" />
+        <package name="react-dom" version="19.2.0" />
+        <package name="zod" version="^4.1.12" />
+        <package name="next-auth" version="^4.24.13" />
+        <package name="@prisma/client" version="^6.19.0" />
+        <package name="tailwindcss" version="^4" />
+        <package name="typescript" version="^5" />
+        <package name="@tiptap/react" version="not-installed" note="Need to install for Tiptap React integration" />
+        <package name="@tiptap/starter-kit" version="not-installed" note="Need to install for basic Tiptap extensions" />
+        <package name="@tiptap/extension-image" version="not-installed" note="Need to install for image extension" />
+        <package name="@tiptap/extension-markdown" version="not-installed" note="Need to install for Markdown support" />
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="architecture">
+      Editor component must be created in `components/editor/TiptapEditor.tsx` following React component patterns with TypeScript and JSDoc comments.
+    </constraint>
+    <constraint type="architecture">
+      Upload API endpoint must be created in `app/api/upload/route.ts` using Next.js API Routes pattern with POST handler.
+    </constraint>
+    <constraint type="authentication">
+      All upload operations require ADMIN role. Use `getUserFromHeaders` and `requireAdmin` functions for authorization checks.
+    </constraint>
+    <constraint type="storage">
+      Must use storage abstraction layer (`getStorage()`) for file uploads. Do not directly access file system. Storage interface provides upload, delete, getUrl, list methods.
+    </constraint>
+    <constraint type="validation">
+      File upload must validate file type (jpg, jpeg, png, gif, webp) and size (max 5MB). Return 400 for invalid type, 413 for file too large.
+    </constraint>
+    <constraint type="api">
+      All API responses must follow unified error format: `{ success: boolean, error?: { message: string, code: string } }`. Use appropriate HTTP status codes (200, 400, 401, 403, 413, 500).
+    </constraint>
+    <constraint type="format">
+      Editor content is stored as HTML in database. Article content field accepts HTML format. Images stored as `<img src="/uploads/...">` tags in HTML.
+    </constraint>
+    <constraint type="documentation">
+      All public functions, interfaces, and components must include JSDoc comments with @param, @returns, @throws, @example tags as per architecture standards.
+    </constraint>
+    <constraint type="testing">
+      Must create unit tests for TiptapEditor component and integration tests for upload API endpoint. Follow existing test patterns in `tests/__tests__/` directory.
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="StorageInterface" kind="TypeScript interface" signature="interface StorageInterface { upload(file: File | Buffer, path?: string): Promise&lt;string&gt;; delete(path: string): Promise&lt;void&gt;; getUrl(path: string): Promise&lt;string&gt;; list(prefix?: string): Promise&lt;FileMetadata[]&gt;; }" path="lib/storage/interface.ts" />
+    <interface name="POST /api/upload" kind="REST endpoint" signature="POST /api/upload - multipart/form-data with file field, returns { success: true, data: { url: string, path: string } } or { success: false, error: { message: string, code: string } }" path="app/api/upload/route.ts" note="To be created" />
+    <interface name="TiptapEditorProps" kind="TypeScript interface" signature="interface TiptapEditorProps { initialContent?: string; onChange?: (content: string) =&gt; void; onSave?: (content: string) =&gt; void; placeholder?: string; readOnly?: boolean; }" path="components/editor/TiptapEditor.tsx" note="To be created" />
+    <interface name="POST /api/articles" kind="REST endpoint" signature="POST /api/articles - creates article with content field accepting HTML from Tiptap, requires ADMIN role" path="app/api/articles/route.ts" />
+  </interfaces>
+
+  <tests>
+    <standards>
+      Testing uses Jest for unit and integration tests, Playwright for E2E tests. Unit tests in `tests/__tests__/unit/`, integration tests in `tests/__tests__/integration/`, E2E tests in `tests/e2e/`. Tests should be isolated, clean up test data, mock external services, and include both success and error scenarios. Follow existing test patterns from Story 3.1 integration tests.
+    </standards>
+    <locations>
+      <location>tests/__tests__/unit/</location>
+      <location>tests/__tests__/integration/</location>
+      <location>tests/e2e/</location>
+    </locations>
+    <ideas>
+      <test ac="3.2.1" type="unit">Test TiptapEditor component renders correctly with all formatting extensions (bold, italic, headings, lists, links, blockquote, code block)</test>
+      <test ac="3.2.1" type="unit">Test text formatting operations (apply bold, italic, headings, lists) and verify HTML output</test>
+      <test ac="3.2.2" type="unit">Test Markdown input support - paste Markdown text and verify HTML conversion</test>
+      <test ac="3.2.2" type="unit">Test real-time preview (if implemented) - verify preview syncs with editor content</test>
+      <test ac="3.2.3" type="integration">Test image upload API endpoint - POST /api/upload with valid image file, verify file is stored and URL is returned</test>
+      <test ac="3.2.3" type="integration">Test image upload validation - invalid file type returns 400, file too large returns 413</test>
+      <test ac="3.2.3" type="integration">Test image upload authentication - unauthenticated request returns 401, non-admin returns 403</test>
+      <test ac="3.2.3" type="unit">Test TiptapEditor image upload integration - drag-and-drop image, verify upload API is called, verify image URL is inserted</test>
+      <test ac="3.2.3" type="unit">Test TiptapEditor paste image upload - paste image from clipboard, verify upload and insertion</test>
+      <test ac="3.2.4" type="integration">Test editor content save - extract HTML from editor, send to POST /api/articles, verify content is saved correctly</test>
+      <test ac="3.2.4" type="unit">Test editor state management - initial content loading, content changes, HTML extraction</test>
+      <test ac="all" type="e2e">E2E test: Create article with Tiptap editor, format text, upload image, save article, verify content in database</test>
+    </ideas>
+  </tests>
+</story-context>
+

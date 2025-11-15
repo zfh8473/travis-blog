@@ -1,65 +1,252 @@
-import Image from "next/image";
+import { Suspense } from "react";
+import { prisma } from "@/lib/db/prisma";
+import ArticleList from "@/components/article/ArticleList";
+import Pagination from "@/components/article/Pagination";
 
-export default function Home() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+/**
+ * Article response interface from API.
+ */
+interface Article {
+  id: string;
+  title: string;
+  content: string;
+  excerpt: string | null;
+  slug: string;
+  status: "PUBLISHED";
+  categoryId: string | null;
+  authorId: string;
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  author: {
+    id: string;
+    name: string | null;
+    image: string | null;
+  };
+  category: {
+    id: string;
+    name: string;
+    slug: string;
+  } | null;
+  tags: Array<{
+    id: string;
+    name: string;
+    slug: string;
+  }>;
+}
+
+/**
+ * Pagination metadata interface.
+ */
+interface PaginationData {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+/**
+ * API response interface.
+ */
+interface ArticlesResponse {
+  success: boolean;
+  data?: {
+    articles: Article[];
+    pagination: PaginationData;
+  };
+  error?: {
+    message: string;
+    code: string;
+  };
+}
+
+/**
+ * Fetch published articles directly from database.
+ * 
+ * In Server Components, we can directly use Prisma for better performance
+ * instead of making HTTP requests to API routes.
+ * 
+ * @param page - Page number (default: 1)
+ * @param limit - Items per page (default: 20, max: 100)
+ * @returns Promise resolving to articles and pagination data
+ * @throws Error if database query fails
+ */
+async function fetchArticles(
+  page: number = 1,
+  limit: number = 20
+): Promise<{ articles: Article[]; pagination: PaginationData }> {
+  try {
+    const skip = (page - 1) * limit;
+    const take = Math.min(100, Math.max(1, limit));
+
+    // Build where clause - only published articles
+    const where = {
+      status: "PUBLISHED" as const,
+    };
+
+    // Get total count for pagination
+    const total = await prisma.article.count({ where });
+
+    // Calculate pagination
+    const totalPages = Math.ceil(total / take);
+
+    // Query articles from database
+    const articles = await prisma.article.findMany({
+      where,
+      skip,
+      take,
+      orderBy: {
+        publishedAt: "desc", // Sort by publish date, newest first
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
+        category: true,
+        tags: {
+          include: {
+            tag: true,
+          },
+        },
+      },
+    });
+
+    // Transform tags to simple array format
+    // Type assertion is safe because we filter for PUBLISHED status in where clause
+    const transformedArticles: Article[] = articles.map((article) => ({
+      ...article,
+      status: "PUBLISHED" as const, // Explicitly set status since we filtered for PUBLISHED
+      publishedAt: article.publishedAt?.toISOString() || null,
+      createdAt: article.createdAt.toISOString(),
+      updatedAt: article.updatedAt.toISOString(),
+      tags: article.tags.map((at) => at.tag),
+    }));
+
+    return {
+      articles: transformedArticles,
+      pagination: {
+        page,
+        limit: take,
+        total,
+        totalPages,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching articles:", error);
+    throw new Error("Failed to fetch articles from database");
+  }
+}
+
+/**
+ * Homepage content component.
+ * 
+ * Fetches and displays published articles with pagination.
+ * 
+ * @component
+ */
+async function HomePageContent({
+  searchParams,
+}: {
+  searchParams: { page?: string; limit?: string };
+}) {
+  const page = Math.max(1, parseInt(searchParams.page || "1", 10));
+  const limit = Math.min(100, Math.max(1, parseInt(searchParams.limit || "20", 10)));
+
+  try {
+    const { articles, pagination } = await fetchArticles(page, limit);
+
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Page header */}
+        <header className="mb-8">
+          <h1 className="text-4xl font-bold mb-2 text-gray-900">最新文章</h1>
+          <p className="text-gray-600">
+            {pagination.total > 0
+              ? `共找到 ${pagination.total} 篇文章`
+              : "暂无文章"}
+          </p>
+        </header>
+
+        {/* Article list */}
+        <ArticleList articles={articles} />
+
+        {/* Pagination */}
+        {pagination.totalPages > 1 && (
+          <Suspense fallback={<div className="mt-8 text-center text-gray-500">加载分页...</div>}>
+            <Pagination pagination={pagination} />
+          </Suspense>
+        )}
+      </div>
+    );
+  } catch (error) {
+    // Error state
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="bg-red-50 border border-red-200 text-red-800 px-6 py-4 rounded-lg">
+          <h2 className="text-lg font-semibold mb-2">加载文章失败</h2>
+          <p className="text-sm">
+            {error instanceof Error
+              ? error.message
+              : "无法加载文章列表，请稍后重试"}
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      </div>
+    );
+  }
+}
+
+/**
+ * Loading component for Suspense boundary.
+ */
+function HomePageLoading() {
+  return (
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="mb-8">
+        <div className="h-10 bg-gray-200 rounded w-48 mb-2 animate-pulse" />
+        <div className="h-5 bg-gray-200 rounded w-32 animate-pulse" />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className="border border-gray-200 rounded-lg p-6 bg-white"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+            <div className="h-6 bg-gray-200 rounded w-3/4 mb-3 animate-pulse" />
+            <div className="h-4 bg-gray-200 rounded w-full mb-2 animate-pulse" />
+            <div className="h-4 bg-gray-200 rounded w-2/3 mb-4 animate-pulse" />
+            <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse" />
+          </div>
+        ))}
+      </div>
     </div>
+  );
+}
+
+/**
+ * Homepage component.
+ * 
+ * Displays a list of published articles on the homepage.
+ * Uses Server Component for SSR and SEO optimization.
+ * 
+ * @component
+ * @route /
+ * @requires Public access
+ * 
+ * @example
+ * User visits homepage, sees list of published articles with pagination
+ */
+export default function Home({
+  searchParams,
+}: {
+  searchParams: { page?: string; limit?: string };
+}) {
+  return (
+    <Suspense fallback={<HomePageLoading />}>
+      <HomePageContent searchParams={searchParams} />
+    </Suspense>
   );
 }

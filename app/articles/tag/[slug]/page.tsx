@@ -1,10 +1,52 @@
-"use client";
-
-import { useState, useEffect, useCallback, Suspense } from "react";
-import { useParams, useSearchParams, useRouter } from "next/navigation";
+import { Suspense } from "react";
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import Link from "next/link";
-import { format } from "date-fns";
-import { zhCN } from "date-fns/locale";
+import { prisma } from "@/lib/db/prisma";
+import ArticleList from "@/components/article/ArticleList";
+import Pagination from "@/components/article/Pagination";
+
+/**
+ * Article response interface.
+ */
+interface Article {
+  id: string;
+  title: string;
+  content: string;
+  excerpt: string | null;
+  slug: string;
+  status: "PUBLISHED";
+  categoryId: string | null;
+  authorId: string;
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  author: {
+    id: string;
+    name: string | null;
+    image: string | null;
+  };
+  category: {
+    id: string;
+    name: string;
+    slug: string;
+  } | null;
+  tags: Array<{
+    id: string;
+    name: string;
+    slug: string;
+  }>;
+}
+
+/**
+ * Pagination metadata interface.
+ */
+interface PaginationData {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
 
 /**
  * Tag interface.
@@ -16,410 +58,430 @@ interface Tag {
 }
 
 /**
- * Category interface.
- */
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-}
-
-/**
- * Author interface.
- */
-interface Author {
-  id: string;
-  name: string | null;
-  image: string | null;
-}
-
-/**
- * Article interface for list display.
- */
-interface Article {
-  id: string;
-  title: string;
-  excerpt: string | null;
-  slug: string;
-  status: "DRAFT" | "PUBLISHED";
-  category: Category | null;
-  publishedAt: string | null;
-  createdAt: string;
-  author: Author;
-  tags: Tag[];
-}
-
-/**
- * Pagination interface.
- */
-interface Pagination {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-}
-
-/**
- * Tag filter page.
+ * Fetch tag by slug from database.
  * 
- * Displays all articles with a specific tag.
+ * @param slug - Tag slug
+ * @returns Tag object or null if not found
+ */
+async function fetchTagBySlug(
+  slug: string
+): Promise<Tag | null> {
+  try {
+    const tag = await prisma.tag.findUnique({
+      where: { slug },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+      },
+    });
+
+    return tag;
+  } catch (error) {
+    console.error("Error fetching tag:", error);
+    throw new Error("Failed to fetch tag from database");
+  }
+}
+
+/**
+ * Fetch articles by tag slug from database.
+ * 
+ * @param tagSlug - Tag slug
+ * @param page - Page number (default: 1)
+ * @param limit - Items per page (default: 20)
+ * @returns Articles and pagination data
+ */
+async function fetchArticlesByTag(
+  tagSlug: string,
+  page: number = 1,
+  limit: number = 20
+): Promise<{ articles: Article[]; pagination: PaginationData }> {
+  try {
+    // Find tag by slug first
+    const tag = await prisma.tag.findUnique({
+      where: { slug: tagSlug },
+      select: { id: true },
+    });
+
+    // Tag not found
+    if (!tag) {
+      return {
+        articles: [],
+        pagination: {
+          page: 1,
+          limit,
+          total: 0,
+          totalPages: 0,
+        },
+      };
+    }
+
+    const skip = (page - 1) * limit;
+    const take = Math.min(100, Math.max(1, limit));
+
+    // Build where clause - only published articles with this tag
+    // Use Prisma relation filter for many-to-many relationship
+    const where = {
+      status: "PUBLISHED" as const,
+      tags: {
+        some: {
+          tagId: tag.id,
+        },
+      },
+    };
+
+    // Get total count for pagination
+    const total = await prisma.article.count({ where });
+
+    // Calculate pagination
+    const totalPages = Math.ceil(total / take);
+
+    // Query articles from database
+    const articles = await prisma.article.findMany({
+      where,
+      skip,
+      take,
+      orderBy: {
+        publishedAt: "desc", // Sort by publish date, newest first
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
+        category: true,
+        tags: {
+          include: {
+            tag: true,
+          },
+        },
+      },
+    });
+
+    // Transform tags to simple array format
+    // Type assertion is safe because we filter for PUBLISHED status in where clause
+    const transformedArticles: Article[] = articles.map((article) => ({
+      ...article,
+      status: "PUBLISHED" as const, // Explicitly set status since we filtered for PUBLISHED
+      publishedAt: article.publishedAt?.toISOString() || null,
+      createdAt: article.createdAt.toISOString(),
+      updatedAt: article.updatedAt.toISOString(),
+      tags: article.tags.map((at) => at.tag),
+    }));
+
+    return {
+      articles: transformedArticles,
+      pagination: {
+        page,
+        limit: take,
+        total,
+        totalPages,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching articles:", error);
+    throw new Error("Failed to fetch articles from database");
+  }
+}
+
+/**
+ * Generate metadata for tag page.
+ * 
+ * @param params - Route parameters
+ * @returns Metadata object
+ */
+export async function generateMetadata({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ page?: string; limit?: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const tag = await fetchTagBySlug(slug);
+
+  if (!tag) {
+    return {
+      title: "标签不存在",
+      description: "您访问的标签不存在",
+    };
+  }
+
+  const description = `${tag.name}标签下的所有文章 - Travis 的博客`;
+
+  return {
+    title: `${tag.name}标签文章`,
+    description,
+    openGraph: {
+      title: `${tag.name}标签文章`,
+      description,
+      type: "website",
+    },
+  };
+}
+
+/**
+ * Loading component for Suspense boundary.
+ */
+function TagPageLoading() {
+  return (
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="mb-8">
+        <div className="h-10 bg-gray-200 rounded w-48 mb-2 animate-pulse" />
+        <div className="h-5 bg-gray-200 rounded w-32 animate-pulse" />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className="border border-gray-200 rounded-lg p-6 bg-white"
+          >
+            <div className="h-6 bg-gray-200 rounded w-3/4 mb-3 animate-pulse" />
+            <div className="h-4 bg-gray-200 rounded w-full mb-2 animate-pulse" />
+            <div className="h-4 bg-gray-200 rounded w-2/3 mb-4 animate-pulse" />
+            <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Tag page content component.
+ * 
+ * Fetches and displays articles filtered by tag.
+ * 
+ * @component
+ */
+async function TagPageContent({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ page?: string; limit?: string }>;
+}) {
+  const { slug } = await params;
+  const resolvedSearchParams = await searchParams;
+  const page = Math.max(1, parseInt(resolvedSearchParams.page || "1", 10));
+  const limit = Math.min(100, Math.max(1, parseInt(resolvedSearchParams.limit || "20", 10)));
+
+  try {
+    // Fetch tag and articles
+    const [tag, { articles, pagination }] = await Promise.all([
+      fetchTagBySlug(slug),
+      fetchArticlesByTag(slug, page, limit),
+    ]);
+
+    // Tag not found
+    if (!tag) {
+      notFound();
+    }
+
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Page header */}
+        <header className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-4xl font-bold text-gray-900">{tag.name}标签</h1>
+            <Link
+              href="/"
+              className="text-blue-600 hover:text-blue-800 transition-colors text-sm font-medium"
+            >
+              查看全部文章 →
+            </Link>
+          </div>
+          <p className="text-gray-600">
+            {pagination.total > 0
+              ? `共找到 ${pagination.total} 篇文章`
+              : "暂无文章"}
+          </p>
+        </header>
+
+        {/* Article list */}
+        <ArticleList articles={articles} />
+
+        {/* Pagination */}
+        {pagination.totalPages > 1 && (
+          <Suspense fallback={<div className="mt-8 text-center text-gray-500">加载分页...</div>}>
+            <TagPagination pagination={pagination} tagSlug={slug} />
+          </Suspense>
+        )}
+      </div>
+    );
+  } catch (error) {
+    // Error state
+    console.error("Tag page error:", error);
+    throw error; // Re-throw to trigger error boundary
+  }
+}
+
+/**
+ * Tag pagination component.
+ * 
+ * Wraps Pagination component to use tag URL format.
+ * 
+ * @component
+ */
+function TagPagination({
+  pagination,
+  tagSlug,
+}: {
+  pagination: PaginationData;
+  tagSlug: string;
+}) {
+  // Build URL with tag slug and page parameter
+  const buildPageUrl = (page: number) => {
+    const params = new URLSearchParams();
+    params.set("page", page.toString());
+    return `/articles/tag/${tagSlug}?${params.toString()}`;
+  };
+
+  // Don't render if only one page
+  if (pagination.totalPages <= 1) {
+    return null;
+  }
+
+  /**
+   * Determine which page numbers to show.
+   */
+  const getVisiblePages = () => {
+    const pages: (number | "ellipsis")[] = [];
+    const { page, totalPages } = pagination;
+
+    // Always show first page
+    pages.push(1);
+
+    // Show ellipsis if current page is far from start
+    if (page > 3) {
+      pages.push("ellipsis");
+    }
+
+    // Show pages around current page
+    const start = Math.max(2, page - 1);
+    const end = Math.min(totalPages - 1, page + 1);
+
+    for (let i = start; i <= end; i++) {
+      if (i !== 1 && i !== totalPages) {
+        pages.push(i);
+      }
+    }
+
+    // Show ellipsis if current page is far from end
+    if (page < totalPages - 2) {
+      pages.push("ellipsis");
+    }
+
+    // Always show last page (if more than 1 page)
+    if (totalPages > 1) {
+      pages.push(totalPages);
+    }
+
+    return pages;
+  };
+
+  const visiblePages = getVisiblePages();
+
+  return (
+    <div className="mt-8 flex flex-col sm:flex-row justify-center items-center gap-4">
+      {/* Previous button */}
+      <div>
+        {pagination.page > 1 ? (
+          <Link
+            href={buildPageUrl(pagination.page - 1)}
+            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700"
+          >
+            上一页
+          </Link>
+        ) : (
+          <span className="px-4 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed text-sm font-medium">
+            上一页
+          </span>
+        )}
+      </div>
+
+      {/* Page numbers */}
+      <div className="flex gap-2 flex-wrap justify-center">
+        {visiblePages.map((pageNum, index) => {
+          if (pageNum === "ellipsis") {
+            return (
+              <span
+                key={`ellipsis-${index}`}
+                className="px-2 py-2 text-gray-400"
+              >
+                ...
+              </span>
+            );
+          }
+
+          const isCurrentPage = pageNum === pagination.page;
+
+          return (
+            <Link
+              key={pageNum}
+              href={buildPageUrl(pageNum)}
+              className={`px-4 py-2 border rounded-lg transition-colors text-sm font-medium ${
+                isCurrentPage
+                  ? "bg-blue-600 text-white border-blue-600"
+                  : "border-gray-300 hover:bg-gray-50 text-gray-700"
+              }`}
+            >
+              {pageNum}
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* Next button */}
+      <div>
+        {pagination.page < pagination.totalPages ? (
+          <Link
+            href={buildPageUrl(pagination.page + 1)}
+            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700"
+          >
+            下一页
+          </Link>
+        ) : (
+          <span className="px-4 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed text-sm font-medium">
+            下一页
+          </span>
+        )}
+      </div>
+
+      {/* Page info */}
+      <div className="text-sm text-gray-600">
+        第 {pagination.page} 页，共 {pagination.totalPages} 页
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Tag page component.
+ * 
+ * Displays articles filtered by tag slug.
+ * Uses Server Component for SSR and SEO optimization.
  * 
  * @component
  * @route /articles/tag/[slug]
  * @requires Public access
  * 
  * @example
- * User navigates to /articles/tag/react, sees all articles with "React" tag
+ * User clicks tag link, sees filtered articles for that tag
  */
-/**
- * Tag filter page content component.
- * 
- * This component is wrapped in Suspense to handle useSearchParams.
- */
-function TagFilterPageContent() {
-  const params = useParams();
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const tagSlug = Array.isArray(params?.slug)
-    ? params.slug[0]
-    : (params?.slug as string);
-
-  // Get page and limit from URL query params
-  const currentPage = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
-  const articlesPerPage = Math.max(
-    10,
-    Math.min(50, parseInt(searchParams.get("limit") || "20", 10))
-  );
-
-  // Data state
-  const [tag, setTag] = useState<Tag | null>(null);
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [pagination, setPagination] = useState<Pagination | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  /**
-   * Load tag and filtered articles.
-   */
-  const loadData = useCallback(async () => {
-    if (!tagSlug) {
-      setError("标签 slug 无效");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Fetch tag by slug using new endpoint
-      const tagResponse = await fetch(`/api/tags/${tagSlug}`);
-
-      if (!tagResponse.ok) {
-        if (tagResponse.status === 404) {
-          setError("标签不存在");
-        } else {
-          setError("加载标签失败，请刷新页面重试");
-        }
-        return;
-      }
-
-      const tagData = await tagResponse.json();
-
-      if (!tagData.success || !tagData.data) {
-        setError("加载标签失败，请刷新页面重试");
-        return;
-      }
-
-      setTag(tagData.data);
-
-      // Fetch articles filtered by tag using public API with pagination
-      const articlesResponse = await fetch(
-        `/api/articles/public?tagSlug=${tagSlug}&page=${currentPage}&limit=${articlesPerPage}`
-      );
-
-      if (!articlesResponse.ok) {
-        setError("加载文章失败，请刷新页面重试");
-        return;
-      }
-
-      const articlesData = await articlesResponse.json();
-
-      if (!articlesData.success || !articlesData.data) {
-        setError("加载文章失败，请刷新页面重试");
-        return;
-      }
-
-      setArticles(articlesData.data.articles);
-      setPagination(articlesData.data.pagination);
-    } catch (err) {
-      console.error("Error loading data:", err);
-      setError("网络错误，请检查连接后重试");
-    } finally {
-      setLoading(false);
-    }
-  }, [tagSlug, currentPage, articlesPerPage]);
-
-  /**
-   * Load tag and articles on component mount or when page changes.
-   */
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-  // Loading state
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <p className="text-gray-500">加载中...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Error state
-  if (error || !tag) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
-          <p>{error || "标签不存在"}</p>
-          <Link
-            href="/articles"
-            className="mt-4 inline-block px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-          >
-            返回文章列表
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
+export default function TagPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ page?: string; limit?: string }>;
+}) {
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
-      {/* Page header */}
-      <header className="mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">标签：{tag.name}</h1>
-            <p className="text-gray-600">
-              {pagination && pagination.total > 0
-                ? `共找到 ${pagination.total} 篇文章`
-                : "该标签下暂无文章"}
-            </p>
-          </div>
-          
-          {/* Items per page selector */}
-          {pagination && pagination.total > 0 && (
-            <div className="flex items-center gap-2">
-              <label htmlFor="itemsPerPage" className="text-sm text-gray-600">
-                每页显示：
-              </label>
-              <select
-                id="itemsPerPage"
-                value={articlesPerPage}
-                onChange={(e) => {
-                  const newLimit = parseInt(e.target.value, 10);
-                  // Reset to page 1 when changing limit
-                  router.push(`/articles/tag/${tagSlug}?page=1&limit=${newLimit}`);
-                }}
-                className="px-3 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-              >
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
-              </select>
-            </div>
-          )}
-        </div>
-      </header>
-
-      {/* Empty state */}
-      {articles.length === 0 && (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-          <p className="text-gray-600 mb-4">该标签下暂无文章</p>
-          <Link
-            href="/articles"
-            className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            查看所有文章
-          </Link>
-        </div>
-      )}
-
-      {/* Article list */}
-      {articles.length > 0 && (
-        <div className="space-y-6">
-          {articles.map((article) => {
-            const publishDate = article.publishedAt
-              ? format(new Date(article.publishedAt), "yyyy年MM月dd日", {
-                  locale: zhCN,
-                })
-              : null;
-
-            return (
-              <article
-                key={article.id}
-                className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
-              >
-                <h2 className="text-2xl font-bold mb-2">
-                  <Link
-                    href={`/articles/${article.slug}`}
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    {article.title}
-                  </Link>
-                </h2>
-
-                {/* Article metadata */}
-                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-3">
-                  {publishDate && <span>{publishDate}</span>}
-                  {article.author && (
-                    <span>{article.author.name || "匿名"}</span>
-                  )}
-                  {article.category && (
-                    <Link
-                      href={`/articles/category/${article.category.slug}`}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      {article.category.name}
-                    </Link>
-                  )}
-                </div>
-
-                {/* Excerpt */}
-                {article.excerpt && (
-                  <p className="text-gray-700 mb-3">{article.excerpt}</p>
-                )}
-
-                {/* Tags */}
-                {article.tags && article.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {article.tags.map((articleTag) => (
-                      <Link
-                        key={articleTag.id}
-                        href={`/articles/tag/${articleTag.slug}`}
-                        className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
-                      >
-                        {articleTag.name}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-
-                {/* Read more link */}
-                <Link
-                  href={`/articles/${article.slug}`}
-                  className="text-blue-600 hover:text-blue-800 font-medium"
-                >
-                  阅读全文 →
-                </Link>
-              </article>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Pagination */}
-      {pagination && pagination.totalPages > 1 && (
-        <div className="mt-8 flex justify-center items-center gap-2">
-          {/* Previous page */}
-          {pagination.page > 1 ? (
-            <Link
-              href={`/articles/tag/${tagSlug}?page=${pagination.page - 1}&limit=${articlesPerPage}`}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              上一页
-            </Link>
-          ) : (
-            <span className="px-4 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
-              上一页
-            </span>
-          )}
-
-          {/* Page numbers */}
-          <div className="flex gap-2">
-            {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(
-              (pageNum) => {
-                // Show first page, last page, current page, and pages around current
-                const showPage =
-                  pageNum === 1 ||
-                  pageNum === pagination.totalPages ||
-                  (pageNum >= pagination.page - 1 &&
-                    pageNum <= pagination.page + 1);
-
-                if (!showPage) {
-                  // Show ellipsis
-                  if (
-                    pageNum === pagination.page - 2 ||
-                    pageNum === pagination.page + 2
-                  ) {
-                    return (
-                      <span
-                        key={pageNum}
-                        className="px-2 py-2 text-gray-400"
-                      >
-                        ...
-                      </span>
-                    );
-                  }
-                  return null;
-                }
-
-                return (
-                  <Link
-                    key={pageNum}
-                    href={`/articles/tag/${tagSlug}?page=${pageNum}&limit=${articlesPerPage}`}
-                    className={`px-4 py-2 border rounded-lg transition-colors ${
-                      pageNum === pagination.page
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "border-gray-300 hover:bg-gray-50"
-                    }`}
-                  >
-                    {pageNum}
-                  </Link>
-                );
-              }
-            )}
-          </div>
-
-          {/* Next page */}
-          {pagination.page < pagination.totalPages ? (
-            <Link
-              href={`/articles/tag/${tagSlug}?page=${pagination.page + 1}&limit=${articlesPerPage}`}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              下一页
-            </Link>
-          ) : (
-            <span className="px-4 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
-              下一页
-            </span>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/**
- * Tag filter page.
- * 
- * Wrapped in Suspense to handle useSearchParams.
- */
-export default function TagFilterPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center min-h-[400px]">
-            <p className="text-gray-500">加载中...</p>
-          </div>
-        </div>
-      }
-    >
-      <TagFilterPageContent />
+    <Suspense fallback={<TagPageLoading />}>
+      <TagPageContent params={params} searchParams={searchParams} />
     </Suspense>
   );
 }
-

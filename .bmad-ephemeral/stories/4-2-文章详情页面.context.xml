@@ -1,0 +1,169 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4.2</storyId>
+    <title>文章详情页面</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-14</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/4-2-文章详情页面.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>reader</asA>
+    <iWant>to view the full content of an article</iWant>
+    <soThat>I can read the complete blog post</soThat>
+    <tasks>
+      <task id="1" ac="4.2.1,4.2.2,4.2.7">Convert Article Detail Page to Server Component - Update app/articles/[slug]/page.tsx to be a Server Component, fetch article by slug directly from database using Prisma, handle 404 errors, add loading state</task>
+      <task id="2" ac="4.2.2,4.2.3,4.2.4">Create Article Detail Component - Create components/article/ArticleDetail.tsx component, accept article object as prop, display article title, content, publish date, category, tags, author, excerpt</task>
+      <task id="3" ac="4.2.4">Implement Content Formatting - Use Tailwind Typography plugin (prose classes) for content styling, ensure proper typography hierarchy, style code blocks and inline code, style blockquotes and links</task>
+      <task id="4" ac="4.2.6">Implement Image Display - Use Next.js Image component for article images, handle images in HTML content, implement image lazy loading, handle image loading errors gracefully</task>
+      <task id="5" ac="4.2.5">Implement Responsive Design - Use Tailwind CSS responsive breakpoints, mobile-first design approach, typography scales appropriately, content width optimized for readability</task>
+      <task id="6" ac="4.2.3">Implement Date Formatting - Use date-fns library for date formatting, format publish date as localized string, handle timezone conversion if needed</task>
+      <task id="7" ac="4.2.2">Add SEO Meta Tags - Add dynamic title meta tag, add description meta tag, add Open Graph meta tags, use Next.js Metadata API</task>
+      <task id="8" ac="4.2.2">Add Loading States - Use Next.js Suspense boundary for loading state, display loading indicator while fetching article</task>
+      <task id="9" ac="4.2.7">Handle 404 Errors - Display friendly 404 message when article not found, display friendly message when article is not published, provide navigation back to article list</task>
+      <task id="10" ac="4.2.2,4.2.7">Add Error Handling - Handle database errors gracefully, display user-friendly error messages, log errors for debugging</task>
+      <task id="11" ac="All">Write Tests - Create unit tests for ArticleDetail component, create integration tests for article detail page data fetching, create E2E tests for article detail page display and navigation, test 404 error handling</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="4.2.1">Given I am on the homepage or article list, When I click on an article, Then I am taken to the article detail page</ac>
+    <ac id="4.2.2">Given I am on the article detail page, When the page loads, Then I see the full article content</ac>
+    <ac id="4.2.3">Given I am on the article detail page, Then I see the article title, publish date, category, and tags</ac>
+    <ac id="4.2.4">Given I am viewing article content, Then the content is well-formatted and readable</ac>
+    <ac id="4.2.5">Given I am on the article detail page, Then the page is responsive (works on desktop, tablet, mobile)</ac>
+    <ac id="4.2.6">Given I am viewing article content, Then images in the article are displayed correctly</ac>
+    <ac id="4.2.7">Given I access an article that doesn't exist or is not published, Then I see a 404 error page</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/PRD.md" title="Product Requirements Document" section="Content Display Requirements">
+        PRD defines the overall product vision and requirements for content display functionality, including article detail pages and user experience expectations.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-4.md" title="Epic 4 Technical Specification" section="Story 4.2: 文章详情页面">
+        Technical specification for Story 4.2 detailing implementation approach: create app/articles/[slug]/page.tsx Server Component, call GET /api/articles/public/[slug], create components/article/ArticleDetail.tsx component, render HTML content from Tiptap, implement responsive typography, handle 404 errors.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-4.md" title="Epic 4 Technical Specification" section="Data Models and Contracts">
+        Article Response Model interface definition with all required fields: id, title, content, excerpt, slug, status, categoryId, authorId, publishedAt, createdAt, updatedAt, author, category, tags.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-4.md" title="Epic 4 Technical Specification" section="Workflows and Sequencing">
+        Article detail page workflow: user accesses /articles/[slug], Server Component calls GET /api/articles/public/[slug], API returns article detail if exists and published, Server Component renders article content, if article doesn't exist or not published, display 404 page.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Next.js App Router">
+        Architecture guidance for using Next.js Server Components for SSR and SEO, fetching data directly in Server Component using Prisma, using async/await for asynchronous data fetching.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Component Organization">
+        Component organization patterns: article components in components/article/ directory, follow naming convention PascalCase.tsx, separate Server Components and Client Components appropriately.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Image Optimization">
+        Next.js Image Component usage: automatic image optimization, responsive images, lazy loading support.
+      </doc>
+      <doc path="docs/epics/epic-4-内容展示content-display.md" title="Epic 4 Definition" section="Story 4.2: 文章详情页面">
+        Epic definition with acceptance criteria: Given I am on the homepage or article list, When I click on an article, Then I am taken to the article detail page, And I see the full article content, And I see the article title, publish date, category, and tags, And the content is well-formatted and readable, And the page is responsive, And images in the article are displayed correctly.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/4-1-文章列表页面（首页）.md" title="Story 4.1" section="Dev Agent Record">
+        Learnings from Story 4.1: Server Component pattern using Prisma directly, date formatting with date-fns and zhCN locale, error handling patterns, loading states with Suspense, responsive design patterns, navigation patterns.
+      </doc>
+    </docs>
+    <code>
+      <artifact path="app/articles/[slug]/page.tsx" kind="page" symbol="ArticleDetailPage" lines="1-253" reason="Existing Client Component implementation that needs to be converted to Server Component. Shows current structure for article detail page with loading states, error handling, and content rendering using prose classes." />
+      <artifact path="app/api/articles/public/[slug]/route.ts" kind="api" symbol="GET" lines="1-95" reason="Public API endpoint for fetching article by slug. Returns article with all relations (author, category, tags). Handles 404 for non-existent or unpublished articles. Returns unified response format." />
+      <artifact path="components/article/ArticleCard.tsx" kind="component" symbol="ArticleCard" lines="1-171" reason="Article card component showing patterns for date formatting (date-fns with zhCN locale), category and tag display, author information display, and navigation to article detail page." />
+      <artifact path="components/article/ArticleList.tsx" kind="component" symbol="ArticleList" lines="1-55" reason="Article list component showing responsive grid layout patterns and empty state handling." />
+      <artifact path="app/page.tsx" kind="page" symbol="fetchArticles" lines="74-142" reason="Homepage Server Component showing pattern for fetching articles directly from database using Prisma, including where clause for PUBLISHED status, include relations, and data transformation." />
+      <artifact path="lib/utils/media.ts" kind="utility" symbol="checkFileUsage" lines="1-76" reason="Utility function showing how article content (HTML) contains image references. Images are stored as HTML img tags with src attributes pointing to /uploads/ paths." />
+      <artifact path="components/editor/TiptapEditor.tsx" kind="component" symbol="TiptapEditor" lines="71-414" reason="Tiptap editor component showing how article content is stored as HTML. Images are inserted as img tags with src attributes. Content is saved as HTML string to database." />
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="next" version="16.0.2" />
+        <package name="react" version="19.2.0" />
+        <package name="react-dom" version="19.2.0" />
+        <package name="date-fns" version="^4.1.0" />
+        <package name="date-fns-tz" version="^3.2.0" />
+        <package name="@prisma/client" version="^6.19.0" />
+        <package name="tailwindcss" version="^4" />
+        <package name="@tiptap/react" version="^3.10.7" />
+        <package name="@tiptap/starter-kit" version="^3.10.7" />
+        <package name="@tiptap/extension-image" version="^3.10.7" />
+      </ecosystem>
+      <ecosystem name="dev">
+        <package name="@testing-library/react" version="^16.3.0" />
+        <package name="@testing-library/jest-dom" version="^6.9.1" />
+        <package name="@playwright/test" version="^1.56.1" />
+        <package name="jest" version="^30.2.0" />
+        <package name="typescript" version="^5" />
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Use Next.js Server Components for article detail page to enable SSR and SEO optimization</constraint>
+    <constraint>Fetch data directly in Server Component using Prisma (more efficient than API calls in Server Components)</constraint>
+    <constraint>Use async/await for asynchronous data fetching</constraint>
+    <constraint>Article components must be in components/article/ directory following PascalCase.tsx naming convention</constraint>
+    <constraint>Use Tailwind CSS for all styling with mobile-first responsive design</constraint>
+    <constraint>Use Tailwind Typography plugin (prose classes) for article content formatting</constraint>
+    <constraint>Use Next.js Image component for optimized images with lazy loading</constraint>
+    <constraint>Use date-fns library with zhCN locale for date formatting: format(new Date(dateString), "yyyy年MM月dd日", { locale: zhCN })</constraint>
+    <constraint>Use Next.js Metadata API for dynamic SEO meta tags</constraint>
+    <constraint>Use unified error format: { success: boolean, data: T, error?: { message: string, code: string } }</constraint>
+    <constraint>Display user-friendly error messages, log errors for debugging (console in dev, structured in prod)</constraint>
+    <constraint>Use Suspense boundaries for Server Components with skeleton UI for loading states</constraint>
+    <constraint>Article content is HTML from Tiptap editor, use dangerouslySetInnerHTML with proper sanitization (Next.js handles XSS protection)</constraint>
+    <constraint>Only PUBLISHED articles are accessible to public users, DRAFT articles return 404</constraint>
+    <constraint>Use Prisma ORM for database queries (parameterized queries prevent SQL injection)</constraint>
+    <constraint>Follow patterns from Story 4.1: Server Component pattern, date formatting, error handling, loading states, responsive design</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="GET /api/articles/public/[slug]" kind="REST endpoint" signature="GET /api/articles/public/:slug" path="app/api/articles/public/[slug]/route.ts">
+      Returns published article by slug with all relations (author, category, tags).
+      Response: { success: boolean, data?: Article, error?: { message: string, code: string } }
+      Status codes: 200 (Success), 404 (Not Found), 500 (Internal Error)
+    </interface>
+    <interface name="ArticleResponse" kind="TypeScript interface" signature="interface ArticleResponse { id: string; title: string; content: string; excerpt: string | null; slug: string; status: 'PUBLISHED'; categoryId: string | null; authorId: string; publishedAt: Date | null; createdAt: Date; updatedAt: Date; author: { id: string; name: string | null; image: string | null; }; category: { id: string; name: string; slug: string; } | null; tags: Array<{ id: string; name: string; slug: string; }>; }" path=".bmad-ephemeral/stories/tech-spec-epic-4.md">
+      Article response model from API with all required fields and relations.
+    </interface>
+    <interface name="ArticleCardProps" kind="TypeScript interface" signature="export interface ArticleCardProps { id: string; title: string; excerpt: string | null; slug: string; publishedAt: string | null; category: Category | null; tags: Tag[]; author: Author; }" path="components/article/ArticleCard.tsx">
+      Article card component props interface showing structure for article data display.
+    </interface>
+    <interface name="Prisma Article Model" kind="Prisma schema" signature="model Article { id String @id @default(uuid()) title String content String excerpt String? slug String @unique status ArticleStatus @default(DRAFT) categoryId String? authorId String publishedAt DateTime? createdAt DateTime @default(now()) updatedAt DateTime @updatedAt author User @relation(fields: [authorId], references: [id]) category Category? @relation(fields: [categoryId], references: [id]) tags ArticleTag[] }" path="prisma/schema.prisma">
+      Prisma Article model with all fields and relations needed for article detail page.
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Unit tests use Jest + React Testing Library for component testing. Integration tests use Jest + Next.js API testing with Prisma mocking. E2E tests use Playwright for complete user flow testing. Tests should follow existing patterns from Story 4.1 tests. Test files located in tests/__tests__/unit/, tests/__tests__/integration/, and tests/e2e/ directories.
+    </standards>
+    <locations>
+      <location>tests/__tests__/unit/</location>
+      <location>tests/__tests__/integration/</location>
+      <location>tests/e2e/</location>
+    </locations>
+    <ideas>
+      <test ac="4.2.1">E2E: Test navigation from homepage article card click to article detail page</test>
+      <test ac="4.2.2">Unit: Test ArticleDetail component renders article content correctly</test>
+      <test ac="4.2.2">Integration: Test article fetching from database using Prisma in Server Component</test>
+      <test ac="4.2.2">E2E: Test article detail page loads and displays full article content</test>
+      <test ac="4.2.3">Unit: Test ArticleDetail component displays title, publish date, category, and tags</test>
+      <test ac="4.2.3">Unit: Test date formatting with date-fns and zhCN locale</test>
+      <test ac="4.2.4">Unit: Test content formatting with Tailwind Typography prose classes</test>
+      <test ac="4.2.4">E2E: Test article content is well-formatted and readable</test>
+      <test ac="4.2.5">E2E: Test responsive design on desktop, tablet, mobile viewports</test>
+      <test ac="4.2.6">Unit: Test image display in article content using Next.js Image component</test>
+      <test ac="4.2.6">E2E: Test images in article are displayed correctly</test>
+      <test ac="4.2.7">Integration: Test 404 error handling when article not found</test>
+      <test ac="4.2.7">Integration: Test 404 error handling when article is not published</test>
+      <test ac="4.2.7">E2E: Test 404 error page display for non-existent article</test>
+      <test ac="4.2.2">Unit: Test loading state with Suspense boundary</test>
+      <test ac="4.2.2">Unit: Test error handling and user-friendly error messages</test>
+      <test ac="4.2.2">Unit: Test SEO meta tags generation with Next.js Metadata API</test>
+    </ideas>
+  </tests>
+</story-context>
+

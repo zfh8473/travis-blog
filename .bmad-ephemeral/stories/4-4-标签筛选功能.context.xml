@@ -1,0 +1,153 @@
+<story-context id="4.4" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4</storyId>
+    <title>标签筛选功能</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-14</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/4-4-标签筛选功能.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>reader</asA>
+    <iWant>to filter articles by tag</iWant>
+    <soThat>I can discover related content</soThat>
+    <tasks>
+      <task id="1" description="Create Tag Page Route" ac="4.4.1, 4.4.2, 4.4.7"/>
+      <task id="2" description="Implement Tag Filtering" ac="4.4.1, 4.4.3"/>
+      <task id="3" description="Display Tag Information" ac="4.4.5"/>
+      <task id="4" description="Implement 'All' Filter Option" ac="4.4.4"/>
+      <task id="5" description="Implement Empty State" ac="4.4.6"/>
+      <task id="6" description="Handle 404 Errors" ac="4.4.7"/>
+      <task id="7" description="Add SEO Meta Tags" ac="4.4.5"/>
+      <task id="8" description="Add Loading States" ac="4.4.1"/>
+      <task id="9" description="Add Error Handling" ac="4.4.1, 4.4.7"/>
+      <task id="10" description="Verify Tag Links" ac="4.4.1"/>
+      <task id="11" description="Write Tests" ac="All ACs"/>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-4.4.1" description="Given I am viewing an article or article list, When I click on a tag, Then I see all articles with that tag"/>
+    <criterion id="AC-4.4.2" description="Given I am viewing a filtered tag page, Then the URL reflects the filter (e.g., /articles/tag/javascript)"/>
+    <criterion id="AC-4.4.3" description="Given I am viewing a tag page, Then I can see how many articles have this tag"/>
+    <criterion id="AC-4.4.4" description="Given I am viewing a filtered tag page, When I click 'All' or remove the filter, Then I see all articles again"/>
+    <criterion id="AC-4.4.5" description="Given I am viewing a tag page, Then the page displays the tag name"/>
+    <criterion id="AC-4.4.6" description="Given I am viewing a tag page with no articles, Then I see a friendly empty state message"/>
+    <criterion id="AC-4.4.7" description="Given I access a tag that doesn't exist, Then I see a 404 error page"/>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/PRD.md" title="Product Requirements Document" section="FR-2.7 文章标签管理" snippet="文章可以添加多个标签，可以按标签筛选文章，标签在前台显示。"/>
+      <doc path="docs/PRD.md" title="Product Requirements Document" section="FR-3.4 标签筛选" snippet="用户可以按标签筛选文章，可以点击标签查看该标签下的所有文章，筛选结果正确显示。"/>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-4.md" title="Epic 4 Technical Specification" section="Story 4.4: 标签筛选功能" snippet="创建 app/articles/tag/[slug]/page.tsx Server Component，调用 GET /api/articles/public?tagSlug=[slug]，在文章卡片和详情页中使标签可点击，实现标签导航组件，显示标签文章数量，实现'全部'选项。"/>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-4.md" title="Epic 4 Technical Specification" section="Workflows and Sequencing" snippet="标签筛选流程：用户点击标签，导航到标签页面，Server Component 调用 API 获取该标签下的已发布文章，Server Component 渲染筛选后的文章列表，URL 反映当前筛选状态。"/>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Next.js App Router" snippet="使用 Next.js Server Components 进行服务端渲染，在 Server Component 中直接使用 Prisma 获取数据，使用 async/await 进行异步数据获取。"/>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Component Organization" snippet="组件组织模式：文章组件位于 components/article/ 目录，遵循 PascalCase.tsx 命名约定，适当分离 Server Components 和 Client Components。"/>
+      <doc path="docs/epics.md" title="Epic 4 Definition" section="Story 4.4: 标签筛选功能" snippet="As a reader, I want to filter articles by tag, So that I can discover related content. Given I am viewing an article or article list, When I click on a tag, Then I see all articles with that tag, And the URL reflects the filter, And I can see how many articles have this tag."/>
+      <doc path=".bmad-ephemeral/stories/4-3-分类筛选功能.md" title="Story 4.3: 分类筛选功能" section="Learnings from Previous Story" snippet="Server Component Pattern: Use Prisma directly in Server Component instead of API calls for better performance. Error Handling: Use Next.js notFound() for 404 errors. Loading States: Use Suspense boundaries for Server Components. SEO: Use Next.js Metadata API with generateMetadata function. Tag page implementation should mirror category page implementation for consistency."/>
+      <doc path=".bmad-ephemeral/stories/4-2-文章详情页面.md" title="Story 4.2: 文章详情页面" section="Learnings from Previous Story" snippet="Server Component Pattern: Use Prisma directly in Server Component instead of API calls for better performance. Error Handling: Use Next.js notFound() for 404 errors. Loading States: Use Suspense boundaries for Server Components. SEO: Use Next.js Metadata API with generateMetadata function."/>
+      <doc path=".bmad-ephemeral/stories/4-1-文章列表页面（首页）.md" title="Story 4.1: 文章列表页面（首页）" section="Dev Agent Record" snippet="Server Component pattern using Prisma directly, ArticleList and ArticleCard components created, Pagination component created, empty state handling, responsive design patterns."/>
+    </docs>
+    <code>
+      <code path="app/api/articles/public/route.ts" kind="api-route" symbol="GET" lines="78-112" reason="Public API endpoint that handles tag filtering by slug. Converts tagSlug to tagId and filters articles using Prisma relation query. Returns unified response format with articles and pagination. Can be used as reference for Server Component implementation."/>
+      <code path="app/articles/category/[slug]/page.tsx" kind="page" symbol="CategoryPageContent" lines="94-183" reason="Category page Server Component showing pattern for fetching articles filtered by category using Prisma directly. Can be adapted for tag filtering. Includes fetchCategoryBySlug and fetchArticlesByCategory functions, 404 handling, and data transformation."/>
+      <code path="app/articles/category/[slug]/page.tsx" kind="page" symbol="generateMetadata" lines="191-218" reason="generateMetadata function pattern for dynamic SEO meta tags based on category. Can be adapted for tag page metadata."/>
+      <code path="app/articles/category/[slug]/page.tsx" kind="page" symbol="CategoryPageLoading" lines="224-246" reason="Loading component with skeleton UI for Suspense boundary. Can be adapted for tag page loading state."/>
+      <code path="app/articles/category/[slug]/page.tsx" kind="page" symbol="CategoryPageContent" lines="255-310" reason="Category page content component showing complete pattern: header with category name and article count, 'All' link navigation, ArticleList component reuse, pagination, and error handling. Can be directly adapted for tag page."/>
+      <code path="app/articles/category/[slug]/not-found.tsx" kind="page" symbol="NotFound" reason="404 Not Found page pattern for category. Can be adapted for tag 404 page."/>
+      <code path="app/articles/category/[slug]/error.tsx" kind="page" symbol="Error" reason="Error boundary component pattern for category page. Can be adapted for tag page error handling."/>
+      <code path="app/page.tsx" kind="page" symbol="fetchArticles" lines="74-142" reason="Homepage Server Component showing pattern for fetching articles directly from database using Prisma, including where clause, include relations, and data transformation. Can be adapted for tag filtering."/>
+      <code path="app/articles/[slug]/page.tsx" kind="page" symbol="ArticleDetailPage" lines="49-99" reason="Article detail page Server Component showing pattern for fetching single entity by slug using Prisma, 404 handling with notFound(), and Suspense boundary usage."/>
+      <code path="components/article/ArticleList.tsx" kind="component" symbol="ArticleList" lines="1-56" reason="Article list component that displays articles using ArticleCard components. Handles empty state. Can be reused for tag-filtered articles."/>
+      <code path="components/article/ArticleCard.tsx" kind="component" symbol="ArticleCard" lines="153-166" reason="Article card component showing tag links navigation to /articles/tag/${tag.slug}. Already correctly implemented with Link component and hover styles."/>
+      <code path="components/article/ArticleDetail.tsx" kind="component" symbol="ArticleDetail" lines="150-163" reason="Article detail component showing tag links navigation to /articles/tag/${tag.slug}. Already correctly implemented with Link component and hover styles."/>
+      <code path="components/article/Pagination.tsx" kind="component" symbol="Pagination" lines="1-177" reason="Pagination component for navigating between pages. Can be reused for tag-filtered article lists."/>
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="next" version="16.0.2"/>
+        <package name="react" version="19.2.0"/>
+        <package name="react-dom" version="19.2.0"/>
+        <package name="date-fns" version="^4.1.0"/>
+        <package name="date-fns-tz" version="^3.2.0"/>
+        <package name="@prisma/client" version="^6.19.0"/>
+        <package name="tailwindcss" version="^4"/>
+      </ecosystem>
+      <ecosystem name="dev">
+        <package name="@testing-library/react" version="^16.3.0"/>
+        <package name="@testing-library/jest-dom" version="^6.9.1"/>
+        <package name="@playwright/test" version="^1.56.1"/>
+        <package name="jest" version="^30.2.0"/>
+        <package name="typescript" version="^5"/>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="architectural">Use Next.js Server Components for tag page to enable SSR and SEO optimization.</constraint>
+    <constraint type="architectural">Fetch data directly in Server Component using Prisma (more efficient than API calls in Server Components).</constraint>
+    <constraint type="architectural">Use async/await for asynchronous data fetching.</constraint>
+    <constraint type="component-organization">Article components must be in components/article/ directory following PascalCase.tsx naming convention.</constraint>
+    <constraint type="component-reuse">Reuse existing ArticleList, ArticleCard, and Pagination components from Story 4.1.</constraint>
+    <constraint type="styling">Use Tailwind CSS for all styling with mobile-first responsive design.</constraint>
+    <constraint type="navigation">Use Next.js Link component for client-side navigation. Tag links should navigate to /articles/tag/[slug].</constraint>
+    <constraint type="error-handling">Use Next.js notFound() function for 404 errors. Display user-friendly error messages. Log errors for debugging.</constraint>
+    <constraint type="seo">Use Next.js Metadata API with generateMetadata function for dynamic meta tags based on tag.</constraint>
+    <constraint type="loading-states">Use Suspense boundaries for Server Components with skeleton UI for loading states.</constraint>
+    <constraint type="empty-state">Reuse empty state pattern from ArticleList component when tag has no articles.</constraint>
+    <constraint type="api-reference">API endpoint GET /api/articles/public?tagSlug=[slug] already exists and can be used as reference for Prisma query pattern.</constraint>
+    <constraint type="existing-implementation">Tag links in ArticleCard and ArticleDetail already navigate correctly to /articles/tag/${tag.slug}. Verify but should not need changes.</constraint>
+    <constraint type="consistency">Tag page implementation should mirror category page implementation (app/articles/category/[slug]/page.tsx) for consistency and maintainability.</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="GET /api/articles/public?tagSlug=[slug]" kind="REST endpoint" signature="GET /api/articles/public?tagSlug={slug}&amp;page={page}&amp;limit={limit}" path="app/api/articles/public/route.ts">
+      Returns published articles filtered by tag slug with pagination. Converts tagSlug to tagId internally using Prisma relation query. Response: { success: boolean, data?: { articles: Article[], pagination: PaginationData }, error?: { message: string, code: string } }
+    </interface>
+    <interface name="Tag Model" kind="Prisma schema" signature="model Tag { id String @id @default(cuid()) name String @unique slug String @unique createdAt DateTime @default(now()) updatedAt DateTime @updatedAt articles ArticleTag[] }" path="prisma/schema.prisma">
+      Tag model with id, name, slug, and articles relation through ArticleTag junction table. Used for fetching tag by slug and counting articles.
+    </interface>
+    <interface name="ArticleList Props" kind="TypeScript interface" signature="export default function ArticleList({ articles }: { articles: ArticleCardProps[] })" path="components/article/ArticleList.tsx">
+      Article list component that accepts array of article card props. Can be reused for tag-filtered articles.
+    </interface>
+    <interface name="Pagination Props" kind="TypeScript interface" signature="export interface PaginationProps { page: number; limit: number; total: number; totalPages: number; }" path="components/article/Pagination.tsx">
+      Pagination component props interface. Can be reused for tag-filtered article lists.
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Unit tests use Jest + React Testing Library for component testing. Integration tests use Jest + Next.js API testing with Prisma mocking. E2E tests use Playwright for complete user flow testing. Tests should follow existing patterns from Story 4.1, Story 4.2, and Story 4.3 tests. Test files located in tests/__tests__/unit/, tests/__tests__/integration/, and tests/e2e/ directories.</standards>
+    <locations>
+      <location>tests/__tests__/unit/</location>
+      <location>tests/__tests__/integration/</location>
+      <location>tests/e2e/</location>
+    </locations>
+    <ideas>
+      <idea ac="AC-4.4.1">E2E: Test navigation from homepage article card tag link to tag page and verify only articles with that tag are displayed.</idea>
+      <idea ac="AC-4.4.1">E2E: Test navigation from article detail page tag link to tag page and verify filtered articles.</idea>
+      <idea ac="AC-4.4.1">Integration: Test that Server Component fetches and displays only articles with the selected tag using Prisma query with tag relation filter.</idea>
+      <idea ac="AC-4.4.2">E2E: Verify URL reflects tag filter (e.g., /articles/tag/javascript) when viewing filtered tag page.</idea>
+      <idea ac="AC-4.4.3">Unit: Test tag page displays article count for the tag.</idea>
+      <idea ac="AC-4.4.3">Integration: Test article count calculation for tag using Prisma count query with tag relation filter.</idea>
+      <idea ac="AC-4.4.4">E2E: Test clicking 'All' link navigates to homepage and displays all articles.</idea>
+      <idea ac="AC-4.4.4">E2E: Verify active filter state (highlight current tag) is displayed correctly.</idea>
+      <idea ac="AC-4.4.5">Unit: Test tag page displays tag name.</idea>
+      <idea ac="AC-4.4.5">Integration: Test tag information fetching from database by slug.</idea>
+      <idea ac="AC-4.4.6">Unit: Test empty state message is displayed when tag has no articles.</idea>
+      <idea ac="AC-4.4.6">E2E: Test empty state display and navigation back to all articles.</idea>
+      <idea ac="AC-4.4.7">Integration: Test 404 error handling when tag slug doesn't exist.</idea>
+      <idea ac="AC-4.4.7">E2E: Test 404 error page display for non-existent tag with navigation back to article list.</idea>
+      <idea ac="AC-4.4.1">Unit: Test loading state with Suspense boundary is displayed while fetching tag and articles.</idea>
+      <idea ac="AC-4.4.1">Integration: Test error handling for database failures during tag or article fetch.</idea>
+      <idea ac="AC-4.4.5">Integration: Test SEO meta tags generation with Next.js Metadata API for tag page.</idea>
+      <idea ac="AC-4.4.1">E2E: Test complete user flow: click tag from ArticleCard → see filtered articles → click 'All' → see all articles.</idea>
+      <idea ac="AC-4.4.1">E2E: Test complete user flow: click tag from ArticleDetail → see filtered articles → click 'All' → see all articles.</idea>
+      <idea ac="AC-4.4.2">Unit: Test URL parameter handling and routing for tag pages.</idea>
+      <idea ac="AC-4.4.1">Integration: Test that articles with multiple tags are correctly included when filtering by one tag.</idea>
+    </ideas>
+  </tests>
+</story-context>
+

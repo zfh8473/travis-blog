@@ -68,13 +68,13 @@ development_status:
   epic-3-retrospective: done
 
   # Epic 4: 内容展示（Content Display）
-  epic-4: backlog
-  4-1-文章列表页面（首页）: backlog
-  4-2-文章详情页面: backlog
-  4-3-分类筛选功能: backlog
-  4-4-标签筛选功能: backlog
-  4-5-分页功能: backlog
-  epic-4-retrospective: optional
+  epic-4: contexted
+  4-1-文章列表页面（首页）: done
+  4-2-文章详情页面: done
+  4-3-分类筛选功能: done
+  4-4-标签筛选功能: done
+  4-5-分页功能: done
+  epic-4-retrospective: completed
 
   # Epic 5: 读者互动（Reader Interaction）
   epic-5: backlog

@@ -1,0 +1,161 @@
+<story-context id="4.5" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>5</storyId>
+    <title>分页功能</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-14</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/4-5-分页功能.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>reader</asA>
+    <iWant>to navigate through multiple pages of articles</iWant>
+    <soThat>I can browse all blog content</soThat>
+    <tasks>
+      <task id="1" description="Verify Pagination Component Exists" ac="4.5.1, 4.5.2"/>
+      <task id="2" description="Verify Pagination on Homepage" ac="4.5.1, 4.5.2, 4.5.3, 4.5.4, 4.5.5, 4.5.6"/>
+      <task id="3" description="Verify Pagination on Category Page" ac="4.5.1, 4.5.2, 4.5.3, 4.5.4, 4.5.5, 4.5.6"/>
+      <task id="4" description="Verify Pagination on Tag Page" ac="4.5.1, 4.5.2, 4.5.3, 4.5.4, 4.5.5, 4.5.6"/>
+      <task id="5" description="Verify Edge Cases" ac="4.5.7, 4.5.8"/>
+      <task id="6" description="Verify Ellipsis for Many Pages" ac="4.5.9"/>
+      <task id="7" description="Verify Responsive Design" ac="4.5.10"/>
+      <task id="8" description="Verify URL Parameter Handling" ac="4.5.6"/>
+      <task id="9" description="Verify Pagination Data Calculation" ac="4.5.2"/>
+      <task id="10" description="Write Tests" ac="All ACs"/>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-4.5.1" description="Given there are more articles than fit on one page, When I view the article list, Then I see pagination controls"/>
+    <criterion id="AC-4.5.2" description="Given I am viewing a paginated article list, Then I can see the current page number and total pages"/>
+    <criterion id="AC-4.5.3" description="Given I am viewing a paginated article list, When I click 'Next', Then I see the next page of articles"/>
+    <criterion id="AC-4.5.4" description="Given I am viewing a paginated article list, When I click 'Previous', Then I see the previous page of articles"/>
+    <criterion id="AC-4.5.5" description="Given I am viewing a paginated article list, When I click a specific page number, Then I see that page of articles"/>
+    <criterion id="AC-4.5.6" description="Given I navigate to a different page, Then the URL reflects the current page (e.g., ?page=2)"/>
+    <criterion id="AC-4.5.7" description="Given I am on the first page, Then the 'Previous' button is disabled"/>
+    <criterion id="AC-4.5.8" description="Given I am on the last page, Then the 'Next' button is disabled"/>
+    <criterion id="AC-4.5.9" description="Given there are many pages, Then page numbers are shown with ellipsis for better navigation"/>
+    <criterion id="AC-4.5.10" description="Given I am viewing pagination on mobile, Then the pagination controls are responsive and usable"/>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics.md" title="Epic 4 Definition" section="Story 4.5: 分页功能" snippet="As a reader, I want to navigate through multiple pages of articles, So that I can browse all blog content. Given there are more articles than fit on one page, When I view the article list, Then I see pagination controls, And I can see the current page number and total pages."/>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-4.md" title="Epic 4 Technical Specification" section="Story 4.5: 分页功能" snippet="创建 components/article/Pagination.tsx Client Component，从 API 响应中获取分页元数据，实现页码导航（上一页、下一页、页码），更新 URL 查询参数（?page=2），处理边界情况（第一页、最后一页），实现响应式分页控件（移动端简化显示）。"/>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Next.js App Router" snippet="使用 Next.js Server Components 进行服务端渲染，在 Server Component 中直接使用 Prisma 获取数据，使用 async/await 进行异步数据获取。URL 参数通过 searchParams 传递。"/>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Component Organization" snippet="组件组织模式：文章组件位于 components/article/ 目录，遵循 PascalCase.tsx 命名约定，适当分离 Server Components 和 Client Components。"/>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Styling Architecture" snippet="使用 Tailwind CSS 进行样式设计，移动端优先的响应式设计方法，使用 Tailwind 响应式断点：sm:, md:, lg:, xl:。"/>
+      <doc path=".bmad-ephemeral/stories/4-1-文章列表页面（首页）.md" title="Story 4.1: 文章列表页面（首页）" section="Task 4: Implement Pagination Component" snippet="创建 components/article/Pagination.tsx Client Component，接受分页元数据（page, limit, total, totalPages），显示当前页码和总页数，添加上一页和下一页按钮，添加页码按钮（多页时显示省略号），更新 URL 查询参数，处理边界情况（第一页、最后一页），使分页响应式（移动端简化显示）。"/>
+      <doc path=".bmad-ephemeral/stories/4-3-分类筛选功能.md" title="Story 4.3: 分类筛选功能" section="Learnings from Previous Story" snippet="CategoryPagination 组件包装了分页逻辑，使用分类特定的 URL 构建。URL 格式：/articles/category/[slug]?page=2。分页包装在 Suspense 边界中用于加载状态。"/>
+      <doc path=".bmad-ephemeral/stories/4-4-标签筛选功能.md" title="Story 4.4: 标签筛选功能" section="Learnings from Previous Story" snippet="TagPagination 组件包装了分页逻辑，使用标签特定的 URL 构建。URL 格式：/articles/tag/[slug]?page=2。分页包装在 Suspense 边界中用于加载状态。基础 Pagination 组件存在并可重用。"/>
+    </docs>
+    <code>
+      <code path="components/article/Pagination.tsx" kind="component" symbol="Pagination" lines="1-177" reason="Base pagination component that displays pagination controls with Previous/Next buttons and page numbers. Uses useSearchParams hook for URL parameter handling. Handles ellipsis for many pages, edge cases (first/last page), and responsive design. Already exists and is functional."/>
+      <code path="components/article/Pagination.tsx" kind="interface" symbol="PaginationProps" lines="9-14" reason="Pagination component props interface defining pagination metadata: page, limit, total, totalPages."/>
+      <code path="components/article/Pagination.tsx" kind="function" symbol="buildPageUrl" lines="54-61" reason="Function that builds URL with page parameter for homepage pagination. Uses URLSearchParams to update query parameters."/>
+      <code path="components/article/Pagination.tsx" kind="function" symbol="getVisiblePages" lines="66-99" reason="Function that determines which page numbers to show, including ellipsis logic for many pages. Always shows first and last pages, shows pages around current page, and adds ellipsis when needed."/>
+      <code path="app/page.tsx" kind="page" symbol="HomePageContent" lines="151-200" reason="Homepage Server Component that fetches articles with pagination. Parses page parameter from searchParams (default: 1), calculates pagination data, and renders Pagination component when totalPages > 1."/>
+      <code path="app/page.tsx" kind="function" symbol="fetchArticles" lines="74-142" reason="Function that fetches articles from database using Prisma. Calculates pagination metadata (total, totalPages) based on article count and limit. Returns articles and pagination data."/>
+      <code path="app/articles/category/[slug]/page.tsx" kind="page" symbol="CategoryPageContent" lines="255-315" reason="Category page Server Component that displays filtered articles with pagination. Uses CategoryPagination component that wraps pagination logic with category-specific URL building."/>
+      <code path="app/articles/category/[slug]/page.tsx" kind="component" symbol="CategoryPagination" lines="317-483" reason="Category pagination component that wraps pagination logic. Builds URLs with category slug and page parameter: /articles/category/[slug]?page=2. Reuses pagination display logic from base component."/>
+      <code path="app/articles/tag/[slug]/page.tsx" kind="page" symbol="TagPageContent" lines="260-320" reason="Tag page Server Component that displays filtered articles with pagination. Uses TagPagination component that wraps pagination logic with tag-specific URL building."/>
+      <code path="app/articles/tag/[slug]/page.tsx" kind="component" symbol="TagPagination" lines="329-460" reason="Tag pagination component that wraps pagination logic. Builds URLs with tag slug and page parameter: /articles/tag/[slug]?page=2. Reuses pagination display logic from base component."/>
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="next" version="16.0.2"/>
+        <package name="react" version="19.2.0"/>
+        <package name="react-dom" version="19.2.0"/>
+        <package name="@prisma/client" version="^6.19.0"/>
+        <package name="tailwindcss" version="^4"/>
+      </ecosystem>
+      <ecosystem name="dev">
+        <package name="@testing-library/react" version="^16.3.0"/>
+        <package name="@testing-library/jest-dom" version="^6.9.1"/>
+        <package name="@playwright/test" version="^1.56.1"/>
+        <package name="jest" version="^30.2.0"/>
+        <package name="typescript" version="^5"/>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="architectural">Pagination component already exists at components/article/Pagination.tsx and is functional. This story is primarily for verification and testing.</constraint>
+    <constraint type="architectural">Pagination component is a Client Component (uses useSearchParams hook from next/navigation).</constraint>
+    <constraint type="architectural">Homepage, category page, and tag page are Server Components that calculate pagination data using Prisma.</constraint>
+    <constraint type="component-organization">Pagination component is in components/article/ directory following PascalCase.tsx naming convention.</constraint>
+    <constraint type="component-reuse">Base Pagination component is reusable. Category and tag pages have custom pagination components (CategoryPagination, TagPagination) that adapt URL building logic.</constraint>
+    <constraint type="styling">Use Tailwind CSS for all styling with mobile-first responsive design.</constraint>
+    <constraint type="url-parameters">Page parameter is passed via searchParams in Next.js App Router. Default page is 1 when no parameter is provided. Page parameter format: ?page=2.</constraint>
+    <constraint type="pagination-logic">Pagination is hidden when only one page exists (totalPages <= 1). Previous button disabled on first page. Next button disabled on last page.</constraint>
+    <constraint type="ellipsis-logic">Ellipsis shown when there are many pages. First and last pages always shown. Pages around current page shown. Ellipsis logic: show ellipsis if current page > 3 or current page < totalPages - 2.</constraint>
+    <constraint type="suspense-boundary">Pagination is wrapped in Suspense boundary for loading states on all pages (homepage, category, tag).</constraint>
+    <constraint type="url-building">Homepage pagination uses format: /?page=2. Category pagination uses format: /articles/category/[slug]?page=2. Tag pagination uses format: /articles/tag/[slug]?page=2.</constraint>
+    <constraint type="existing-implementation">Pagination is already implemented on homepage (Story 4.1), category page (Story 4.3), and tag page (Story 4.4). This story verifies all implementations work correctly.</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="PaginationProps" kind="TypeScript interface" signature="export interface PaginationProps { page: number; limit: number; total: number; totalPages: number; }" path="components/article/Pagination.tsx">
+      Pagination component props interface. Defines pagination metadata required by the component.
+    </interface>
+    <interface name="Pagination Component" kind="React Component" signature="export default function Pagination({ pagination }: { pagination: PaginationProps })" path="components/article/Pagination.tsx">
+      Base pagination component that displays pagination controls. Accepts PaginationProps and renders Previous/Next buttons, page numbers with ellipsis, and page info. Updates URL query parameters on navigation.
+    </interface>
+    <interface name="CategoryPagination Component" kind="React Component" signature="function CategoryPagination({ pagination, categorySlug }: { pagination: PaginationData; categorySlug: string })" path="app/articles/category/[slug]/page.tsx">
+      Category-specific pagination component that wraps pagination logic with category URL building. Builds URLs with format: /articles/category/[slug]?page=2.
+    </interface>
+    <interface name="TagPagination Component" kind="React Component" signature="function TagPagination({ pagination, tagSlug }: { pagination: PaginationData; tagSlug: string })" path="app/articles/tag/[slug]/page.tsx">
+      Tag-specific pagination component that wraps pagination logic with tag URL building. Builds URLs with format: /articles/tag/[slug]?page=2.
+    </interface>
+    <interface name="Next.js searchParams" kind="Next.js App Router" signature="searchParams: { page?: string; limit?: string }" path="app/page.tsx">
+      Next.js App Router searchParams object that contains URL query parameters. Page parameter is parsed from searchParams.page with default value of 1.
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Unit tests use Jest + React Testing Library for component testing. Integration tests use Jest + Next.js API testing with Prisma mocking. E2E tests use Playwright for complete user flow testing. Tests should follow existing patterns from Story 4.1, Story 4.2, Story 4.3, and Story 4.4 tests. Test files located in tests/__tests__/unit/, tests/__tests__/integration/, and tests/e2e/ directories.</standards>
+    <locations>
+      <location>tests/__tests__/unit/</location>
+      <location>tests/__tests__/integration/</location>
+      <location>tests/e2e/</location>
+    </locations>
+    <ideas>
+      <idea ac="AC-4.5.1">Unit: Test Pagination component renders when totalPages > 1.</idea>
+      <idea ac="AC-4.5.1">Unit: Test Pagination component does not render when totalPages <= 1.</idea>
+      <idea ac="AC-4.5.2">Unit: Test Pagination component displays current page number and total pages.</idea>
+      <idea ac="AC-4.5.2">Integration: Test pagination metadata is correctly calculated and passed to component.</idea>
+      <idea ac="AC-4.5.3">E2E: Test clicking 'Next' button navigates to next page and displays next page articles on homepage.</idea>
+      <idea ac="AC-4.5.3">E2E: Test clicking 'Next' button navigates to next page and displays next page articles on category page.</idea>
+      <idea ac="AC-4.5.3">E2E: Test clicking 'Next' button navigates to next page and displays next page articles on tag page.</idea>
+      <idea ac="AC-4.5.4">E2E: Test clicking 'Previous' button navigates to previous page and displays previous page articles on homepage.</idea>
+      <idea ac="AC-4.5.4">E2E: Test clicking 'Previous' button navigates to previous page and displays previous page articles on category page.</idea>
+      <idea ac="AC-4.5.4">E2E: Test clicking 'Previous' button navigates to previous page and displays previous page articles on tag page.</idea>
+      <idea ac="AC-4.5.5">E2E: Test clicking a specific page number navigates to that page and displays correct articles on homepage.</idea>
+      <idea ac="AC-4.5.5">E2E: Test clicking a specific page number navigates to that page and displays correct articles on category page.</idea>
+      <idea ac="AC-4.5.5">E2E: Test clicking a specific page number navigates to that page and displays correct articles on tag page.</idea>
+      <idea ac="AC-4.5.6">E2E: Test URL updates with page parameter when navigating to different page on homepage (?page=2).</idea>
+      <idea ac="AC-4.5.6">E2E: Test URL updates with page parameter when navigating to different page on category page (/articles/category/[slug]?page=2).</idea>
+      <idea ac="AC-4.5.6">E2E: Test URL updates with page parameter when navigating to different page on tag page (/articles/tag/[slug]?page=2).</idea>
+      <idea ac="AC-4.5.7">Unit: Test 'Previous' button is disabled on first page.</idea>
+      <idea ac="AC-4.5.7">E2E: Test 'Previous' button is disabled and non-clickable on first page.</idea>
+      <idea ac="AC-4.5.8">Unit: Test 'Next' button is disabled on last page.</idea>
+      <idea ac="AC-4.5.8">E2E: Test 'Next' button is disabled and non-clickable on last page.</idea>
+      <idea ac="AC-4.5.9">Unit: Test ellipsis is shown when there are many pages (current page > 3 or current page < totalPages - 2).</idea>
+      <idea ac="AC-4.5.9">Unit: Test first and last pages are always shown regardless of current page.</idea>
+      <idea ac="AC-4.5.9">E2E: Test ellipsis displays correctly when navigating through many pages.</idea>
+      <idea ac="AC-4.5.10">E2E: Test pagination controls are responsive and usable on mobile devices (viewport width < 640px).</idea>
+      <idea ac="AC-4.5.10">E2E: Test pagination layout adapts to different screen sizes (mobile, tablet, desktop).</idea>
+      <idea ac="AC-4.5.6">Integration: Test invalid page numbers are handled correctly (page=0, page=-1, page=999).</idea>
+      <idea ac="AC-4.5.6">Integration: Test default page is 1 when no page parameter is provided.</idea>
+      <idea ac="AC-4.5.2">Integration: Test pagination data calculation handles edge cases (total=0, limit=100).</idea>
+      <idea ac="AC-4.5.1">E2E: Test pagination is displayed on homepage when articles exceed one page.</idea>
+      <idea ac="AC-4.5.1">E2E: Test pagination is displayed on category page when filtered articles exceed one page.</idea>
+      <idea ac="AC-4.5.1">E2E: Test pagination is displayed on tag page when filtered articles exceed one page.</idea>
+      <idea ac="AC-4.5.6">E2E: Test pagination maintains category filter in URL when navigating pages.</idea>
+      <idea ac="AC-4.5.6">E2E: Test pagination maintains tag filter in URL when navigating pages.</idea>
+    </ideas>
+  </tests>
+</story-context>
+

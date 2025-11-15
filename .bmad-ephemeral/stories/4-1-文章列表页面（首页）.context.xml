@@ -1,0 +1,228 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4.1</storyId>
+    <title>文章列表页面（首页）</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-14</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/4-1-文章列表页面（首页）.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>reader</asA>
+    <iWant>to see a list of published articles on the homepage</iWant>
+    <soThat>I can discover and browse blog content</soThat>
+    <tasks>
+      <task id="1" ac="4.1.1,4.1.6">Create Homepage Server Component</task>
+      <task id="2" ac="4.1.1,4.1.2">Create Article List Component</task>
+      <task id="3" ac="4.1.2">Create Article Card Component</task>
+      <task id="4" ac="4.1.4">Implement Pagination Component</task>
+      <task id="5" ac="4.1.5">Implement Responsive Design</task>
+      <task id="6" ac="4.1.2">Implement Date Formatting</task>
+      <task id="7" ac="4.1.3">Implement Article Sorting</task>
+      <task id="8" ac="4.1.6">Add Loading States</task>
+      <task id="9" ac="4.1.7">Handle Empty State</task>
+      <task id="10" ac="4.1.1">Add Error Handling</task>
+      <task id="11" ac="4.1.2">Add Navigation to Article Detail</task>
+      <task id="12" ac="all">Write Tests</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="4.1.1">Given I visit the homepage, When the page loads, Then I see a list of published articles</ac>
+    <ac id="4.1.2">Each article shows title, excerpt, publish date, category, and tags</ac>
+    <ac id="4.1.3">Articles are sorted by publish date (newest first by default)</ac>
+    <ac id="4.1.4">Articles are paginated (default 20 per page, max 100)</ac>
+    <ac id="4.1.5">The page is responsive (works on desktop, tablet, mobile)</ac>
+    <ac id="4.1.6">Loading states are displayed while fetching articles</ac>
+    <ac id="4.1.7">Empty state is displayed when no articles are available</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics/epic-4-内容展示content-display.md" title="Epic 4: 内容展示" section="Story 4.1: 文章列表页面（首页）">
+        Story definition with acceptance criteria and technical notes for homepage article list. Includes requirements for displaying published articles, pagination, responsive design, loading states, and empty state handling.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-4.md" title="Tech Spec Epic 4" section="Story 4.1: 文章列表页面（首页）">
+        Technical specification for homepage article list: Create Server Component, fetch from GET /api/articles/public, implement ArticleList and ArticleCard components, add pagination, responsive layout with Tailwind CSS, loading and empty states.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-4.md" title="Tech Spec Epic 4" section="APIs and Interfaces">
+        Public articles API endpoint specification: GET /api/articles/public returns published articles with pagination, supports query parameters (page, limit, categorySlug, tagSlug), returns unified response format with articles array and pagination metadata.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-4.md" title="Tech Spec Epic 4" section="Data Models and Contracts">
+        Article response model definition: ArticleResponse interface includes id, title, content, excerpt, slug, status, category, author, tags, publishedAt. ArticlesListResponse includes articles array and pagination metadata.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-4.md" title="Tech Spec Epic 4" section="Workflows and Sequencing">
+        Article list page workflow: User visits homepage, Server Component calls GET /api/articles/public?page=1&limit=20, API returns published articles and pagination info, Server Component renders article list UI, user clicks article card to navigate to detail page.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Project Structure">
+        Next.js App Router structure: Pages in app/ directory, components in components/ directory, use Server Components for data fetching, Client Components only when needed for interactivity, follow PascalCase for components.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Component Organization">
+        Component organization patterns: Organize by feature (components/article/), shared UI in components/ui/, layout in components/layout/, use co-location for tests and types.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Styling Architecture">
+        Styling patterns: Use Tailwind CSS for all styling, mobile-first responsive design, use responsive breakpoints (sm, md, lg, xl), follow design system patterns.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Date/Time Handling">
+        Date formatting patterns: Use date-fns library for date manipulation, format dates in user's locale (Chinese), convert to local timezone, use format function with locale option.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Error Handling">
+        Error handling patterns: Use unified error format from API, display user-friendly error messages, log errors for debugging, handle network errors gracefully, provide retry mechanism when appropriate.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Loading States">
+        Loading state patterns: Use Next.js Suspense boundary for Server Components, display loading indicators, handle async data fetching, show skeleton screens for better UX.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Navigation Patterns">
+        Navigation patterns: Use Next.js Link component for client-side navigation, use router.push() for programmatic navigation, preserve URL state with query parameters.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/3-8-媒体管理功能.md" title="Story 3.8: 媒体管理功能" section="Dev Notes">
+        Pagination implementation pattern from media library page: Use pagination metadata from API, display current page and total pages, implement Previous/Next buttons, handle edge cases, make responsive. Reference: app/admin/media/page.tsx:360-380.
+      </doc>
+    </docs>
+    <code>
+      <artifact path="app/api/articles/public/route.ts" kind="controller" symbol="GET" lines="26-177" reason="Public articles API endpoint. Returns published articles with pagination, supports filtering by category and tag, handles query parameters (page, limit, categorySlug, tagSlug), returns unified response format." />
+      <artifact path="app/page.tsx" kind="component" symbol="Home" lines="1-65" reason="Current homepage component showing default Next.js template. Needs to be updated to display article list using Server Component pattern." />
+      <artifact path="app/articles/page.tsx" kind="component" symbol="ArticlesListPageContent" lines="64-286" reason="Existing article list page component for /articles route. Uses Client Component with useSearchParams, fetches from public API, displays articles in grid layout. Can reference for patterns but homepage should use Server Component." />
+      <artifact path="app/articles/page.tsx" kind="component" symbol="format" lines="6-7" reason="Date formatting example using date-fns: import format from date-fns, import zhCN locale, use format(new Date(dateString), 'yyyy年MM月dd日', { locale: zhCN })." />
+      <artifact path="app/admin/articles/page.tsx" kind="component" symbol="ArticlesListPage" lines="54-354" reason="Admin articles list page. Uses Client Component, implements pagination with state management, displays articles in table layout. Pagination pattern can be referenced but needs adaptation for public homepage." />
+      <artifact path="app/admin/articles/page.tsx" kind="interface" symbol="Pagination" lines="34-39" reason="Pagination interface definition: page, limit, total, totalPages. Used for pagination metadata from API responses." />
+      <artifact path="app/articles/tag/[slug]/page.tsx" kind="component" symbol="TagFilterPageContent" lines="323-403" reason="Tag filter page with pagination implementation. Shows pagination controls with Previous/Next buttons, page numbers with ellipsis, URL parameter handling. Good reference for pagination component pattern." />
+      <artifact path="app/admin/media/page.tsx" kind="component" symbol="MediaLibraryPage" lines="360-380" reason="Media library pagination implementation. Simple pagination with Previous/Next buttons, displays current page and total pages, handles disabled states. Can be referenced for pagination component structure." />
+      <artifact path="prisma/schema.prisma" kind="schema" symbol="Article" lines="118-140" reason="Article data model definition. Includes all fields needed for display: id, title, content, excerpt, slug, status, categoryId, authorId, publishedAt, createdAt, updatedAt, and relations to author, category, tags." />
+      <artifact path="prisma/schema.prisma" kind="schema" symbol="Category" lines="81-90" reason="Category data model definition. Includes id, name, slug for category display in article cards." />
+      <artifact path="prisma/schema.prisma" kind="schema" symbol="Tag" lines="98-107" reason="Tag data model definition. Includes id, name, slug for tag display in article cards." />
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="next" version="16.0.2" />
+        <package name="react" version="19.2.0" />
+        <package name="react-dom" version="19.2.0" />
+        <package name="date-fns" version="^4.1.0" />
+        <package name="date-fns-tz" version="^3.2.0" />
+        <package name="@prisma/client" version="^6.19.0" />
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>
+      <name>Server Components</name>
+      <description>Use Next.js Server Components for homepage to enable SSR and SEO. Fetch data directly in Server Component using fetch API. Use async/await for asynchronous data fetching. Reference: docs/architecture.md#Next.js-App-Router.</description>
+      <source>docs/architecture.md#Next.js-App-Router</source>
+    </constraint>
+    <constraint>
+      <name>API Integration</name>
+      <description>Use public API endpoint GET /api/articles/public. API already implements pagination, filtering, and sorting. API returns unified response format: { success: boolean, data: T, error?: { message: string, code: string } }. Reference: app/api/articles/public/route.ts.</description>
+      <source>app/api/articles/public/route.ts</source>
+    </constraint>
+    <constraint>
+      <name>Component Organization</name>
+      <description>Article components in components/article/ directory. Follow naming convention: PascalCase.tsx for components. Separate Server Components and Client Components appropriately. Reference: docs/architecture.md#Component-Organization.</description>
+      <source>docs/architecture.md#Component-Organization</source>
+    </constraint>
+    <constraint>
+      <name>Styling</name>
+      <description>Use Tailwind CSS for all styling. Mobile-first responsive design. Use Tailwind responsive breakpoints: sm:, md:, lg:, xl:. Reference: docs/architecture.md#Styling-Architecture.</description>
+      <source>docs/architecture.md#Styling-Architecture</source>
+    </constraint>
+    <constraint>
+      <name>Error Handling</name>
+      <description>Use unified error format from API. Display user-friendly error messages. Log errors for debugging (console in dev, structured in prod). Reference: docs/architecture.md#Error-Handling.</description>
+      <source>docs/architecture.md#Error-Handling</source>
+    </constraint>
+    <constraint>
+      <name>Date Formatting</name>
+      <description>Use date-fns library for date formatting. Format dates in user's locale (Chinese). Handle timezone conversion if needed. Use format(new Date(dateString), 'yyyy年MM月dd日', { locale: zhCN }). Reference: docs/architecture.md#Date-Time-Handling.</description>
+      <source>docs/architecture.md#Date-Time-Handling</source>
+    </constraint>
+    <constraint>
+      <name>Pagination</name>
+      <description>Default page size: 20 items. Maximum page size: 100 items. Return pagination metadata (page, limit, total, totalPages) from API. Use URL query parameters for page navigation. Reference: .bmad-ephemeral/stories/tech-spec-epic-4.md#APIs-and-Interfaces.</description>
+      <source>.bmad-ephemeral/stories/tech-spec-epic-4.md#APIs-and-Interfaces</source>
+    </constraint>
+    <constraint>
+      <name>Loading States</name>
+      <description>Use Next.js Suspense boundary for Server Components. Display loading indicator while fetching articles. Reference: docs/architecture.md#Loading-States.</description>
+      <source>docs/architecture.md#Loading-States</source>
+    </constraint>
+    <constraint>
+      <name>Empty State</name>
+      <description>Display friendly message when no articles available. Suggest actions (e.g., "Check back later for new articles"). Reference: .bmad-ephemeral/stories/tech-spec-epic-4.md#Reliability-Availability.</description>
+      <source>.bmad-ephemeral/stories/tech-spec-epic-4.md#Reliability-Availability</source>
+    </constraint>
+    <constraint>
+      <name>Navigation</name>
+      <description>Use Next.js Link component for client-side navigation. Navigate to /articles/[slug] when article card is clicked. Reference: docs/architecture.md#Navigation-Patterns.</description>
+      <source>docs/architecture.md#Navigation-Patterns</source>
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>GET /api/articles/public</name>
+      <kind>REST endpoint</kind>
+      <signature>GET /api/articles/public?page=number&amp;limit=number&amp;categorySlug=string&amp;tagSlug=string
+Authentication: Not required (public access)
+Response (200): { success: true, data: { articles: ArticleResponse[], pagination: { page: number, limit: number, total: number, totalPages: number } } }
+Error Responses: 500 (Internal Server Error)</signature>
+      <path>app/api/articles/public/route.ts</path>
+    </interface>
+    <interface>
+      <name>ArticleResponse</name>
+      <kind>TypeScript interface</kind>
+      <signature>interface ArticleResponse {
+  id: string;
+  title: string;
+  content: string;
+  excerpt: string | null;
+  slug: string;
+  status: "PUBLISHED";
+  categoryId: string | null;
+  authorId: string;
+  publishedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+  author: { id: string; name: string | null; image: string | null };
+  category: { id: string; name: string; slug: string } | null;
+  tags: Array&lt;{ id: string; name: string; slug: string }&gt;;
+}</signature>
+      <path>.bmad-ephemeral/stories/tech-spec-epic-4.md#Data-Models-and-Contracts</path>
+    </interface>
+    <interface>
+      <name>Pagination</name>
+      <kind>TypeScript interface</kind>
+      <signature>interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}</signature>
+      <path>app/admin/articles/page.tsx:34-39</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Use Jest for unit tests and React Testing Library for component tests. Use Playwright for E2E tests. Test files co-located with source files or in tests/__tests__/ directory. Follow existing test patterns from previous stories. Reference: .bmad-ephemeral/stories/tech-spec-epic-4.md#Test-Strategy-Summary.</standards>
+    <locations>tests/__tests__/unit/ for unit tests, tests/__tests__/integration/ for integration tests, tests/e2e/ for E2E tests</locations>
+    <ideas>
+      <test ac="4.1.1">Test homepage Server Component renders article list when articles are available</test>
+      <test ac="4.1.1">Test homepage displays empty state when no articles are available</test>
+      <test ac="4.1.2">Test ArticleCard component displays all required fields (title, excerpt, date, category, tags)</test>
+      <test ac="4.1.2">Test ArticleCard handles missing optional fields (excerpt, category, tags)</test>
+      <test ac="4.1.3">Test articles are sorted by publishedAt descending (newest first)</test>
+      <test ac="4.1.4">Test pagination component displays correct page numbers and total pages</test>
+      <test ac="4.1.4">Test pagination Previous/Next buttons work correctly</test>
+      <test ac="4.1.4">Test pagination handles edge cases (first page, last page)</test>
+      <test ac="4.1.5">Test responsive design on mobile, tablet, and desktop breakpoints</test>
+      <test ac="4.1.6">Test loading state is displayed while fetching articles</test>
+      <test ac="4.1.7">Test empty state message is displayed when no articles</test>
+      <test ac="4.1.1">Test error handling when API returns error</test>
+      <test ac="4.1.2">Test article card navigation to detail page</test>
+      <test ac="all">E2E test: Visit homepage, see articles, click article, navigate to detail page</test>
+      <test ac="all">E2E test: Test pagination navigation on homepage</test>
+    </ideas>
+  </tests>
+</story-context>
+

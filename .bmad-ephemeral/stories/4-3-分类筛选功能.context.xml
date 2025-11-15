@@ -1,0 +1,144 @@
+<story-context id="4.3" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>3</storyId>
+    <title>分类筛选功能</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-14</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/4-3-分类筛选功能.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>reader</asA>
+    <iWant>to filter articles by category</iWant>
+    <soThat>I can find articles on specific topics</soThat>
+    <tasks>
+      <task id="1" description="Create Category Page Route" ac="4.3.1, 4.3.2, 4.3.7"/>
+      <task id="2" description="Implement Category Filtering" ac="4.3.1, 4.3.3"/>
+      <task id="3" description="Display Category Information" ac="4.3.5"/>
+      <task id="4" description="Implement 'All' Filter Option" ac="4.3.4"/>
+      <task id="5" description="Implement Empty State" ac="4.3.6"/>
+      <task id="6" description="Handle 404 Errors" ac="4.3.7"/>
+      <task id="7" description="Add SEO Meta Tags" ac="4.3.5"/>
+      <task id="8" description="Add Loading States" ac="4.3.1"/>
+      <task id="9" description="Add Error Handling" ac="4.3.1, 4.3.7"/>
+      <task id="10" description="Update Navigation Links" ac="4.3.1"/>
+      <task id="11" description="Write Tests" ac="All ACs"/>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-4.3.1" description="Given I am on the homepage or article list, When I click on a category, Then I see only articles in that category"/>
+    <criterion id="AC-4.3.2" description="Given I am viewing a filtered category page, Then the URL reflects the filter (e.g., /articles/category/技术)"/>
+    <criterion id="AC-4.3.3" description="Given I am viewing a category page, Then I can see how many articles are in this category"/>
+    <criterion id="AC-4.3.4" description="Given I am viewing a filtered category page, When I click 'All' or remove the filter, Then I see all articles again"/>
+    <criterion id="AC-4.3.5" description="Given I am viewing a category page, Then the page displays the category name and description (if available)"/>
+    <criterion id="AC-4.3.6" description="Given I am viewing a category page with no articles, Then I see a friendly empty state message"/>
+    <criterion id="AC-4.3.7" description="Given I access a category that doesn't exist, Then I see a 404 error page"/>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/PRD.md" title="Product Requirements Document" section="FR-3.3 分类筛选" snippet="用户可以按分类筛选文章，可以点击分类查看该分类下的所有文章，筛选结果正确显示。"/>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-4.md" title="Epic 4 Technical Specification" section="Story 4.3: 分类筛选功能" snippet="创建 app/articles/category/[slug]/page.tsx Server Component，调用 GET /api/articles/public?categorySlug=[slug]，实现分类导航组件，显示分类文章数量，实现'全部'选项。"/>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-4.md" title="Epic 4 Technical Specification" section="Workflows and Sequencing" snippet="分类筛选流程：用户点击分类链接，导航到分类页面，Server Component 调用 API 获取该分类下的已发布文章，Server Component 渲染筛选后的文章列表，URL 反映当前筛选状态。"/>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Next.js App Router" snippet="使用 Next.js Server Components 进行服务端渲染，在 Server Component 中直接使用 Prisma 获取数据，使用 async/await 进行异步数据获取。"/>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Component Organization" snippet="组件组织模式：文章组件位于 components/article/ 目录，遵循 PascalCase.tsx 命名约定，适当分离 Server Components 和 Client Components。"/>
+      <doc path="docs/epics/epic-4-内容展示content-display.md" title="Epic 4 Definition" section="Story 4.3: 分类筛选功能" snippet="As a reader, I want to filter articles by category, So that I can find articles on specific topics. Given I am on the homepage or article list, When I click on a category, Then I see only articles in that category, And the URL reflects the filter, And I can see how many articles are in this category."/>
+      <doc path=".bmad-ephemeral/stories/4-2-文章详情页面.md" title="Story 4.2: 文章详情页面" section="Learnings from Previous Story" snippet="Server Component Pattern: Use Prisma directly in Server Component instead of API calls for better performance. Error Handling: Use Next.js notFound() for 404 errors. Loading States: Use Suspense boundaries for Server Components. SEO: Use Next.js Metadata API with generateMetadata function."/>
+      <doc path=".bmad-ephemeral/stories/4-1-文章列表页面（首页）.md" title="Story 4.1: 文章列表页面（首页）" section="Dev Agent Record" snippet="Server Component pattern using Prisma directly, ArticleList and ArticleCard components created, Pagination component created, empty state handling, responsive design patterns."/>
+    </docs>
+    <code>
+      <code path="app/api/articles/public/route.ts" kind="api-route" symbol="GET" lines="50-76" reason="Public API endpoint that handles category filtering by slug. Converts categorySlug to categoryId and filters articles. Returns unified response format with articles and pagination."/>
+      <code path="app/page.tsx" kind="page" symbol="fetchArticles" lines="74-142" reason="Homepage Server Component showing pattern for fetching articles directly from database using Prisma, including where clause, include relations, and data transformation. Can be adapted for category filtering."/>
+      <code path="app/articles/[slug]/page.tsx" kind="page" symbol="ArticleDetailPage" lines="49-99" reason="Article detail page Server Component showing pattern for fetching single entity by slug using Prisma, 404 handling with notFound(), and Suspense boundary usage."/>
+      <code path="components/article/ArticleList.tsx" kind="component" symbol="ArticleList" lines="1-56" reason="Article list component that displays articles using ArticleCard components. Handles empty state. Can be reused for category-filtered articles."/>
+      <code path="components/article/ArticleCard.tsx" kind="component" symbol="ArticleCard" lines="144-149" reason="Article card component showing category link navigation to /articles/category/[slug]. Already correctly implemented."/>
+      <code path="components/article/ArticleDetail.tsx" kind="component" symbol="ArticleDetail" lines="138-143" reason="Article detail component showing category link navigation to /articles/category/[slug]. Already correctly implemented."/>
+      <code path="components/article/Pagination.tsx" kind="component" symbol="Pagination" lines="1-177" reason="Pagination component for navigating between pages. Can be reused for category-filtered article lists."/>
+      <code path="app/articles/[slug]/not-found.tsx" kind="page" symbol="NotFound" lines="1-27" reason="404 Not Found page pattern for article detail. Can be adapted for category 404 page."/>
+      <code path="app/articles/[slug]/error.tsx" kind="page" symbol="Error" lines="1-50" reason="Error boundary component pattern for article detail. Can be adapted for category page error handling."/>
+      <code path="app/articles/[slug]/page.tsx" kind="page" symbol="generateMetadata" lines="107-136" reason="generateMetadata function pattern for dynamic SEO meta tags. Can be adapted for category page metadata."/>
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="next" version="16.0.2"/>
+        <package name="react" version="19.2.0"/>
+        <package name="react-dom" version="19.2.0"/>
+        <package name="date-fns" version="^4.1.0"/>
+        <package name="date-fns-tz" version="^3.2.0"/>
+        <package name="@prisma/client" version="^6.19.0"/>
+        <package name="tailwindcss" version="^4"/>
+      </ecosystem>
+      <ecosystem name="dev">
+        <package name="@testing-library/react" version="^16.3.0"/>
+        <package name="@testing-library/jest-dom" version="^6.9.1"/>
+        <package name="@playwright/test" version="^1.56.1"/>
+        <package name="jest" version="^30.2.0"/>
+        <package name="typescript" version="^5"/>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="architectural">Use Next.js Server Components for category page to enable SSR and SEO optimization.</constraint>
+    <constraint type="architectural">Fetch data directly in Server Component using Prisma (more efficient than API calls in Server Components).</constraint>
+    <constraint type="architectural">Use async/await for asynchronous data fetching.</constraint>
+    <constraint type="component-organization">Article components must be in components/article/ directory following PascalCase.tsx naming convention.</constraint>
+    <constraint type="component-reuse">Reuse existing ArticleList, ArticleCard, and Pagination components from Story 4.1.</constraint>
+    <constraint type="styling">Use Tailwind CSS for all styling with mobile-first responsive design.</constraint>
+    <constraint type="navigation">Use Next.js Link component for client-side navigation. Category links should navigate to /articles/category/[slug].</constraint>
+    <constraint type="error-handling">Use Next.js notFound() function for 404 errors. Display user-friendly error messages. Log errors for debugging.</constraint>
+    <constraint type="seo">Use Next.js Metadata API with generateMetadata function for dynamic meta tags based on category.</constraint>
+    <constraint type="loading-states">Use Suspense boundaries for Server Components with skeleton UI for loading states.</constraint>
+    <constraint type="empty-state">Reuse empty state pattern from ArticleList component when category has no articles.</constraint>
+    <constraint type="api-reference">API endpoint GET /api/articles/public?categorySlug=[slug] already exists and can be used as reference for Prisma query pattern.</constraint>
+    <constraint type="existing-implementation">Category links in ArticleCard and ArticleDetail already navigate correctly to /articles/category/[slug]. Verify but should not need changes.</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="GET /api/articles/public?categorySlug=[slug]" kind="REST endpoint" signature="GET /api/articles/public?categorySlug={slug}&amp;page={page}&amp;limit={limit}" path="app/api/articles/public/route.ts">
+      Returns published articles filtered by category slug with pagination. Converts categorySlug to categoryId internally. Response: { success: boolean, data?: { articles: Article[], pagination: PaginationData }, error?: { message: string, code: string } }
+    </interface>
+    <interface name="Category Model" kind="Prisma schema" signature="model Category { id String @id @default(cuid()) name String @unique slug String @unique createdAt DateTime @default(now()) updatedAt DateTime @updatedAt articles Article[] }" path="prisma/schema.prisma">
+      Category model with id, name, slug, and articles relation. Used for fetching category by slug and counting articles.
+    </interface>
+    <interface name="ArticleList Props" kind="TypeScript interface" signature="export default function ArticleList({ articles }: { articles: ArticleCardProps[] })" path="components/article/ArticleList.tsx">
+      Article list component that accepts array of article card props. Can be reused for category-filtered articles.
+    </interface>
+    <interface name="Pagination Props" kind="TypeScript interface" signature="export interface PaginationProps { page: number; limit: number; total: number; totalPages: number; }" path="components/article/Pagination.tsx">
+      Pagination component props interface. Can be reused for category-filtered article lists.
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Unit tests use Jest + React Testing Library for component testing. Integration tests use Jest + Next.js API testing with Prisma mocking. E2E tests use Playwright for complete user flow testing. Tests should follow existing patterns from Story 4.1 and Story 4.2 tests. Test files located in tests/__tests__/unit/, tests/__tests__/integration/, and tests/e2e/ directories.</standards>
+    <locations>
+      <location>tests/__tests__/unit/</location>
+      <location>tests/__tests__/integration/</location>
+      <location>tests/e2e/</location>
+    </locations>
+    <ideas>
+      <idea ac="AC-4.3.1">E2E: Test navigation from homepage article card category link to category page and verify only articles in that category are displayed.</idea>
+      <idea ac="AC-4.3.1">Integration: Test that Server Component fetches and displays only articles in the selected category using Prisma query with categoryId filter.</idea>
+      <idea ac="AC-4.3.2">E2E: Verify URL reflects category filter (e.g., /articles/category/tech) when viewing filtered category page.</idea>
+      <idea ac="AC-4.3.3">Unit: Test category page displays article count for the category.</idea>
+      <idea ac="AC-4.3.3">Integration: Test article count calculation for category using Prisma count query.</idea>
+      <idea ac="AC-4.3.4">E2E: Test clicking 'All' link navigates to homepage and displays all articles.</idea>
+      <idea ac="AC-4.3.4">E2E: Verify active filter state (highlight current category) is displayed correctly.</idea>
+      <idea ac="AC-4.3.5">Unit: Test category page displays category name and description (if available).</idea>
+      <idea ac="AC-4.3.5">Integration: Test category information fetching from database by slug.</idea>
+      <idea ac="AC-4.3.6">Unit: Test empty state message is displayed when category has no articles.</idea>
+      <idea ac="AC-4.3.6">E2E: Test empty state display and navigation back to all articles.</idea>
+      <idea ac="AC-4.3.7">Integration: Test 404 error handling when category slug doesn't exist.</idea>
+      <idea ac="AC-4.3.7">E2E: Test 404 error page display for non-existent category with navigation back to article list.</idea>
+      <idea ac="AC-4.3.1">Unit: Test loading state with Suspense boundary is displayed while fetching category and articles.</idea>
+      <idea ac="AC-4.3.1">Integration: Test error handling for database failures during category or article fetch.</idea>
+      <idea ac="AC-4.3.5">Integration: Test SEO meta tags generation with Next.js Metadata API for category page.</idea>
+      <idea ac="AC-4.3.1">E2E: Test complete user flow: click category from ArticleCard → see filtered articles → click 'All' → see all articles.</idea>
+      <idea ac="AC-4.3.2">Unit: Test URL parameter handling and routing for category pages.</idea>
+    </ideas>
+  </tests>
+</story-context>
+

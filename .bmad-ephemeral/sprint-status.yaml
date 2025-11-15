@@ -84,11 +84,11 @@ development_status:
   epic-5-retrospective: completed
 
   # Epic 6: 后台管理界面（Admin Dashboard）
-  epic-6: backlog
-  6-1-后台管理界面基础结构: backlog
-  6-2-文章管理列表: backlog
-  6-3-后台文章编辑集成: backlog
-  epic-6-retrospective: optional
+  epic-6: contexted
+  6-1-后台管理界面基础结构: done
+  6-2-文章管理列表: done
+  6-3-后台文章编辑集成: done
+  epic-6-retrospective: done
 
   # Epic 7: SEO 和性能优化（SEO & Performance）
   epic-7: backlog

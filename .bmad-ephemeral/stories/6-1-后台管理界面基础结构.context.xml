@@ -1,0 +1,206 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>6</epicId>
+    <storyId>6.1</storyId>
+    <title>后台管理界面基础结构</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-15</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/6-1-后台管理界面基础结构.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>blog author</asA>
+    <iWant>to access an admin dashboard</iWant>
+    <soThat>I can manage my blog content</soThat>
+    <tasks>
+      <task id="1" ac="6.1.1,6.1.5">Create Admin Layout Component</task>
+      <task id="2" ac="6.1.1,6.1.4,6.1.5">Create Admin Navigation Component</task>
+      <task id="3" ac="6.1.1">Update Admin Dashboard Homepage</task>
+      <task id="4" ac="6.1.2,6.1.3">Verify Middleware Protection</task>
+      <task id="5" ac="6.1.2,6.1.3">Implement Server Component Permission Check</task>
+      <task id="6" ac="6.1.1,6.1.5">Style Admin Layout</task>
+      <task id="7" ac="all">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="6.1.1">Given I am logged in as an admin, When I navigate to /admin, Then I see the admin dashboard, And I see a navigation menu with admin sections (文章管理、媒体管理等), And the dashboard has a clean, professional layout</ac>
+    <ac id="6.1.2">Given I am not logged in, When I navigate to /admin, Then I am redirected to the login page with callback URL, And after logging in, I am redirected back to /admin</ac>
+    <ac id="6.1.3">Given I am logged in as a regular user (not admin), When I navigate to /admin, Then I am redirected to the homepage, And I see an error message indicating admin access is required</ac>
+    <ac id="6.1.4">Given I am logged in as an admin, When I view the admin dashboard, Then I see a navigation menu with links to different admin sections, And I can navigate between sections using the menu</ac>
+    <ac id="6.1.5">Given I am logged in as an admin, When I view any admin page, Then all pages use the same admin layout, And the navigation menu is consistent across all pages</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics.md" title="Epic 6: 后台管理界面（Admin Dashboard）" section="Story 6.1">
+        Story definition with acceptance criteria and technical notes for admin dashboard foundation. Includes requirements for /admin route, admin layout component, navigation menu, authentication and role checks, redirects for non-admins, and professional UI design with Tailwind CSS.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-6.md" title="Tech Spec Epic 6" section="Admin Layout Module">
+        Admin layout module specification: Provides unified admin layout and navigation menu. Input: child page content. Output: React layout component. Owner: Story 6.1.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-6.md" title="Tech Spec Epic 6" section="Admin Navigation Module">
+        Admin navigation module specification: Provides navigation menu linking to different admin functions. Input: current route. Output: React navigation component. Owner: Story 6.1.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-6.md" title="Tech Spec Epic 6" section="Permission Architecture">
+        Permission architecture: Uses NextAuth.js for authentication (Epic 2), middleware protects admin routes (Epic 2 Story 2.4), requireAdmin function verifies admin permissions (Epic 2 Story 2.5). All admin routes require ADMIN role. Double-check security: middleware + Server Component.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-6.md" title="Tech Spec Epic 6" section="Workflows and Sequencing">
+        Story 6.1 workflow: User accesses /admin, middleware checks authentication and role, Server Component verifies permissions, renders admin layout with navigation menu, displays child page content.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Project Structure">
+        Next.js App Router structure: Admin pages in app/admin/ directory, layout component at app/admin/layout.tsx (Server Component), automatically wraps all pages in app/admin/ directory. Use kebab-case for files, PascalCase for components.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Epic to Architecture Mapping">
+        Epic 6 architecture mapping: Admin dashboard in app/admin/, components/admin/ for admin-specific components. Uses Next.js App Router Server Components and Client Components.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Security Architecture">
+        Security architecture patterns: Use middleware for route protection, Server Components for permission checks, double-check security (middleware + Server Component), redirect unauthenticated users to login, redirect non-admin users to homepage with error.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/2-5-用户角色和权限管理.md" title="Story 2.5: User Role and Permission Management" section="Dev Notes">
+        Permission check pattern: Use getServerSession in Server Components for permission checks. Middleware already protects /admin/* routes. Permission functions available: requireAdmin for API routes, getUserFromHeaders for request headers.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/2-4-JWT-认证中间件.md" title="Story 2.4: JWT Authentication Middleware" section="Dev Notes">
+        Middleware protection: Middleware checks authentication and ADMIN role for /admin/* routes. Redirects unauthenticated users to login. Redirects non-admin users to homepage with error. Attaches user information to request headers.
+      </doc>
+    </docs>
+    <code>
+      <artifact path="middleware.ts" kind="middleware" symbol="middleware" lines="1-178" reason="Next.js middleware for JWT authentication. Protects /admin/* routes, checks authentication and ADMIN role, redirects unauthenticated users to login, redirects non-admin users to homepage with error. Attaches user information to request headers." />
+      <artifact path="app/admin/page.tsx" kind="component" symbol="AdminPage" lines="1-53" reason="Existing admin dashboard page. Demonstrates permission check pattern using getServerSession. Checks session and user role, redirects if not authenticated or not admin. Shows user information. Will be updated to use new admin layout." />
+      <artifact path="lib/auth/permissions.ts" kind="utility" symbol="Role" lines="10-15" reason="Role enumeration: USER, ADMIN. Matches Prisma Role enum. Used for role checks in permission functions." />
+      <artifact path="lib/auth/permissions.ts" kind="utility" symbol="hasRole" lines="43-48" reason="Checks if user has specific role. Takes user info and required role, returns boolean. Used for role-based access control." />
+      <artifact path="lib/auth/permissions.ts" kind="utility" symbol="requireAdmin" lines="121-143" reason="Requires admin role for API routes. Returns 401 if not authenticated, 403 if not admin, null if user is admin. Used in API route handlers." />
+      <artifact path="app/api/auth/[...nextauth]/route.ts" kind="config" symbol="authOptions" lines="40-293" reason="NextAuth.js configuration. Includes credentials provider, GitHub OAuth, Google OAuth, JWT session strategy. Returns session with user information including role. Used by getServerSession in Server Components." />
+      <artifact path="app/admin/articles/page.tsx" kind="component" symbol="ArticlesListPage" lines="34-354" reason="Existing articles list page in admin. Client component displaying all articles with edit/delete actions. Will automatically use new admin layout when created." />
+      <artifact path="app/admin/articles/new/page.tsx" kind="component" symbol="NewArticlePage" lines="28-728" reason="Existing article creation page in admin. Client component with form for creating articles. Will automatically use new admin layout when created." />
+      <artifact path="app/admin/articles/[id]/edit/page.tsx" kind="component" symbol="EditArticlePage" lines="41-914" reason="Existing article edit page in admin. Client component with form for editing articles. Will automatically use new admin layout when created." />
+      <artifact path="app/admin/media/page.tsx" kind="component" symbol="MediaLibraryPage" lines="22-473" reason="Existing media library page in admin. Client component displaying uploaded media files. Will automatically use new admin layout when created." />
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="next" version="16.0.2" />
+        <package name="react" version="19.2.0" />
+        <package name="react-dom" version="19.2.0" />
+        <package name="next-auth" version="^4.24.13" />
+        <package name="@prisma/client" version="^6.19.0" />
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>
+      <type>architecture</type>
+      <description>Must use Next.js App Router layout pattern. Create app/admin/layout.tsx as Server Component. Layout automatically applies to all pages in app/admin/ directory.</description>
+      <source>docs/architecture.md#Project-Structure</source>
+    </constraint>
+    <constraint>
+      <type>security</type>
+      <description>Must implement double-check security: middleware (first layer) + Server Component (second layer). Both must check authentication and ADMIN role.</description>
+      <source>.bmad-ephemeral/stories/tech-spec-epic-6.md#Permission-Architecture</source>
+    </constraint>
+    <constraint>
+      <type>component</type>
+      <description>Layout component must be Server Component (no "use client" directive). Use getServerSession for permission checks. Use redirect from next/navigation for redirects.</description>
+      <source>docs/architecture.md#Server-Components</source>
+    </constraint>
+    <constraint>
+      <type>styling</type>
+      <description>Must use Tailwind CSS for styling. Design clean, professional admin layout. Make layout responsive (mobile, tablet, desktop).</description>
+      <source>docs/architecture.md#UI-Design-Patterns</source>
+    </constraint>
+    <constraint>
+      <type>navigation</type>
+      <description>Navigation menu must include: 文章管理 (Articles) - /admin/articles, 媒体管理 (Media) - /admin/media, 仪表板 (Dashboard) - /admin. Highlight current active route.</description>
+      <source>.bmad-ephemeral/stories/tech-spec-epic-6.md#Admin-Navigation-Module</source>
+    </constraint>
+    <constraint>
+      <type>permission</type>
+      <description>Must redirect unauthenticated users to /login?callbackUrl=/admin. Must redirect non-admin users to /?error=admin_required.</description>
+      <source>middleware.ts:79-82,112-114</source>
+    </constraint>
+  </constraints>
+
+  <patterns>
+    <pattern>
+      <name>Permission Check in Server Components</name>
+      <description>Use getServerSession(authOptions) to get session. Check session.user.role === Role.ADMIN. Redirect to login if not authenticated. Redirect to homepage if not admin.</description>
+      <example>app/admin/page.tsx:14-29</example>
+      <source>app/admin/page.tsx</source>
+    </pattern>
+    <pattern>
+      <name>Layout Pattern</name>
+      <description>Create layout.tsx in app/admin/ directory. Layout automatically wraps all pages in app/admin/. Include header, sidebar (navigation), main content area. Use children prop to render page content.</description>
+      <example>Next.js App Router layout pattern</example>
+      <source>docs/architecture.md#Layout-Patterns</source>
+    </pattern>
+    <pattern>
+      <name>Navigation Menu</name>
+      <description>Create navigation component (can be inline in layout or separate). Use Next.js Link component for navigation. Use usePathname hook if navigation is Client Component to highlight active route.</description>
+      <example>Navigation menu with active route highlighting</example>
+      <source>.bmad-ephemeral/stories/tech-spec-epic-6.md#Admin-Navigation-Module</source>
+    </pattern>
+    <pattern>
+      <name>Responsive Design</name>
+      <description>Desktop: Sidebar visible, full layout. Mobile: Collapsible sidebar (hamburger menu). Use Tailwind CSS responsive classes (md:, lg:). Test on different screen sizes.</description>
+      <example>Responsive admin layout with mobile menu</example>
+      <source>docs/architecture.md#UI-Design-Patterns</source>
+    </pattern>
+  </patterns>
+
+  <learnings>
+    <learning>
+      <from>Epic 2: User Authentication & Authorization</from>
+      <topic>Permission Check Pattern</topic>
+      <description>Use getServerSession in Server Components for permission checks. Reference: app/admin/page.tsx:14-29. Use getServerSession(authOptions) to get user session. Check session.user.role === Role.ADMIN for admin access. Redirect to login or homepage based on authentication/authorization status.</description>
+      <reference>app/admin/page.tsx</reference>
+    </learning>
+    <learning>
+      <from>Epic 2: User Authentication & Authorization</from>
+      <topic>Middleware Protection</topic>
+      <description>Middleware already protects /admin/* routes. Reference: middleware.ts:19-24,38-40,89-115. Middleware checks authentication and ADMIN role. Redirects unauthenticated users to login. Redirects non-admin users to homepage with error.</description>
+      <reference>middleware.ts</reference>
+    </learning>
+    <learning>
+      <from>Epic 3: Content Creation & Management</from>
+      <topic>Admin Pages Structure</topic>
+      <description>Admin pages are already in app/admin/ directory. app/admin/articles/page.tsx - Articles list (already exists). app/admin/articles/new/page.tsx - Article creation (already exists). app/admin/articles/[id]/edit/page.tsx - Article editing (already exists). These pages will automatically use the new admin layout.</description>
+      <reference>docs/architecture.md#Project-Structure</reference>
+    </learning>
+  </learnings>
+
+  <implementation-notes>
+    <note>
+      <task>Task 1: Create Admin Layout Component</task>
+      <description>Create app/admin/layout.tsx as Server Component. Implement permission check using getServerSession. Redirect unauthenticated users to /login?callbackUrl=/admin. Redirect non-admin users to /?error=admin_required. Create layout structure: header, sidebar (navigation), main content area. Use Tailwind CSS for professional styling. Make layout responsive.</description>
+      <files>app/admin/layout.tsx</files>
+    </note>
+    <note>
+      <task>Task 2: Create Admin Navigation Component</task>
+      <description>Create navigation component (can be inline in layout or separate). Add navigation menu items: 文章管理 (/admin/articles), 媒体管理 (/admin/media), 仪表板 (/admin). Highlight current active route. Style navigation with Tailwind CSS. Make navigation responsive (mobile menu).</description>
+      <files>app/admin/layout.tsx (or components/admin/Navigation.tsx)</files>
+    </note>
+    <note>
+      <task>Task 3: Update Admin Dashboard Homepage</task>
+      <description>Update app/admin/page.tsx to use new admin layout (will happen automatically). Add welcome message and quick links. Display user information (name, email, role). Ensure page uses admin layout automatically.</description>
+      <files>app/admin/page.tsx</files>
+    </note>
+    <note>
+      <task>Task 4: Verify Middleware Protection</task>
+      <description>Verify middleware protects all /admin/* routes. Verify middleware redirects unauthenticated users to login. Verify middleware redirects non-admin users to homepage with error. Test middleware behavior for different user roles.</description>
+      <files>middleware.ts</files>
+    </note>
+    <note>
+      <task>Task 5: Implement Server Component Permission Check</task>
+      <description>In app/admin/layout.tsx, use getServerSession to check authentication. Check user role (must be ADMIN). Redirect unauthenticated users to /login?callbackUrl=/admin. Redirect non-admin users to /?error=admin_required. This provides double-check security (middleware + Server Component).</description>
+      <files>app/admin/layout.tsx</files>
+    </note>
+    <note>
+      <task>Task 6: Style Admin Layout</task>
+      <description>Design clean, professional admin layout. Use consistent color scheme (Tailwind CSS). Add header with site title/logo. Add sidebar with navigation menu. Style main content area. Ensure layout is responsive (mobile, tablet, desktop). Add hover states and transitions for better UX.</description>
+      <files>app/admin/layout.tsx</files>
+    </note>
+  </implementation-notes>
+
+</story-context>
+

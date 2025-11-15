@@ -2,6 +2,7 @@
 
 import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import TiptapEditor from "@/components/editor/TiptapEditor";
 
 /**
@@ -293,9 +294,10 @@ export default function NewArticlePage() {
         // Success - show success message and redirect
         setSuccessMessage("文章创建成功！");
         
-        // Redirect after a brief delay to show success message
+        // Redirect to articles list after a brief delay to show success message
+        // This allows users to immediately see the newly created article in the list
         setTimeout(() => {
-          router.push(`/admin/articles/${data.data.id}`);
+          router.push("/admin/articles");
         }, 1000);
       } else {
         setSubmitError("创建文章失败，请重试");
@@ -410,7 +412,15 @@ export default function NewArticlePage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">创建文章</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold">创建文章</h1>
+        <Link
+          href="/admin/articles"
+          className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          ← 返回文章列表
+        </Link>
+      </div>
 
       {/* Success message */}
       {successMessage && (

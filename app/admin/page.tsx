@@ -1,52 +1,60 @@
-import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { Role } from "@/lib/auth/permissions";
+import Link from "next/link";
 
 /**
- * Protected admin page.
+ * Admin dashboard homepage.
  * 
- * Demonstrates how to protect pages using NextAuth.js getServerSession.
- * Middleware handles authentication and role checks, but we also verify here for additional security.
+ * Displays welcome message, user information, and quick links to admin sections.
+ * Layout is automatically provided by app/admin/layout.tsx.
+ * Permission checks are handled by layout component.
  * 
- * @see middleware.ts - Middleware redirects unauthenticated users to login and blocks non-admin users
+ * @see app/admin/layout.tsx - Admin layout with permission checks
  */
 export default async function AdminPage() {
-  // Get session using NextAuth.js getServerSession
-  // This works in Server Components and verifies the JWT token
+  // Get session - layout already checks permissions, but we need session for user info
   const session = await getServerSession(authOptions);
 
-  if (!session || !session.user) {
-    // This should not happen if middleware is working correctly,
-    // but we add this check as a safety measure
-    redirect("/login?callbackUrl=/admin");
-  }
-
-  // Check if user has admin role
-  if (session.user.role !== Role.ADMIN) {
-    // User is authenticated but not admin - redirect to home with error
-    redirect("/?error=admin_required");
-  }
-
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-4">Admin Dashboard</h1>
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">Welcome, {session.user.name || session.user.email}!</h2>
-        <div className="space-y-2">
+    <div>
+      <h1 className="text-3xl font-bold mb-6">仪表板</h1>
+      
+      {/* Welcome Message */}
+      <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 className="text-xl font-semibold mb-4">
+          欢迎, {session?.user?.name || session?.user?.email || "管理员"}!
+        </h2>
+        <div className="space-y-2 text-gray-600">
           <p>
-            <strong>User ID:</strong> {session.user.id}
+            <strong>邮箱:</strong> {session?.user?.email}
           </p>
           <p>
-            <strong>Email:</strong> {session.user.email}
-          </p>
-          <p>
-            <strong>Role:</strong> {session.user.role}
+            <strong>角色:</strong> {session?.user?.role}
           </p>
         </div>
-        <p className="mt-4 text-gray-600">
-          This is a protected admin page. Only users with ADMIN role can access it.
-        </p>
+      </div>
+
+      {/* Quick Links */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Link
+          href="/admin/articles"
+          className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
+        >
+          <h3 className="text-lg font-semibold mb-2">文章管理</h3>
+          <p className="text-gray-600 text-sm">
+            创建、编辑和管理文章
+          </p>
+        </Link>
+        
+        <Link
+          href="/admin/media"
+          className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
+        >
+          <h3 className="text-lg font-semibold mb-2">媒体管理</h3>
+          <p className="text-gray-600 text-sm">
+            管理上传的媒体文件
+          </p>
+        </Link>
       </div>
     </div>
   );

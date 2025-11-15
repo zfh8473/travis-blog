@@ -2,6 +2,7 @@
 
 import { useState, useEffect, FormEvent } from "react";
 import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
 import TiptapEditor from "@/components/editor/TiptapEditor";
 
 /**
@@ -444,9 +445,10 @@ export default function EditArticlePage() {
         // Success - show success message
         setSuccessMessage("文章更新成功！");
         
-        // Optionally redirect after a brief delay
+        // Redirect to articles list after a brief delay to show success message
+        // This allows users to immediately see the updated article in the list
         setTimeout(() => {
-          router.push(`/admin/articles/${articleId}`);
+          router.push("/admin/articles");
         }, 1000);
       } else {
         setSubmitError("更新文章失败，请重试");
@@ -580,7 +582,15 @@ export default function EditArticlePage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">编辑文章</h1>
+        <div className="flex items-center gap-4">
+          <Link
+            href="/admin/articles"
+            className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            ← 返回文章列表
+          </Link>
+          <h1 className="text-3xl font-bold">编辑文章</h1>
+        </div>
         <button
           onClick={handleDelete}
           disabled={deleting || submitting}

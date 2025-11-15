@@ -1,0 +1,202 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>6</epicId>
+    <storyId>6.2</storyId>
+    <title>文章管理列表</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-15</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/6-2-文章管理列表.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>blog author</asA>
+    <iWant>to see a list of all my articles in the admin dashboard</iWant>
+    <soThat>I can quickly find and manage articles</soThat>
+    <tasks>
+      <task id="1" ac="6.2.1,6.2.4,6.2.5,6.2.6">Review and Enhance Existing Articles List Page</task>
+      <task id="2" ac="6.2.2">Implement Status Filter</task>
+      <task id="3" ac="6.2.3">Implement Search Functionality</task>
+      <task id="4" ac="6.2.7">Add Article Statistics Display</task>
+      <task id="5" ac="6.2.1">Enhance Article Display</task>
+      <task id="6" ac="6.2.2,6.2.3">Implement URL Parameter Management</task>
+      <task id="7" ac="all">Improve User Experience</task>
+      <task id="8" ac="all">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="6.2.1">Given I am logged in as an admin, When I navigate to /admin/articles, Then I see a list of all articles (published and drafts), And each article shows title, status, publish date, author, category, and tags</ac>
+    <ac id="6.2.2">Given I am viewing the articles list, When I select a status filter (all, published, drafts), Then the list is filtered to show only articles with the selected status, And the URL is updated with the filter parameter</ac>
+    <ac id="6.2.3">Given I am viewing the articles list, When I enter a search keyword in the search box, Then the list is filtered to show only articles whose title contains the keyword, And the URL is updated with the search parameter</ac>
+    <ac id="6.2.4">Given I am viewing the articles list, When I click "New Article" button, Then I am navigated to /admin/articles/new to create a new article</ac>
+    <ac id="6.2.5">Given I am viewing the articles list, When I click "Edit" on an article, Then I am navigated to /admin/articles/[id]/edit to edit the article</ac>
+    <ac id="6.2.6">Given I am viewing the articles list, When I click "Delete" on an article, Then I see a confirmation dialog, When I confirm the deletion, Then the article is deleted, And the article is removed from the list, And I see a success message</ac>
+    <ac id="6.2.7">Given I am viewing the articles list, Then I see article statistics (total articles, published articles, draft articles) displayed at the top of the page</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics.md" title="Epic 6: 后台管理界面（Admin Dashboard）" section="Story 6.2">
+        Story definition with acceptance criteria and technical notes for articles management list. Includes requirements for displaying all articles (published and drafts), status filtering, search functionality, navigation to create/edit pages, delete functionality with confirmation, and article statistics display.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-6.md" title="Tech Spec Epic 6" section="文章管理列表模块">
+        Articles management list module specification: Displays all articles list with filtering and search. Input: filter parameters, search keyword. Output: articles list, pagination info. Owner: Story 6.2.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-6.md" title="Tech Spec Epic 6" section="Story 6.2: 文章管理列表">
+        Story 6.2 workflow: User accesses /admin/articles, middleware and layout perform permission checks, load articles data from /api/articles, display articles list with status filter and search, user can navigate to create/edit pages, user can delete articles with confirmation.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-6.md" title="Tech Spec Epic 6" section="APIs and Interfaces">
+        Articles API: GET /api/articles with query params (status, categoryId, tagId, page, limit) returns paginated articles list. DELETE /api/articles/[id] deletes article. All require ADMIN role. API supports status filtering (DRAFT, PUBLISHED).
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Project Structure">
+        Next.js App Router structure: Articles list page at app/admin/articles/page.tsx (Client Component). Page automatically uses admin layout from app/admin/layout.tsx. Use Client Components for interactive features (filter, search, delete). Use useState and useEffect for state management. Use useRouter and useSearchParams for URL management.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Code Documentation">
+        JSDoc comment standards: All public functions, components, and interfaces must include JSDoc comments. Components should include @component, @param, @returns, @example tags.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/6-1-后台管理界面基础结构.md" title="Story 6.1: Admin Dashboard Foundation" section="Dev Notes">
+        Admin layout automatically applies to all pages in app/admin/ directory. No need to manually wrap pages. Permission checks are handled by layout. Navigation menu is consistent across all admin pages.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/3-1-文章数据模型和基础-API.md" title="Story 3.1: Article Data Model and API" section="Dev Notes">
+        Article data model includes: id, title, content, status (DRAFT/PUBLISHED), publishedAt, createdAt, author, category, tags. Tags are nested in ArticleTag relation. API endpoint /api/articles supports filtering by status, categoryId, tagId, and pagination.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/3-5-文章删除功能.md" title="Story 3.5: Article Deletion" section="Dev Notes">
+        Delete API endpoint at /api/articles/[id] (DELETE method) requires ADMIN role. Returns success/error response. Deletes article and cascades to ArticleTag and Comment records. Category relation is set to null.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/4-5-分页功能.md" title="Story 4.5: Pagination" section="Dev Notes">
+        Pagination pattern: Use service-side pagination with page and limit parameters. Display pagination info (current page, total pages, total items). Can reference pagination implementation from public articles list page.
+      </doc>
+    </docs>
+    <code>
+      <artifact path="app/admin/articles/page.tsx" kind="component" symbol="ArticlesListPage" lines="1-356" reason="Existing articles list page. Client component displaying all articles in table layout with edit/delete actions. Currently loads all articles without filtering or search. Has delete functionality with confirmation dialog. Missing: status filter, search functionality, article statistics, URL parameter management. Automatically uses admin layout from Story 6.1." />
+      <artifact path="app/api/articles/route.ts" kind="api" symbol="GET" lines="31-140" reason="GET /api/articles endpoint. Returns paginated articles list with optional filtering by status, categoryId, tagId. Supports pagination with page and limit params. Requires ADMIN role. Returns articles with author, category, tags. Does NOT support search parameter - need to check if search should be added to API or implemented client-side." />
+      <artifact path="app/api/articles/[id]/route.ts" kind="api" symbol="DELETE" lines="363-422" reason="DELETE /api/articles/[id] endpoint. Deletes article and cascades to ArticleTag and Comment records. Requires ADMIN role. Returns success/error response. Used by articles list page for delete functionality." />
+      <artifact path="app/admin/layout.tsx" kind="component" symbol="AdminLayout" lines="1-81" reason="Admin layout Server Component from Story 6.1. Provides unified admin layout with navigation menu. Handles permission checks automatically. All pages in app/admin/ directory automatically use this layout. Articles list page inherits this layout." />
+      <artifact path="components/admin/AdminNavigation.tsx" kind="component" symbol="AdminNavigation" reason="Admin navigation component from Story 6.1. Provides navigation menu with links to different admin sections (文章管理, 媒体管理, 仪表板). Highlights current active route. Responsive mobile menu." />
+      <artifact path="prisma/schema.prisma" kind="schema" symbol="Article" lines="100-130" reason="Article Prisma model. Fields: id, title, content, excerpt, slug, status (DRAFT/PUBLISHED), categoryId, authorId, publishedAt, createdAt, updatedAt. Relations: author (User), category (Category), tags (ArticleTag[]), comments (Comment[]). Status enum: DRAFT, PUBLISHED." />
+      <artifact path="lib/auth/permissions.ts" kind="utility" symbol="requireAdmin" lines="121-143" reason="Requires admin role for API routes. Returns 401 if not authenticated, 403 if not admin, null if user is admin. Used in articles API route handlers." />
+      <artifact path="middleware.ts" kind="middleware" symbol="middleware" reason="Next.js middleware for JWT authentication. Protects /admin/* routes, checks authentication and ADMIN role. Redirects unauthenticated users to login. Redirects non-admin users to homepage with error. Attaches user information to request headers." />
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="next" version="16.0.2" />
+        <package name="react" version="19.2.0" />
+        <package name="react-dom" version="19.2.0" />
+        <package name="next-auth" version="^4.24.13" />
+        <package name="@prisma/client" version="^6.19.0" />
+        <package name="date-fns" version="^4.1.0" />
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>
+      <type>architecture</type>
+      <description>Must use Next.js App Router Client Component pattern for articles list page. Use useState and useEffect for state management. Use useRouter and useSearchParams for URL parameter management.</description>
+      <source>docs/architecture.md#Project-Structure</source>
+    </constraint>
+    <constraint>
+      <type>api</type>
+      <description>Must use existing /api/articles endpoint. API supports status filter (DRAFT, PUBLISHED) via query parameter. API does NOT currently support search parameter - need to implement client-side filtering or add search to API.</description>
+      <source>app/api/articles/route.ts#GET</source>
+    </constraint>
+    <constraint>
+      <type>security</type>
+      <description>All admin routes are protected by middleware and admin layout. Articles list page automatically inherits permission checks from admin layout. No need to add additional permission checks.</description>
+      <source>.bmad-ephemeral/stories/6-1-后台管理界面基础结构.md</source>
+    </constraint>
+    <constraint>
+      <type>ui</type>
+      <description>Must use Tailwind CSS for styling. Follow existing admin layout design patterns. Ensure responsive design for mobile devices. Table layout may need card layout for mobile.</description>
+      <source>docs/architecture.md#UI-Design-Patterns</source>
+    </constraint>
+    <constraint>
+      <type>code-quality</type>
+      <description>All public functions and components must include JSDoc comments with @component, @param, @returns, @example tags.</description>
+      <source>docs/architecture.md#Code-Documentation</source>
+    </constraint>
+  </constraints>
+
+  <implementation-notes>
+    <note>
+      <category>existing-code</category>
+      <content>Articles list page already exists at app/admin/articles/page.tsx. Current implementation displays all articles in table layout with edit/delete actions. Has delete confirmation dialog. Missing features: status filter, search functionality, article statistics, URL parameter management.</content>
+    </note>
+    <note>
+      <category>api-limitation</category>
+      <content>GET /api/articles endpoint supports status filter (status=DRAFT or status=PUBLISHED) but does NOT support search parameter. Need to decide: add search to API (server-side) or implement client-side filtering. For MVP, client-side filtering may be sufficient if article count is low.</content>
+    </note>
+    <note>
+      <category>url-state</category>
+      <content>Use Next.js useSearchParams hook to read URL parameters on page load. Use router.push() or router.replace() to update URL when filter/search changes. This allows bookmarking and sharing filtered views. Preserve other parameters when updating.</content>
+    </note>
+    <note>
+      <category>statistics</category>
+      <content>Article statistics should be calculated from current articles list (after filtering). Display: Total articles, Published articles, Draft articles. Update statistics when articles are filtered or deleted. Display as cards or summary section at top of page.</content>
+    </note>
+    <note>
+      <category>search-debounce</category>
+      <content>If implementing client-side search, use debounce (300-500ms delay) to avoid excessive filtering on every keystroke. If adding server-side search to API, debounce is still recommended to reduce API calls.</content>
+    </note>
+    <note>
+      <category>responsive-design</category>
+      <content>Table layout may not work well on mobile devices. Consider card layout for mobile or responsive table with horizontal scroll. Use Tailwind CSS responsive classes (sm:, md:, lg:).</content>
+    </note>
+    <note>
+      <category>delete-confirmation</category>
+      <content>Current implementation uses window.confirm() for delete confirmation. Consider using a modal component for better UX (optional enhancement). Show article title in confirmation message. Disable delete button while deletion is in progress.</content>
+    </note>
+    <note>
+      <category>tags-display</category>
+      <content>Article tags are available in article data but not currently displayed in table. Need to add tags column or display tags as badges/chips in title or separate column. Tags are nested in ArticleTag relation, transformed to simple array in API response.</content>
+    </note>
+  </implementation-notes>
+
+  <learnings>
+    <learning>
+      <from>Story 6.1: Admin Dashboard Foundation</from>
+      <content>Admin layout automatically applies to all pages in app/admin/ directory. No need to manually wrap pages. Permission checks are handled by layout. Navigation menu is consistent across all admin pages. Articles list page automatically uses admin layout.</content>
+    </learning>
+    <learning>
+      <from>Story 3.1: Article Data Model and API</from>
+      <content>Articles API endpoint /api/articles supports filtering by status (DRAFT, PUBLISHED), categoryId, tagId, and pagination (page, limit). Returns articles with author, category, tags. API requires ADMIN role. Tags are nested in ArticleTag relation, transformed to simple array in API response.</content>
+    </learning>
+    <learning>
+      <from>Story 3.5: Article Deletion</from>
+      <content>Delete API endpoint at /api/articles/[id] requires ADMIN role. Returns success/error response. Deletes article and cascades to ArticleTag and Comment records. Current implementation uses window.confirm() for confirmation.</content>
+    </learning>
+    <learning>
+      <from>Story 4.5: Pagination</from>
+      <content>Pagination pattern: Use service-side pagination with page and limit parameters. Display pagination info (current page, total pages, total items). Can reference pagination implementation from public articles list page.</content>
+    </learning>
+  </learnings>
+
+  <test-strategy>
+    <unit-tests>
+      <test>Test articles list component rendering with empty state</test>
+      <test>Test articles list component rendering with articles data</test>
+      <test>Test status filter functionality (all, published, drafts)</test>
+      <test>Test search functionality (client-side or API-based)</test>
+      <test>Test delete confirmation dialog</test>
+      <test>Test delete functionality and optimistic update</test>
+      <test>Test article statistics calculation and display</test>
+      <test>Test URL parameter reading and updating</test>
+      <test>Test navigation buttons (New Article, Edit)</test>
+    </unit-tests>
+    <integration-tests>
+      <test>Test articles API call with status filter</test>
+      <test>Test articles API call with search parameter (if added)</test>
+      <test>Test delete API call</test>
+      <test>Test permission checks (middleware + layout)</test>
+    </integration-tests>
+    <e2e-tests>
+      <test>Test complete articles management flow: view list → filter by status → search → edit article → delete article</test>
+      <test>Test delete confirmation and deletion flow</test>
+      <test>Test navigation from list to create/edit pages</test>
+      <test>Test URL parameter persistence on page refresh</test>
+    </e2e-tests>
+  </test-strategy>
+
+</story-context>
+

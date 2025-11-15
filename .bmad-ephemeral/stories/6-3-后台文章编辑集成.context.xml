@@ -1,0 +1,196 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>6</epicId>
+    <storyId>6.3</storyId>
+    <title>后台文章编辑集成</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-15</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/6-3-后台文章编辑集成.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>blog author</asA>
+    <iWant>to create and edit articles within the admin dashboard</iWant>
+    <soThat>I can manage my content with a consistent admin interface</soThat>
+    <tasks>
+      <task id="1" ac="6.3.1,6.3.3">Verify Admin Layout Integration</task>
+      <task id="2" ac="6.3.5">Add Back to Articles List Navigation</task>
+      <task id="3" ac="6.3.1,6.3.2">Verify Article Creation Flow</task>
+      <task id="4" ac="6.3.3,6.3.4">Verify Article Edit Flow</task>
+      <task id="5" ac="all">Improve User Experience</task>
+      <task id="6" ac="all">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="6.3.1">Given I am logged in as an admin, When I click "New Article" in the admin dashboard, Then I am taken to /admin/articles/new, And I see the article creation form with Tiptap editor, And the form is displayed within the admin layout with navigation menu</ac>
+    <ac id="6.3.2">Given I am creating a new article, When I fill in the form and click "Save as Draft" or "Publish", Then the article is saved, And I am redirected to the articles list or article detail page, And I see a success message</ac>
+    <ac id="6.3.3">Given I am logged in as an admin, When I click "Edit" on an article in the articles list, Then I am taken to /admin/articles/[id]/edit, And I see the article edit form with pre-filled data, And the form is displayed within the admin layout with navigation menu</ac>
+    <ac id="6.3.4">Given I am editing an article, When I make changes and save, Then the article is updated in the database, And I see a success message, And I can navigate back to the articles list using the navigation menu</ac>
+    <ac id="6.3.5">Given I am on any admin article page (new or edit), When I view the page, Then I see a "Back to Articles List" link or button, And clicking it navigates me back to /admin/articles</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics.md" title="Epic 6: 后台管理界面（Admin Dashboard）" section="Story 6.3">
+        Story definition with acceptance criteria for integrating article creation and editing pages into admin dashboard. Includes requirements for admin layout integration, navigation menu visibility, and "Back to Articles List" navigation link.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-6.md" title="Tech Spec Epic 6" section="Story 6.3: 后台文章编辑集成">
+        Story 6.3 workflow: User clicks "New Article" or "Edit" from articles list, navigates to creation/edit page, sees form within admin layout with navigation menu, can create/edit article, sees success message, can navigate back to articles list.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-6.md" title="Tech Spec Epic 6" section="文章创建集成模块">
+        Article creation integration module: Displays article creation form within admin layout. Input: form data (title, content, excerpt, category, tags, status). Output: created article, redirect to articles list. Owner: Story 6.3.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-6.md" title="Tech Spec Epic 6" section="文章编辑集成模块">
+        Article edit integration module: Displays article edit form with pre-filled data within admin layout. Input: article ID, form data. Output: updated article, redirect to articles list. Owner: Story 6.3.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Project Structure">
+        Next.js App Router structure: Article creation page at app/admin/articles/new/page.tsx (Client Component), article edit page at app/admin/articles/[id]/edit/page.tsx (Client Component). Both pages automatically use admin layout from app/admin/layout.tsx. Use Client Components for interactive features (forms, editors).
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Code Documentation">
+        JSDoc comment standards: All public functions, components, and interfaces must include JSDoc comments. Components should include @component, @param, @returns, @example tags.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/6-1-后台管理界面基础结构.md" title="Story 6.1: Admin Dashboard Foundation" section="Dev Notes">
+        Admin layout automatically applies to all pages in app/admin/ directory. No need to manually wrap pages. Permission checks are handled by layout. Navigation menu is consistent across all admin pages.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/6-2-文章管理列表.md" title="Story 6.2: Articles Management List" section="Dev Notes">
+        Articles list page has "New Article" button linking to /admin/articles/new and "Edit" button linking to /admin/articles/[id]/edit. Admin layout automatically applies to all admin pages.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/3-3-文章创建功能.md" title="Story 3.3: Article Creation" section="Dev Notes">
+        Article creation page already exists at app/admin/articles/new/page.tsx. Uses TiptapEditor component for rich text editing. Has complete form with title, content, excerpt, category, tags, status. Handles form submission and validation.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/3-4-文章编辑功能.md" title="Story 3.4: Article Editing" section="Dev Notes">
+        Article edit page already exists at app/admin/articles/[id]/edit/page.tsx. Pre-fills form with existing article data. Uses TiptapEditor component. Handles form submission and validation.
+      </doc>
+    </docs>
+    <code>
+      <artifact path="app/admin/articles/new/page.tsx" kind="component" symbol="NewArticlePage" reason="Existing article creation page. Client component with Tiptap editor, form fields (title, content, excerpt, category, tags, status), form validation, and submission handling. Needs to verify admin layout integration and add 'Back to Articles List' navigation link." />
+      <artifact path="app/admin/articles/[id]/edit/page.tsx" kind="component" symbol="EditArticlePage" reason="Existing article edit page. Client component that loads article data, pre-fills form with Tiptap editor, handles form validation and submission. Needs to verify admin layout integration and add 'Back to Articles List' navigation link." />
+      <artifact path="app/admin/layout.tsx" kind="component" symbol="AdminLayout" lines="1-81" reason="Admin layout Server Component from Story 6.1. Provides unified admin layout with navigation menu. Handles permission checks automatically. All pages in app/admin/ directory automatically use this layout. Article creation and edit pages inherit this layout." />
+      <artifact path="components/admin/AdminNavigation.tsx" kind="component" symbol="AdminNavigation" reason="Admin navigation component from Story 6.1. Provides navigation menu with links to different admin sections (文章管理, 媒体管理, 仪表板). Highlights current active route. Should be visible on article creation and edit pages." />
+      <artifact path="app/admin/articles/page.tsx" kind="component" symbol="ArticlesListPage" lines="364-369,518-523" reason="Articles list page from Story 6.2. Has 'New Article' button linking to /admin/articles/new and 'Edit' button linking to /admin/articles/[id]/edit. Navigation from this page to create/edit pages should work correctly." />
+      <artifact path="app/api/articles/route.ts" kind="api" symbol="POST" lines="175-352" reason="POST /api/articles endpoint. Creates new article with title, content, excerpt, category, tags, status. Requires ADMIN role. Returns created article with ID. Used by article creation page." />
+      <artifact path="app/api/articles/[id]/route.ts" kind="api" symbol="PUT" lines="150-300" reason="PUT /api/articles/[id] endpoint. Updates existing article with provided data. Requires ADMIN role. Returns updated article. Used by article edit page." />
+      <artifact path="components/editor/TiptapEditor.tsx" kind="component" symbol="TiptapEditor" reason="Tiptap rich text editor component. Used in both article creation and edit pages. Supports rich text editing, image upload, and content formatting. Takes initialContent prop for editing existing articles." />
+      <artifact path="lib/auth/permissions.ts" kind="utility" symbol="requireAdmin" reason="Requires admin role for API routes. Returns 401 if not authenticated, 403 if not admin, null if user is admin. Used in articles API route handlers." />
+      <artifact path="middleware.ts" kind="middleware" symbol="middleware" reason="Next.js middleware for JWT authentication. Protects /admin/* routes, checks authentication and ADMIN role. Redirects unauthenticated users to login. Redirects non-admin users to homepage with error. Attaches user information to request headers." />
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="next" version="16.0.2" />
+        <package name="react" version="19.2.0" />
+        <package name="react-dom" version="19.2.0" />
+        <package name="next-auth" version="^4.24.13" />
+        <package name="@tiptap/react" version="^3.10.7" />
+        <package name="@tiptap/starter-kit" version="^3.10.7" />
+        <package name="@tiptap/extension-image" version="^3.10.7" />
+        <package name="@tiptap/extension-placeholder" version="^3.10.7" />
+        <package name="@prisma/client" version="^6.19.0" />
+        <package name="date-fns" version="^4.1.0" />
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>
+      <type>architecture</type>
+      <description>Must use Next.js App Router Client Component pattern for article creation and edit pages. Pages automatically use admin layout from app/admin/layout.tsx. No need to manually wrap pages in layout component.</description>
+      <source>docs/architecture.md#Project-Structure</source>
+    </constraint>
+    <constraint>
+      <type>api</type>
+      <description>Must use existing POST /api/articles endpoint for article creation and PUT /api/articles/[id] endpoint for article updates. Both require ADMIN role.</description>
+      <source>app/api/articles/route.ts, app/api/articles/[id]/route.ts</source>
+    </constraint>
+    <constraint>
+      <type>security</type>
+      <description>All admin routes are protected by middleware and admin layout. Article creation and edit pages automatically inherit permission checks from admin layout. No need to add additional permission checks.</description>
+      <source>.bmad-ephemeral/stories/6-1-后台管理界面基础结构.md</source>
+    </constraint>
+    <constraint>
+      <type>ui</type>
+      <description>Must use Tailwind CSS for styling. Follow existing admin layout design patterns. Ensure consistent navigation patterns across admin pages. Use Next.js Link component for navigation.</description>
+      <source>docs/architecture.md#UI-Design-Patterns</source>
+    </constraint>
+    <constraint>
+      <type>code-quality</type>
+      <description>All public functions and components must include JSDoc comments with @component, @param, @returns, @example tags.</description>
+      <source>docs/architecture.md#Code-Documentation</source>
+    </constraint>
+  </constraints>
+
+  <implementation-notes>
+    <note>
+      <category>existing-code</category>
+      <content>Article creation and edit pages already exist at app/admin/articles/new/page.tsx and app/admin/articles/[id]/edit/page.tsx. Both pages are Client Components with complete form functionality. They automatically use admin layout from Story 6.1. This story primarily focuses on verifying integration and adding navigation improvements.</content>
+    </note>
+    <note>
+      <category>admin-layout</category>
+      <content>All pages in app/admin/ directory automatically inherit the admin layout from app/admin/layout.tsx. No need to manually wrap pages. The layout provides navigation menu and permission checks. Article creation and edit pages should already have the layout applied.</content>
+    </note>
+    <note>
+      <category>navigation</category>
+      <content>Need to add "Back to Articles List" link/button to both article creation and edit pages. Link should navigate to /admin/articles. Should be placed in a visible location (e.g., top of page, near form title). Use Next.js Link component for navigation.</content>
+    </note>
+    <note>
+      <category>form-handling</category>
+      <content>Article creation and edit pages already have complete form handling including validation, submission, error handling, and success messages. Need to verify these work correctly within admin layout context.</content>
+    </note>
+    <note>
+      <category>tiptap-editor</category>
+      <content>TiptapEditor component is already integrated in both pages. Need to verify editor loads and functions correctly within admin layout. Editor supports rich text editing, image upload, and content formatting.</content>
+    </note>
+    <note>
+      <category>api-integration</category>
+      <content>Article creation uses POST /api/articles endpoint, article editing uses PUT /api/articles/[id] endpoint. Both APIs require ADMIN role and are already implemented. Need to verify API calls work correctly from pages within admin layout.</content>
+    </note>
+  </implementation-notes>
+
+  <learnings>
+    <learning>
+      <from>Story 6.1: Admin Dashboard Foundation</from>
+      <content>Admin layout automatically applies to all pages in app/admin/ directory. No need to manually wrap pages. Permission checks are handled by layout. Navigation menu is consistent across all admin pages. Article creation and edit pages automatically use admin layout.</content>
+    </learning>
+    <learning>
+      <from>Story 6.2: Articles Management List</from>
+      <content>Articles list page has "New Article" button linking to /admin/articles/new and "Edit" button linking to /admin/articles/[id]/edit. Admin layout automatically applies to all admin pages. Navigation from articles list to create/edit pages should work correctly.</content>
+    </learning>
+    <learning>
+      <from>Story 3.3: Article Creation</from>
+      <content>Article creation page already exists at app/admin/articles/new/page.tsx. Uses TiptapEditor component for rich text editing. Has complete form with title, content, excerpt, category, tags, status. Handles form submission and validation. Redirects to article detail page after creation.</content>
+    </learning>
+    <learning>
+      <from>Story 3.4: Article Editing</from>
+      <content>Article edit page already exists at app/admin/articles/[id]/edit/page.tsx. Pre-fills form with existing article data. Uses TiptapEditor component. Handles form submission and validation. Updates article in database.</content>
+    </learning>
+  </learnings>
+
+  <test-strategy>
+    <unit-tests>
+      <test>Test "Back to Articles List" navigation link renders on article creation page</test>
+      <test>Test "Back to Articles List" navigation link renders on article edit page</test>
+      <test>Test "Back to Articles List" link navigates to /admin/articles</test>
+      <test>Test admin layout integration (navigation menu visible on create/edit pages)</test>
+      <test>Test article creation form displays correctly within admin layout</test>
+      <test>Test article edit form displays correctly within admin layout</test>
+      <test>Test Tiptap editor loads correctly within admin layout</test>
+    </unit-tests>
+    <integration-tests>
+      <test>Test article creation flow within admin layout (form submission, API call, redirect)</test>
+      <test>Test article edit flow within admin layout (form pre-fill, submission, API call, redirect)</test>
+      <test>Test navigation from articles list to create page</test>
+      <test>Test navigation from articles list to edit page</test>
+      <test>Test permission checks (middleware + layout) for create/edit pages</test>
+    </integration-tests>
+    <e2e-tests>
+      <test>Test complete article creation flow: navigate from articles list → create page → fill form → submit → redirect → verify success</test>
+      <test>Test complete article edit flow: navigate from articles list → edit page → modify form → submit → redirect → verify success</test>
+      <test>Test "Back to Articles List" navigation from create page</test>
+      <test>Test "Back to Articles List" navigation from edit page</test>
+      <test>Test admin layout navigation menu visibility on create/edit pages</test>
+    </e2e-tests>
+  </test-strategy>
+
+</story-context>
+

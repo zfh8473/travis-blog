@@ -63,9 +63,9 @@ development_status:
   3-4-文章编辑功能: done
   3-5-文章删除功能: done
   3-6-文章分类管理: done
-  3-7-文章标签管理: review
-  3-8-媒体管理功能: backlog
-  epic-3-retrospective: optional
+  3-7-文章标签管理: done
+  3-8-媒体管理功能: done
+  epic-3-retrospective: done
 
   # Epic 4: 内容展示（Content Display）
   epic-4: backlog

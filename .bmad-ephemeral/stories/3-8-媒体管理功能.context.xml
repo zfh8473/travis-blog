@@ -1,0 +1,232 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.8</storyId>
+    <title>媒体管理功能</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-14</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/3-8-媒体管理功能.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>blog author</asA>
+    <iWant>to manage uploaded media files</iWant>
+    <soThat>I can view and delete media files I've uploaded</soThat>
+    <tasks>
+      <task id="1" ac="3.8.1">Create Media Library API Endpoint</task>
+      <task id="2" ac="3.8.4,3.8.5">Create Media Delete API Endpoint</task>
+      <task id="3" ac="3.8.5">Implement File Usage Check</task>
+      <task id="4" ac="3.8.1">Create Media Library Page Component</task>
+      <task id="5" ac="3.8.1">Implement Media File List Display</task>
+      <task id="6" ac="3.8.2">Implement Image Preview</task>
+      <task id="7" ac="3.8.3">Implement Delete Confirmation Dialog</task>
+      <task id="8" ac="3.8.4">Implement File Deletion</task>
+      <task id="9" ac="3.8.5">Implement File-in-Use Warning</task>
+      <task id="10" ac="3.8.1">Add Pagination Support</task>
+      <task id="11" ac="3.8.1">Add Search/Filter Functionality (Optional)</task>
+      <task id="12" ac="all">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="3.8.1">Given I am logged in as an admin, When I navigate to the media library page, Then I see a list of all uploaded media files with thumbnail (for images), filename, upload date, and file size</ac>
+    <ac id="3.8.2">I can preview images by clicking on them</ac>
+    <ac id="3.8.3">When I click delete on a media file, Then I see a confirmation dialog</ac>
+    <ac id="3.8.4">When I confirm the deletion, Then the file is removed from storage, the file is removed from the media library, and I see a success message</ac>
+    <ac id="3.8.5">When I try to delete a file that is used in an article, Then I see a warning message indicating the file is in use, and I can choose to delete anyway or cancel</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics.md" title="Epic 3: 内容创作和管理" section="Story 3.8">
+        Story definition with acceptance criteria and technical notes for media management functionality. Includes requirements for media library page, file list display with thumbnails, image preview, file deletion with confirmation, and file usage check before deletion.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-3.md" title="Tech Spec Epic 3" section="Media Library API Endpoints">
+        Media library API endpoints specification: GET /api/media to list all media files with pagination, DELETE /api/media/[path] to delete media files, requires ADMIN role, checks file usage before deletion, returns unified response format.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-3.md" title="Tech Spec Epic 3" section="Story 3.8: 媒体管理功能">
+        Acceptance criteria for media management: AC-3.8.1 through AC-3.8.5 covering media list display, image preview, delete confirmation, file deletion, and file-in-use warning.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Project Structure">
+        Next.js App Router structure: Admin pages in app/admin/ directory, media pages in app/admin/media/ directory, use "use client" directive for client components, follow kebab-case for files and PascalCase for components.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Error Handling">
+        Error handling patterns: Follow unified error format, display user-friendly error messages, handle validation errors inline, show toast notifications for success/error, handle authentication errors (401, 403), handle network errors.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Storage Integration">
+        Storage abstraction layer integration: Use storage abstraction layer for all file operations, use getStorage() factory function, use list(), delete(), getUrl() methods, do not access file system directly.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/1-5-存储抽象层实现.md" title="Story 1.5: Storage Abstraction Layer" section="Dev Notes">
+        Storage abstraction layer is fully implemented with StorageInterface containing upload, delete, list, getUrl methods. LocalStorage implementation stores files in public/uploads/ directory. FileMetadata includes path, name, size, mimeType, createdAt.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/3-1-文章数据模型和基础-API.md" title="Story 3.1: Article Data Model and Basic API" section="Dev Notes">
+        Article model includes content field storing HTML (may contain image URLs). Can query articles to check file usage. Article API endpoints available for querying article content.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/3-2-Tiptap-编辑器集成.md" title="Story 3.2: Tiptap Editor Integration" section="Dev Notes">
+        Image upload API POST /api/upload is available, files are uploaded to public/uploads/ via storage abstraction layer, files are accessible at /uploads/{filename} URL.
+      </doc>
+    </docs>
+    <code>
+      <artifact path="lib/storage/interface.ts" kind="interface" symbol="StorageInterface" lines="1-125" reason="Storage abstraction layer interface. Defines contract for storage implementations with methods: upload, delete, list, getUrl. FileMetadata type includes path, name, size, mimeType, createdAt." />
+      <artifact path="lib/storage/local.ts" kind="implementation" symbol="LocalStorage" lines="1-260" reason="Local file system storage implementation. Stores files in public/uploads/ directory. Implements StorageInterface with upload, delete, list, getUrl methods. Files accessible at /uploads/{filename} URL." />
+      <artifact path="lib/storage/index.ts" kind="factory" symbol="getStorage" lines="1-60" reason="Storage factory function. Returns storage instance based on STORAGE_TYPE environment variable. Defaults to LocalStorage. Implements factory pattern for switching storage backends." />
+      <artifact path="lib/auth/permissions.ts" kind="middleware" symbol="requireAdmin" lines="102-143" reason="Permission check function for ADMIN role. Returns NextResponse with 401 or 403 error if requirements not met, null if user is admin. Used for authorization checks in API routes." />
+      <artifact path="lib/auth/middleware.ts" kind="middleware" symbol="getUserFromHeaders" lines="55-76" reason="Middleware helper function to get authenticated user from request headers. Returns user information (id, email, name, role) or null if not present. Used for authentication checks." />
+      <artifact path="prisma/schema.prisma" kind="schema" symbol="Article" lines="118-140" reason="Article data model definition. Includes content field (String @db.Text) storing HTML content which may contain image URLs. Can query articles to check if file is referenced in content." />
+      <artifact path="app/api/upload/route.ts" kind="controller" symbol="POST" lines="1-150" reason="Image upload API endpoint. Validates file type and size, uploads to storage abstraction layer, returns image URL. Files stored in public/uploads/ directory." />
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="next" version="16.0.2" />
+        <package name="react" version="19.2.0" />
+        <package name="react-dom" version="19.2.0" />
+        <package name="@prisma/client" version="^6.19.0" />
+        <package name="next-auth" version="^4.24.13" />
+        <package name="date-fns" version="latest" />
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>
+      <name>Next.js App Router</name>
+      <description>Use Next.js App Router structure for pages. Page component should be at app/admin/media/page.tsx. Use "use client" directive for client-side interactive components. Follow Next.js 16 patterns.</description>
+      <source>docs/architecture.md#Project-Structure</source>
+    </constraint>
+    <constraint>
+      <name>API Pattern</name>
+      <description>Use Next.js API Routes. Follow unified error response format: { success: false, error: { message: string, code: string } }. Use HTTP status codes: 200 (Success), 400 (Bad Request), 401 (Unauthorized), 403 (Forbidden), 404 (Not Found), 500 (Internal Server Error).</description>
+      <source>docs/architecture.md#API-Contracts</source>
+    </constraint>
+    <constraint>
+      <name>Storage Abstraction</name>
+      <description>Use storage abstraction layer for all file operations. Use getStorage() factory function to get storage instance. Use list(), delete(), getUrl() methods. Do not access file system directly. Storage abstraction allows future migration to cloud storage.</description>
+      <source>lib/storage/index.ts</source>
+    </constraint>
+    <constraint>
+      <name>Authentication</name>
+      <description>All media management operations require ADMIN role. Use requireAdmin function in API routes. Protect page with middleware. Redirect to login if not authenticated. All API calls require ADMIN role.</description>
+      <source>lib/auth/permissions.ts</source>
+    </constraint>
+    <constraint>
+      <name>Error Handling</name>
+      <description>Follow unified error format. Display user-friendly error messages. Handle API errors gracefully. Show toast notifications for success/error. Handle authentication errors (401, 403). Handle network errors.</description>
+      <source>docs/architecture.md#Error-Handling</source>
+    </constraint>
+    <constraint>
+      <name>File Usage Check</name>
+      <description>Before deleting a file, check if it is used in any article. Search article content (HTML) for file URL or path. File URLs may be in different formats: /uploads/filename.jpg, uploads/filename.jpg, full URL. Use regex or string matching to find file references. Query all articles to check usage.</description>
+      <source>prisma/schema.prisma#Article-model</source>
+    </constraint>
+    <constraint>
+      <name>File Metadata Display</name>
+      <description>Format file size: Convert bytes to KB, MB, GB. Format upload date: Use date-fns or similar library. Show file type icon for non-image files. Display filename, upload date, and file size for each file.</description>
+      <source>lib/storage/interface.ts#FileMetadata</source>
+    </constraint>
+    <constraint>
+      <name>Image Thumbnails</name>
+      <description>For images: Show thumbnail using file URL. Use Next.js Image component for optimization. Handle image loading errors. Show placeholder for non-image files. Display images in grid or list layout.</description>
+      <source>components/</source>
+    </constraint>
+    <constraint>
+      <name>Pagination</name>
+      <description>If many files, implement pagination. Default page size: 20-50 files per page. Server-side pagination via API query parameters (page, limit). Display pagination info (current page, total pages, total files).</description>
+      <source>.bmad-ephemeral/stories/tech-spec-epic-3.md#Media-Library-API-Endpoints</source>
+    </constraint>
+    <constraint>
+      <name>File Deletion</name>
+      <description>Always check file usage before deletion. Show warning if file is in use. Allow force delete (with warning). Remove file from UI immediately after successful deletion. Use storage abstraction layer delete() method.</description>
+      <source>lib/storage/interface.ts#delete-method</source>
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>GET /api/media</name>
+      <kind>REST endpoint</kind>
+      <signature>GET /api/media?page=1&amp;limit=20
+Authentication: Required (ADMIN role)
+Query Parameters: page (optional, default 1), limit (optional, default 20)
+Response (200): { success: true, data: { files: MediaFile[], pagination: { page: number, limit: number, total: number, totalPages: number } } }
+Error Responses: 401 (Unauthorized), 403 (Forbidden), 500 (Internal Server Error)</signature>
+      <path>app/api/media/route.ts (to be created)</path>
+    </interface>
+    <interface>
+      <name>DELETE /api/media/[path]</name>
+      <kind>REST endpoint</kind>
+      <signature>DELETE /api/media/[path]
+Authentication: Required (ADMIN role)
+Path Parameter: path (URL decoded file path, e.g., "uploads/filename.jpg")
+Response (200): { success: true, message: "File deleted successfully" }
+Error Responses: 400 (File is in use), 401 (Unauthorized), 403 (Forbidden), 404 (File not found), 500 (Internal Server Error)
+File-in-use Response: { success: false, error: { message: "File is in use", code: "FILE_IN_USE", inUse: true } }</signature>
+      <path>app/api/media/[path]/route.ts (to be created)</path>
+    </interface>
+    <interface>
+      <name>StorageInterface</name>
+      <kind>TypeScript Interface</kind>
+      <signature>StorageInterface {
+  upload(file: File | Buffer, path?: string): Promise&lt;string&gt;;
+  delete(path: string): Promise&lt;void&gt;;
+  list(prefix?: string): Promise&lt;FileMetadata[]&gt;;
+  getUrl(path: string): Promise&lt;string&gt;;
+}
+FileMetadata {
+  path: string;
+  name: string;
+  size: number;
+  mimeType: string;
+  createdAt: Date;
+}</signature>
+      <path>lib/storage/interface.ts</path>
+    </interface>
+    <interface>
+      <name>getStorage</name>
+      <kind>Factory Function</kind>
+      <signature>getStorage(): StorageInterface
+Returns storage instance based on STORAGE_TYPE environment variable. Defaults to LocalStorage. Implements factory pattern for switching storage backends.</signature>
+      <path>lib/storage/index.ts</path>
+    </interface>
+    <interface>
+      <name>requireAdmin</name>
+      <kind>Permission Check Function</kind>
+      <signature>requireAdmin(user: UserInfo | null): NextResponse | null
+Returns NextResponse with 401 or 403 error if requirements not met, null if user is admin. Used for authorization checks in API routes.</signature>
+      <path>lib/auth/permissions.ts</path>
+    </interface>
+    <interface>
+      <name>getUserFromHeaders</name>
+      <kind>Middleware Helper Function</kind>
+      <signature>getUserFromHeaders(headers: Headers): { id: string, email: string, name: string | null, role: string } | null
+Returns user information from request headers, or null if not present. Used for authentication checks.</signature>
+      <path>lib/auth/middleware.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Testing uses Jest for unit and integration tests, Playwright for E2E tests. Test files should be in tests/__tests__/unit/ for unit tests, tests/__tests__/integration/ for integration tests, and tests/e2e/ for E2E tests. Follow existing test patterns from previous stories. Use React Testing Library for component tests. Mock API calls in tests. Test file list display, image preview, delete confirmation, file deletion, and file-in-use warning.</standards>
+    <locations>
+      <location>tests/__tests__/unit/</location>
+      <location>tests/__tests__/integration/</location>
+      <location>tests/e2e/</location>
+    </locations>
+    <ideas>
+      <test ac="3.8.1">Test media library page renders with file list displaying thumbnails (for images), filename, upload date, and file size</test>
+      <test ac="3.8.1">Test GET /api/media endpoint returns file list with pagination</test>
+      <test ac="3.8.1">Test file metadata formatting (file size in KB/MB/GB, date formatting)</test>
+      <test ac="3.8.2">Test image preview modal opens when clicking on image thumbnail</test>
+      <test ac="3.8.2">Test image preview modal closes on close button or ESC key</test>
+      <test ac="3.8.3">Test delete confirmation dialog appears when clicking delete button</test>
+      <test ac="3.8.4">Test file deletion removes file from storage and UI after confirmation</test>
+      <test ac="3.8.4">Test DELETE /api/media/[path] endpoint deletes file successfully</test>
+      <test ac="3.8.4">Test success message is displayed after file deletion</test>
+      <test ac="3.8.5">Test file usage check detects file references in article content</test>
+      <test ac="3.8.5">Test file-in-use warning dialog appears when trying to delete used file</test>
+      <test ac="3.8.5">Test force delete option allows deletion even when file is in use</test>
+      <test ac="3.8.5">Test DELETE /api/media/[path] endpoint returns FILE_IN_USE error when file is used</test>
+      <test ac="all">E2E test: Complete media management flow from viewing files to deleting with usage check</test>
+    </ideas>
+  </tests>
+</story-context>
+

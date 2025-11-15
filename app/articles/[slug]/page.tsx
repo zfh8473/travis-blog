@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { prisma } from "@/lib/db/prisma";
 import ArticleDetail from "@/components/article/ArticleDetail";
+import CommentList, { CommentListLoading } from "@/components/comment/CommentList";
+import CommentForm from "@/components/comment/CommentForm";
 
 /**
  * Article interface for detail page.
@@ -181,7 +183,29 @@ async function ArticleDetailContent({
       notFound();
     }
 
-    return <ArticleDetail {...article} />;
+    return (
+      <>
+        <ArticleDetail {...article} />
+        
+        {/* Comments section */}
+        <div className="container mx-auto px-4 py-8 max-w-4xl border-t border-gray-200 mt-12">
+          <h2 className="text-2xl font-bold mb-6 text-gray-900">留言</h2>
+          
+          {/* Comment form */}
+          <div className="mb-8">
+            <CommentForm articleId={article.id} />
+          </div>
+          
+          {/* Comment list */}
+          <div>
+            <h3 className="text-xl font-semibold mb-4 text-gray-900">所有留言</h3>
+            <Suspense fallback={<CommentListLoading />}>
+              <CommentList articleId={article.id} />
+            </Suspense>
+          </div>
+        </div>
+      </>
+    );
   } catch (error) {
     console.error("Error loading article:", error);
     // Re-throw to trigger error boundary or show error state

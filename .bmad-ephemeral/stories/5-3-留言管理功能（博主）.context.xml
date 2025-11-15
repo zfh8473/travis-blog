@@ -1,0 +1,161 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>5.3</storyId>
+    <title>留言管理功能（博主）</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-15</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/5-3-留言管理功能（博主）.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>blog author</asA>
+    <iWant>to manage comments (delete, moderate)</iWant>
+    <soThat>I can maintain a healthy discussion environment</soThat>
+    <tasks>
+      <task id="1" ac="5.3.2,5.3.3,5.3.4,5.3.5">Create Delete Comment Server Action - Create deleteCommentAction function with proper JSDoc comments, validate user authentication and ADMIN role, validate comment exists, delete comment using Prisma (cascade delete handled automatically), return unified error format ActionResult&lt;T&gt;</task>
+      <task id="2" ac="5.3.1,5.3.2">Add Delete Button to CommentItem Component - Add delete button (visible only to admins), check user role from session (useSession hook), style delete button with danger styling, add confirmation dialog, call deleteCommentAction when confirmed, handle success/error responses</task>
+      <task id="3" ac="5.3.2">Implement Delete Confirmation Dialog - Create confirmation dialog component (or use browser confirm for MVP), display warning message, show cascade warning if comment has replies, add cancel and confirm buttons, make dialog accessible</task>
+      <task id="4" ac="5.3.3">Verify Cascade Delete Behavior - Verify Prisma schema has onDelete: Cascade for Comment replies relation, test that deleting a parent comment automatically deletes all replies, verify database constraints are correct</task>
+      <task id="5" ac="5.3.1,5.3.4,5.3.5">Add Permission Checks - Verify requireAdmin function exists, use requireAdmin in deleteCommentAction to check permissions, return appropriate error messages for unauthorized access, test permission checks with different user roles</task>
+      <task id="6" ac="5.3.2">Update CommentList to Handle Deletion - Ensure CommentList can handle comment removal (refresh or optimistic update), add error handling for deletion failures</task>
+      <task id="7" ac="5.3.2,5.3.4,5.3.5">Add Success/Error Messages - Display success message after successful deletion, display error messages for permission errors (403, 401), display error messages for other errors, use consistent message styling</task>
+      <task id="8" ac="5.3.1,5.3.2,5.3.3,5.3.4,5.3.5">Write Tests - Create unit tests for deleteCommentAction, create unit tests for CommentItem delete button, create integration tests for delete Server Action, create E2E tests for delete functionality</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="5.3.1">Given I am logged in as an admin, And comments exist on articles, When I view an article with comments, Then I see delete buttons on each comment, And ordinary users do not see delete buttons</ac>
+    <ac id="5.3.2">Given I am logged in as an admin, When I click delete on a comment, Then I see a confirmation dialog, When I confirm the deletion, Then the comment is removed from the database, And the comment disappears from the page, And I see a success message</ac>
+    <ac id="5.3.3">Given comments have replies, When an admin deletes a parent comment, Then the parent comment is deleted, And all replies are also deleted (cascade), And the page updates to remove all related comments</ac>
+    <ac id="5.3.4">Given a regular user is logged in, When the regular user attempts to call the delete API, Then a 403 Forbidden error is returned, And an error message is displayed ("您没有权限执行此操作")</ac>
+    <ac id="5.3.5">Given a user is not logged in, When the user attempts to call the delete API, Then a 401 Unauthorized error is returned, And an error message is displayed ("请先登录")</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics.md" title="Epics Breakdown" section="Story 5.3: 留言管理功能（博主）">
+        Story definition with acceptance criteria and technical notes. Defines comment deletion functionality requirements including admin-only delete buttons, confirmation dialog, cascade delete, and permission checks.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-5.md" title="Epic 5 Technical Specification" section="Story 5.3: 留言管理功能（博主）">
+        Comprehensive technical specification for comment management functionality including AC-5.3.1 through AC-5.3.5, workflows, data models, and API interfaces. Details delete button visibility, confirmation dialog, cascade delete behavior, and permission validation.
+      </doc>
+      <doc path="docs/PRD.md" title="Product Requirements Document" section="FR-4.3 留言管理">
+        Product requirements for comment management: blog author can delete comments, reply to comments, manage comments in admin dashboard.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Documentation" section="Server Actions Pattern">
+        Architecture patterns for Server Actions, component organization, database operations, authentication, authorization, error handling, and styling. Defines unified error format and component structure.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Documentation" section="Component Organization">
+        Component organization patterns: by feature in components/comment/, Client Components for interactivity, Server Components for data fetching, PascalCase naming convention.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Documentation" section="Data Architecture">
+        Database architecture using Prisma ORM, PostgreSQL, connection management, and data models. Comment model supports cascade delete via onDelete: Cascade in Prisma schema.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Documentation" section="Security Architecture">
+        Security patterns including authentication with NextAuth.js, authorization with role-based access control, permission checks using requireAdmin function.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/5-2-留言回复功能.md" title="Story 5.2: 留言回复功能" section="Dev Agent Record">
+        Previous story learnings: Server Actions pattern with ActionResult&lt;T&gt;, CommentItem component structure, permission checks using requireAdmin, cascade delete already configured in Prisma schema, testing patterns established.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/3-5-文章删除功能.md" title="Story 3.5: 文章删除功能" section="Dev Agent Record">
+        Reference for delete confirmation dialog patterns: using browser confirm() for MVP, confirmation message format, delete API call patterns, success/error message handling.
+      </doc>
+    </docs>
+    <code>
+      <artifact path="lib/actions/comment.ts" kind="server-action" symbol="createCommentAction" lines="85-239" reason="Server Action for creating comments. Follow same pattern for deleteCommentAction - use ActionResult&lt;T&gt; for consistent error handling, JSDoc comments, validation, and error handling." />
+      <artifact path="lib/actions/comment.ts" kind="server-action" symbol="getCommentsAction" lines="255-365" reason="Server Action for fetching comments. Reference for Server Action structure and error handling patterns." />
+      <artifact path="lib/actions/comment.ts" kind="type" symbol="Comment" lines="14-29" reason="Comment interface with nested replies support. Includes all comment fields needed for deletion operations." />
+      <artifact path="lib/types/action-result.ts" kind="type" symbol="ActionResult" lines="20-22" reason="Unified action result type for Server Actions. Use this type for deleteCommentAction return value: ActionResult&lt;void&gt; or ActionResult&lt;{ id: string }&gt;." />
+      <artifact path="lib/auth/permissions.ts" kind="function" symbol="requireAdmin" lines="121-143" reason="Permission check function for admin-only operations. Use this in deleteCommentAction to validate user has ADMIN role. Returns NextResponse with 401/403 error if requirements not met, null if user is admin." />
+      <artifact path="lib/auth/permissions.ts" kind="function" symbol="requireAuth" lines="86-100" reason="Authentication check function. Returns 401 Unauthorized if user is not authenticated. Can be used before requireAdmin check." />
+      <artifact path="components/comment/CommentItem.tsx" kind="component" symbol="CommentItem" lines="46-210" reason="Client Component for displaying single comment. Add delete button here, visible only to admins. Component already handles nested replies and user information." />
+      <artifact path="components/comment/CommentList.tsx" kind="component" symbol="CommentList" lines="21-63" reason="Server Component for displaying comment list. May need to handle comment removal (refresh or optimistic update) after deletion." />
+      <artifact path="components/comment/CommentForm.tsx" kind="component" symbol="CommentForm" lines="58-221" reason="Comment form component. Reference for success/error message display patterns (lines 162-166 for success message)." />
+      <artifact path="prisma/schema.prisma" kind="schema" symbol="Comment" lines="164-182" reason="Prisma schema for Comment model. Already supports cascade delete via onDelete: Cascade for CommentReplies relation (line 176). No migration needed." />
+      <artifact path="app/api/articles/[id]/route.ts" kind="endpoint" symbol="DELETE" lines="363-422" reason="Article delete API endpoint. Reference for delete operation patterns: permission checks using requireAdmin, Prisma delete operation, error handling, success response format." />
+      <artifact path="app/admin/articles/page.tsx" kind="component" symbol="ArticlesListPage" lines="54-354" reason="Article list page with delete functionality. Reference for delete confirmation dialog patterns (using window.confirm), delete button styling, success/error message handling, optimistic UI updates." />
+      <artifact path="app/admin/media/page.tsx" kind="component" symbol="MediaLibraryPage" lines="418-439" reason="Media library page with delete confirmation dialog. Reference for custom confirmation dialog implementation (modal overlay, centered dialog, cancel/confirm buttons)." />
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="next" version="16.0.2" />
+        <package name="react" version="19.2.0" />
+        <package name="react-dom" version="19.2.0" />
+        <package name="next-auth" version="^4.24.13" />
+        <package name="zod" version="^4.1.12" />
+        <package name="date-fns" version="^4.1.0" />
+        <package name="@prisma/client" version="^6.19.0" />
+      </ecosystem>
+      <ecosystem name="dev">
+        <package name="jest" version="^30.2.0" />
+        <package name="@testing-library/react" version="^16.3.0" />
+        <package name="@testing-library/jest-dom" version="^6.9.1" />
+        <package name="@playwright/test" version="^1.56.1" />
+        <package name="prisma" version="^6.19.0" />
+        <package name="typescript" version="^5" />
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Server Actions Pattern: Create deleteCommentAction in lib/actions/comment.ts. Follow unified error response format: { success: true, data: T } | { success: false, error: { message: string, code: string } }. All Server Actions must have JSDoc comments.</constraint>
+    <constraint>Component Organization: Comment components in components/comment/ directory. Client Components for interactive delete buttons and dialogs. Server Components for data fetching. Follow PascalCase naming convention.</constraint>
+    <constraint>Database Operations: Use Prisma ORM for all database operations. Use Prisma Client from lib/db/prisma.ts. Cascade delete is handled automatically by Prisma schema (onDelete: Cascade) - no additional code needed.</constraint>
+    <constraint>Authentication and Authorization: Use NextAuth.js for user session management. Get user from session in Server Actions: await getServerSession(). Use requireAdmin from lib/auth/permissions.ts for permission checks.</constraint>
+    <constraint>Error Handling: Use unified error format. Return user-friendly error messages in Chinese. Log errors on server side.</constraint>
+    <constraint>Styling: Use Tailwind CSS for styling. Follow responsive design patterns. Ensure mobile-friendly layout. Use danger styling for delete buttons (red color, trash icon).</constraint>
+    <constraint>Code Documentation: All public functions, interfaces, and components MUST include JSDoc comments with @param, @returns, @example tags.</constraint>
+    <constraint>Confirmation Dialog: For MVP, can use browser confirm() dialog. For better UX, consider creating reusable confirmation dialog component. Reference: app/admin/media/page.tsx for custom dialog implementation.</constraint>
+    <constraint>Permission Checks: Delete button must only be visible to admins. Use useSession hook in CommentItem to check user role. Use requireAdmin in deleteCommentAction to validate permissions on server side.</constraint>
+    <constraint>Cascade Delete: Prisma schema already has onDelete: Cascade configured for Comment replies relation. No migration needed. Deleting a parent comment automatically deletes all replies.</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="deleteCommentAction" kind="server-action" signature="deleteCommentAction(commentId: string): Promise&lt;ActionResult&lt;void&gt; | ActionResult&lt;{ id: string }&gt;&gt;" path="lib/actions/comment.ts">
+      Server Action for deleting comments. Validates user authentication and ADMIN role, validates comment exists, deletes comment using Prisma (cascade delete handled automatically), returns unified error format.
+    </interface>
+    <interface name="requireAdmin" kind="function" signature="requireAdmin(user: UserInfo | null): NextResponse | null" path="lib/auth/permissions.ts">
+      Permission check function for admin-only operations. Returns NextResponse with 401/403 error if requirements not met, null if user is admin. Use in deleteCommentAction to validate permissions.
+    </interface>
+    <interface name="requireAuth" kind="function" signature="requireAuth(user: UserInfo | null): NextResponse | null" path="lib/auth/permissions.ts">
+      Authentication check function. Returns 401 Unauthorized if user is not authenticated. Can be used before requireAdmin check.
+    </interface>
+    <interface name="ActionResult" kind="type" signature="type ActionResult&lt;T&gt; = { success: true; data: T } | { success: false; error: { message: string; code: string } }" path="lib/types/action-result.ts">
+      Unified action result type for Server Actions. Use for deleteCommentAction return value.
+    </interface>
+    <interface name="CommentItemProps" kind="component-props" signature="interface CommentItemProps { comment: Comment; depth?: number; allComments?: Comment[]; }" path="components/comment/CommentItem.tsx">
+      CommentItem component props. Comment includes nested replies structure. Add delete button to this component, visible only to admins.
+    </interface>
+    <interface name="useSession" kind="hook" signature="useSession(): { data: Session | null; status: 'loading' | 'authenticated' | 'unauthenticated' }" path="next-auth/react">
+      NextAuth hook for accessing user session in Client Components. Use in CommentItem to check user role and show/hide delete button only for admins.
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Testing standards follow patterns established in Story 5.1 and 5.2. Use Jest for unit tests, React Testing Library for component tests, and Playwright for E2E tests. Unit tests should cover delete action with valid and invalid inputs, permission checks (admin, regular user, not logged in), component rendering with delete button visibility, and confirmation dialog functionality. Integration tests should mock Prisma Client and test Server Action with delete operation, permission validation, cascade delete behavior, and error handling. E2E tests should cover complete delete flow (admin), permission check (regular user), cascade delete, and confirmation dialog. All tests should follow existing patterns in tests/__tests__/integration/comments-reply.test.ts and tests/__tests__/unit/article-delete.test.tsx.
+    </standards>
+    <locations>
+      <location>tests/__tests__/unit/</location>
+      <location>tests/__tests__/integration/</location>
+      <location>tests/e2e/</location>
+    </locations>
+    <ideas>
+      <test ac="5.3.1" idea="Unit test: CommentItem component - delete button visibility for admin vs regular user, delete button not shown for non-admin users" />
+      <test ac="5.3.2" idea="Unit test: CommentItem component - delete button click shows confirmation dialog, confirmation triggers deleteCommentAction, success message displayed after deletion, comment removed from UI" />
+      <test ac="5.3.2" idea="Integration test: deleteCommentAction - successful deletion as admin, comment removed from database, success response returned" />
+      <test ac="5.3.2" idea="E2E test: Complete delete flow - admin clicks delete button, confirms deletion, comment removed from page, success message displayed" />
+      <test ac="5.3.3" idea="Integration test: deleteCommentAction - cascade delete behavior, deleting parent comment automatically deletes all replies, verify database state after deletion" />
+      <test ac="5.3.3" idea="E2E test: Cascade delete - admin deletes parent comment with replies, verify all replies are removed from page" />
+      <test ac="5.3.4" idea="Integration test: deleteCommentAction - regular user attempts deletion, returns 403 Forbidden error, error message displayed" />
+      <test ac="5.3.4" idea="E2E test: Permission check - regular user cannot see delete button, cannot call delete API" />
+      <test ac="5.3.5" idea="Integration test: deleteCommentAction - unauthenticated user attempts deletion, returns 401 Unauthorized error, error message displayed" />
+      <test ac="5.3.5" idea="E2E test: Unauthorized access - not logged in user cannot see delete button, cannot call delete API" />
+      <test ac="5.3.2" idea="Unit test: Confirmation dialog - cancel action does not delete comment, confirm action proceeds with deletion" />
+      <test ac="5.3.2" idea="Unit test: Error handling - comment not found error, network error, server error, appropriate error messages displayed" />
+    </ideas>
+  </tests>
+</story-context>
+

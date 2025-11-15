@@ -77,11 +77,11 @@ development_status:
   epic-4-retrospective: completed
 
   # Epic 5: 读者互动（Reader Interaction）
-  epic-5: backlog
-  5-1-留言功能: backlog
-  5-2-留言回复功能: backlog
-  5-3-留言管理功能（博主）: backlog
-  epic-5-retrospective: optional
+  epic-5: contexted
+  5-1-留言功能: done
+  5-2-留言回复功能: done
+  5-3-留言管理功能（博主）: done
+  epic-5-retrospective: completed
 
   # Epic 6: 后台管理界面（Admin Dashboard）
   epic-6: backlog

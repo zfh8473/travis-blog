@@ -167,6 +167,7 @@ model Comment {
   articleId String
   userId    String?
   parentId  String?
+  authorName String? // Name for anonymous comments (when userId is null)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

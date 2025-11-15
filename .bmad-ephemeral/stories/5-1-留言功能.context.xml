@@ -1,0 +1,135 @@
+<story-context id="5.1" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>1</storyId>
+    <title>留言功能</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-14</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/5-1-留言功能.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>reader</asA>
+    <iWant>to leave a comment on an article</iWant>
+    <soThat>I can share my thoughts and interact with the author</soThat>
+    <tasks>
+      <task id="1" description="Create Comment Validation Schema" ac="5.1.5"/>
+      <task id="2" description="Create Comment Server Actions" ac="5.1.2, 5.1.3, 5.1.4"/>
+      <task id="3" description="Create Comment Form Component" ac="5.1.1, 5.1.2, 5.1.3, 5.1.4, 5.1.5"/>
+      <task id="4" description="Create Comment List Component" ac="5.1.1, 5.1.6"/>
+      <task id="5" description="Create Comment Item Component" ac="5.1.3, 5.1.4"/>
+      <task id="6" description="Integrate Comments into Article Detail Page" ac="5.1.1"/>
+      <task id="7" description="Install Required Dependencies" ac="All"/>
+      <task id="8" description="Verify Database Schema" ac="All"/>
+      <task id="9" description="Add Input Sanitization" ac="5.1.5"/>
+      <task id="10" description="Write Tests" ac="All ACs"/>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-5.1.1" description="Given I am viewing an article, When I scroll to the comments section, Then I see a comment form"/>
+    <criterion id="AC-5.1.2" description="Given I enter my name (or it's auto-filled if logged in) and comment text, And I submit the comment, Then my comment is saved to the database, And my comment appears in the comments list, And I see a success message"/>
+    <criterion id="AC-5.1.3" description="Given I am logged in, When I submit a comment, Then the comment displays my name and avatar (if available), And the comment shows a 'Reply' button"/>
+    <criterion id="AC-5.1.4" description="Given I am not logged in, When I enter my name and comment text in the comment form, And I submit the comment, Then the comment displays the name I entered, And the comment does not display an avatar, And the comment shows a 'Reply' button"/>
+    <criterion id="AC-5.1.5" description="Given I try to submit a comment, When the comment content is empty, Then I see a validation error message, And the comment is not saved, When the comment content exceeds 5000 characters, Then I see a validation error message, And the comment is not saved"/>
+    <criterion id="AC-5.1.6" description="Given an article has multiple comments, When I view the comments list, Then comments are sorted by creation time (newest first or oldest first, based on design decision)"/>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics.md" title="Epic 5 Definition" section="Story 5.1: 留言功能" snippet="As a reader, I want to leave a comment on an article, So that I can share my thoughts and interact with the author. Create comments table (id, article_id, user_id, content, created_at, parent_id for replies), create comment API endpoint (POST), create comment form component, display comments list on article detail page."/>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-5.md" title="Epic 5 Technical Specification" section="Story 5.1: 留言功能" snippet="留言创建模块处理留言创建逻辑，支持登录用户和匿名用户。留言查询模块查询文章的所有留言。使用 Next.js Server Actions 处理留言创建和查询，使用 Prisma ORM 进行数据库操作，使用 React 组件实现用户界面。"/>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-5.md" title="Epic 5 Technical Specification" section="Data Models and Contracts" snippet="Comment model includes: id (CUID), content (Text), articleId (foreign key), userId (optional for anonymous), parentId (optional for replies), createdAt, updatedAt. Relationships: Comment → Article (many-to-one), Comment → User (many-to-one, optional), Comment → Comment (self-referential for nested replies)."/>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-5.md" title="Epic 5 Technical Specification" section="APIs and Interfaces" snippet="createCommentAction(data: CreateCommentInput): Promise&lt;ActionResult&lt;Comment&gt;&gt; - Server action to create a new comment with validation, authorization checks, and database operations. getCommentsAction(articleId: string): Promise&lt;Comment[]&gt; - Returns comments with nested replies in hierarchical structure."/>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-5.md" title="Epic 5 Technical Specification" section="Security" snippet="Input validation and sanitization: comment content length limit (min 1 char, max 5000 chars), HTML tag sanitization using DOMPurify, SQL injection prevention (Prisma automatic), XSS attack prevention. Rate limiting: each IP address max 10 comments per minute, each user max 5 comments per minute."/>
+      <doc path="docs/PRD.md" title="Product Requirements Document" section="FR-4.1 留言功能" snippet="读者可以在文章下方留言。留言显示在文章下方。留言包含作者、内容、时间。支持未登录用户留言（可选）。"/>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Server Actions Pattern" snippet="Prefer Server Actions for data mutations. Type-safe by default, less boilerplate, better integration with React. API Routes for external integrations only. Server Actions use unified error format: { success: true, data: T } or { success: false, error: { message: string, code: string } }."/>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Component Organization" snippet="Components organized by feature: components/article/, components/comment/. Shared UI: components/ui/ (shadcn/ui components). Component files: PascalCase.tsx. Client Components for interactive forms, Server Components for data fetching."/>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Data Architecture" snippet="Comment model represents user comments on articles. Supports nested replies via self-referential relationship (parentId). Relationships: Many-to-One with Article, Many-to-One with User (optional), Self-referential for comment replies. Indexes on articleId and parentId for performance."/>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Security Architecture" snippet="Input validation: Server-side validation for all inputs, use Zod for schema validation, sanitize user inputs. XSS prevention: React automatic escaping, sanitize HTML content (DOMPurify), Content Security Policy (CSP) headers. SQL injection prevention: Prisma parameterized queries (automatic)."/>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Error Handling" snippet="Error format: { success: true, data: T } or { success: false, error: { message: string, code: string } }. Server Actions: Throw errors, catch in error boundaries. Log errors: Console in dev, structured logging in prod."/>
+      <doc path=".bmad-ephemeral/stories/4-5-分页功能.md" title="Story 4.5: 分页功能" section="Learnings from Previous Story" snippet="Server Components for data fetching, Client Components for interactivity. Wrap data-fetching components in Suspense boundaries for loading states. Use Tailwind CSS responsive utilities. Component organization by feature in components/ directory."/>
+    </docs>
+    <code>
+      <code path="prisma/schema.prisma" kind="schema" symbol="Comment" lines="164-181" reason="Comment model definition with all required fields: id (CUID), content (Text), articleId, userId (optional), parentId (optional), createdAt, updatedAt. Relationships defined: article (many-to-one), user (optional many-to-one), parent (optional self-referential), replies (one-to-many self-referential). Indexes on articleId and parentId. Already exists in schema, no migration needed."/>
+      <code path="lib/db/prisma.ts" kind="service" symbol="prisma" lines="65-71" reason="Prisma Client singleton instance exported for database operations. Use this instance in Server Actions to query and create comments. Includes connection pooling and type-safe database access. Validates DATABASE_URL environment variable."/>
+      <code path="app/articles/[slug]/page.tsx" kind="page" symbol="ArticleDetailPage" lines="1-216" reason="Article detail page Server Component that displays article content. This is where comments section should be integrated. Currently shows article content, author, category, tags. Need to add CommentList and CommentForm components below article content."/>
+      <code path="app/articles/[slug]/page.tsx" kind="function" symbol="fetchArticleBySlug" lines="49-100" reason="Function that fetches article by slug from database using Prisma. Returns article with author, category, and tags. Can be used as reference for fetching comments for article. Uses Prisma include to get related data."/>
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="next" version="16.0.2"/>
+        <package name="react" version="19.2.0"/>
+        <package name="react-dom" version="19.2.0"/>
+        <package name="@prisma/client" version="^6.19.0"/>
+        <package name="next-auth" version="^4.24.13"/>
+        <package name="zod" version="^4.1.12"/>
+        <package name="date-fns" version="^4.1.0"/>
+      </ecosystem>
+      <ecosystem name="dev">
+        <package name="@testing-library/react" version="^16.3.0"/>
+        <package name="@testing-library/jest-dom" version="^6.9.1"/>
+        <package name="@playwright/test" version="^1.56.1"/>
+        <package name="jest" version="^30.2.0"/>
+        <package name="typescript" version="^5"/>
+      </ecosystem>
+      <ecosystem name="missing">
+        <package name="dompurify" version="latest" note="Required for HTML sanitization to prevent XSS attacks. Install: npm install dompurify"/>
+        <package name="@types/dompurify" version="latest" note="TypeScript types for DOMPurify. Install: npm install --save-dev @types/dompurify"/>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="architectural">Use Next.js Server Actions for comment creation and retrieval. Server Actions should be in app/articles/[slug]/actions.ts or lib/actions/comment.ts. Follow unified error response format.</constraint>
+    <constraint type="architectural">Comment components must be in components/comment/ directory following PascalCase.tsx naming convention. Client Components for interactive forms (CommentForm), Server Components for data fetching (CommentList).</constraint>
+    <constraint type="architectural">Use Prisma ORM for all database operations. Use Prisma Client from lib/db/prisma.ts. Comment model already exists in schema (no migration needed).</constraint>
+    <constraint type="validation">Use Zod for schema validation. Validate on both client and server. Comment content: min 1 char, max 5000 chars.</constraint>
+    <constraint type="security">Sanitize HTML content using DOMPurify to prevent XSS attacks. Apply sanitization in createCommentAction before saving to database. Use React automatic escaping for display.</constraint>
+    <constraint type="authentication">Use NextAuth.js for user session management. Get user from session in Server Actions: await getServerSession(). Handle both logged-in and anonymous users.</constraint>
+    <constraint type="error-handling">Use unified error format: { success: true, data: T } or { success: false, error: { message: string, code: string } }. Return user-friendly error messages. Log errors on server side.</constraint>
+    <constraint type="styling">Use Tailwind CSS for styling. Follow responsive design patterns. Ensure mobile-friendly layout. Reference existing component patterns from Story 4.5.</constraint>
+    <constraint type="database">Comment model supports both logged-in and anonymous comments (userId optional). Schema supports nested replies (parentId for future Story 5.2). Indexes on articleId and parentId for performance.</constraint>
+    <constraint type="component-reuse">Follow Server Component pattern for data fetching (CommentList), Client Component pattern for forms (CommentForm). Wrap data-fetching components in Suspense boundaries for loading states.</constraint>
+    <constraint type="jsdoc">All public functions and components must include JSDoc comments with @param, @returns, @throws tags. Follow JSDoc standards from architecture document.</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="CreateCommentInput" kind="TypeScript interface" signature="export interface CreateCommentInput { content: string; articleId: string; userId?: string | null; parentId?: string | null; authorName?: string; }" path="lib/actions/comment.ts" note="Input type for creating a comment. userId is optional for anonymous comments. authorName is used for anonymous comments when userId is null."/>
+    <interface name="Comment" kind="TypeScript interface" signature="export interface Comment { id: string; content: string; articleId: string; userId: string | null; parentId: string | null; createdAt: Date; updatedAt: Date; user?: { id: string; name: string | null; image: string | null; } | null; replies?: Comment[]; }" path="lib/actions/comment.ts" note="Comment data type with nested replies. user is optional and includes name and image for logged-in users. replies array for nested comment structure."/>
+    <interface name="createCommentAction" kind="Server Action" signature="export async function createCommentAction(data: CreateCommentInput): Promise&lt;ActionResult&lt;Comment&gt;&gt;" path="lib/actions/comment.ts" note="Server action to create a new comment. Validates input using Zod schema, checks if article exists, handles logged-in and anonymous users, sanitizes content using DOMPurify, saves to database using Prisma, returns created comment with user information."/>
+    <interface name="getCommentsAction" kind="Server Action" signature="export async function getCommentsAction(articleId: string): Promise&lt;Comment[]&gt;" path="lib/actions/comment.ts" note="Server action to get all comments for an article. Queries comments using Prisma, includes user information (name, image) for logged-in comments, sorts by createdAt (newest first or oldest first), returns comments list."/>
+    <interface name="CommentForm" kind="React Component" signature="export function CommentForm({ articleId, parentId?: string, user?: User }): JSX.Element" path="components/comment/CommentForm.tsx" note="Client Component for comment form. Accepts articleId, optional parentId for replies, optional user for logged-in users. Shows name input for anonymous users, auto-fills name for logged-in users, validates input, calls createCommentAction on submit."/>
+    <interface name="CommentList" kind="React Component" signature="export function CommentList({ articleId }: { articleId: string }): Promise&lt;JSX.Element&gt;" path="components/comment/CommentList.tsx" note="Server Component for comment list. Accepts articleId as prop, calls getCommentsAction to fetch comments, renders comments using CommentItem component, handles empty state, wrapped in Suspense boundary for loading state."/>
+    <interface name="CommentItem" kind="React Component" signature="export function CommentItem({ comment }: { comment: Comment }): JSX.Element" path="components/comment/CommentItem.tsx" note="Client Component for single comment item. Displays author name (from user.name or anonymous name), author avatar (from user.image if logged-in), comment content (sanitized HTML), comment timestamp (formatted using date-fns), Reply button (for future Story 5.2)."/>
+  </interfaces>
+
+  <tests>
+    <standards>Use Jest for unit tests and validation tests. Use React Testing Library for component tests. Use Playwright for E2E tests. Test validation schemas with valid and invalid inputs. Test component rendering with different props. Test form validation and submission. Test Server Actions with database operations. Mock Prisma Client for database operations in integration tests. Test complete user flows in E2E tests.</standards>
+    <locations>
+      <location>tests/__tests__/unit/validations/</location>
+      <location>tests/__tests__/unit/components/comment/</location>
+      <location>tests/__tests__/integration/</location>
+      <location>tests/e2e/</location>
+    </locations>
+    <ideas>
+      <test ac="AC-5.1.1" description="Test comment form is displayed on article detail page when scrolling to comments section"/>
+      <test ac="AC-5.1.2" description="Test comment creation flow: submit comment, verify saved to database, verify appears in list, verify success message"/>
+      <test ac="AC-5.1.3" description="Test logged-in user comment: verify displays user name and avatar, verify Reply button shown"/>
+      <test ac="AC-5.1.4" description="Test anonymous user comment: verify displays entered name, verify no avatar, verify Reply button shown"/>
+      <test ac="AC-5.1.5" description="Test validation: empty content shows error, content over 5000 chars shows error, comment not saved on validation error"/>
+      <test ac="AC-5.1.6" description="Test comment sorting: verify comments sorted by creation time (test both newest first and oldest first)"/>
+      <test ac="All" description="Unit test: comment validation schema with valid/invalid inputs (empty, too long, valid)"/>
+      <test ac="All" description="Unit test: CommentForm component rendering with logged-in user, anonymous user, form submission, error display"/>
+      <test ac="All" description="Unit test: CommentItem component rendering with logged-in comment, anonymous comment, timestamp formatting"/>
+      <test ac="All" description="Integration test: createCommentAction with logged-in user, anonymous user, validation errors, article not found"/>
+      <test ac="All" description="Integration test: getCommentsAction with articleId, verify user information included, verify sorting"/>
+      <test ac="All" description="E2E test: complete comment creation flow (logged-in user), verify comment appears in list"/>
+      <test ac="All" description="E2E test: complete comment creation flow (anonymous user), verify comment appears in list"/>
+      <test ac="All" description="E2E test: validation error display, test empty content and too long content"/>
+      <test ac="All" description="E2E test: comment display on article page, verify all comments shown, verify sorting"/>
+    </ideas>
+  </tests>
+</story-context>
+

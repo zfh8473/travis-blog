@@ -1,0 +1,160 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>5.2</storyId>
+    <title>留言回复功能</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-15</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/5-2-留言回复功能.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>reader</asA>
+    <iWant>to reply to comments</iWant>
+    <soThat>I can engage in discussions with other readers and the author</soThat>
+    <tasks>
+      <task id="1" ac="5.2.1">Update Comment Validation Schema - Verify parentId support, add parent comment existence validation, add nesting depth validation</task>
+      <task id="2" ac="5.2.1">Enhance Comment Server Actions for Replies - Add parent comment validation, article match check, nesting depth validation</task>
+      <task id="3" ac="5.2.1">Enhance CommentForm Component for Replies - Add visual indication, cancel button, inline form styling, form visibility state</task>
+      <task id="4" ac="5.2.1,5.2.2,5.2.4">Enhance CommentItem Component for Replies - Implement reply button, show/hide form, nested display, "@username" indication, scroll-to-parent</task>
+      <task id="5" ac="5.2.2">Enhance CommentList Component for Nested Display - Update rendering with indentation, visual distinction for replies</task>
+      <task id="6" ac="5.2.3">Implement Nesting Depth Validation - Create utility function, add validation in Server Action, disable reply button at max depth</task>
+      <task id="7" ac="">Add Reply Count Display - Optional enhancement for better UX</task>
+      <task id="8" ac="5.2.1,5.2.2,5.2.3,5.2.4">Write Tests - Unit tests, integration tests, E2E tests for all reply functionality</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="5.2.1">Given I am viewing an article with comments, When I click "Reply" on a comment, Then a reply form appears, When I enter my reply text, And I submit the reply, Then my reply is saved to the database, And my reply appears nested under the original comment, And the reply shows my name, reply text, and timestamp, And I see a success message</ac>
+    <ac id="5.2.2">Given comments have replies, When I view the comments list, Then replies are displayed nested under the parent comment (with indentation or visual distinction), And replies show the replier's name and timestamp, And replies can be replied to (supporting multi-level nesting)</ac>
+    <ac id="5.2.3">Given the system has a maximum nesting depth (e.g., 3 levels), When I try to reply to a comment that has reached the maximum depth, Then I see a message indicating the maximum depth has been reached, And I cannot continue replying (or an alternative is provided)</ac>
+    <ac id="5.2.4">Given I reply to a comment, When the reply is displayed in the comments list, Then the reply shows "回复 @username" indication, And I can click the indication to scroll to the parent comment</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics.md" title="Epics Breakdown" section="Story 5.2: 留言回复功能">
+        Story definition with acceptance criteria and technical notes. Defines reply functionality requirements including nested display, reply form, and nesting depth limits.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-5.md" title="Epic 5 Technical Specification" section="Story 5.2: 留言回复功能">
+        Comprehensive technical specification for reply functionality including AC-5.2.1 through AC-5.2.4, workflows, data models, and API interfaces. Details nested reply structure, parent comment validation, and nesting depth limits.
+      </doc>
+      <doc path="docs/PRD.md" title="Product Requirements Document" section="FR-4.2 留言回复">
+        Product requirements for comment replies: users can reply to other users' comments, replies display below comments, supports multi-level replies (optional).
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Documentation" section="Server Actions Pattern">
+        Architecture patterns for Server Actions, component organization, database operations, input validation, authentication, error handling, and styling. Defines unified error format and component structure.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Documentation" section="Component Organization">
+        Component organization patterns: by feature in components/comment/, Client Components for interactivity, Server Components for data fetching, PascalCase naming convention.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Documentation" section="Data Architecture">
+        Database architecture using Prisma ORM, PostgreSQL, connection management, and data models. Comment model supports nested replies via parentId field.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture Documentation" section="Security Architecture">
+        Security patterns including input validation with Zod, XSS protection with DOMPurify, SQL injection prevention with Prisma, and authentication with NextAuth.js.
+      </doc>
+      <doc path=".bmad-ephemeral/stories/5-1-留言功能.md" title="Story 5.1: 留言功能" section="Dev Agent Record">
+        Previous story learnings: createCommentAction already supports parentId, CommentForm accepts parentId prop, getCommentsAction returns nested replies, CommentItem has reply button UI, validation schema supports parentId, database schema supports nested replies.
+      </doc>
+    </docs>
+    <code>
+      <artifact path="lib/actions/comment.ts" kind="server-action" symbol="createCommentAction" lines="69-161" reason="Server Action for creating comments. Already supports parentId parameter for replies. Needs enhancement to validate parent comment existence and nesting depth." />
+      <artifact path="lib/actions/comment.ts" kind="server-action" symbol="getCommentsAction" lines="177-251" reason="Server Action for fetching comments. Already returns nested replies structure. May need enhancement for reply count display." />
+      <artifact path="lib/actions/comment.ts" kind="type" symbol="Comment" lines="13-28" reason="Comment interface with nested replies support. Includes parentId, replies array, and user information." />
+      <artifact path="lib/actions/comment.ts" kind="type" symbol="CreateCommentInput" lines="33-39" reason="Input type for creating comments. Already includes parentId field for replies." />
+      <artifact path="lib/validations/comment.ts" kind="validation" symbol="createCommentSchema" lines="25-59" reason="Zod validation schema for comment creation. Already supports parentId field. Needs enhancement for parent comment validation and nesting depth." />
+      <artifact path="components/comment/CommentForm.tsx" kind="component" symbol="CommentForm" lines="1-182" reason="Client Component for comment form. Already accepts parentId prop. Needs enhancement for reply mode: visual indication, cancel button, inline styling, form visibility state." />
+      <artifact path="components/comment/CommentItem.tsx" kind="component" symbol="CommentItem" lines="50-106" reason="Client Component for displaying single comment. Has reply button UI (lines 92-101) with TODO comment. Needs implementation: reply form toggle, nested display, "@username" indication, scroll-to-parent." />
+      <artifact path="components/comment/CommentList.tsx" kind="component" symbol="CommentList" lines="20-42" reason="Server Component for displaying comment list. Already handles nested replies from getCommentsAction. Needs enhancement for proper nested display with indentation and visual distinction." />
+      <artifact path="prisma/schema.prisma" kind="schema" symbol="Comment" lines="164-182" reason="Prisma schema for Comment model. Already supports nested replies via parentId field and self-referential relationship. No migration needed." />
+      <artifact path="lib/types/action-result.ts" kind="type" symbol="ActionResult" lines="1-10" reason="Unified error response type for Server Actions. Use for consistent error handling in reply functionality." />
+      <artifact path="lib/db/prisma.ts" kind="database" symbol="prisma" lines="65-71" reason="Prisma Client instance. Use for all database operations including comment and reply queries." />
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="next" version="16.0.2" />
+        <package name="react" version="19.2.0" />
+        <package name="react-dom" version="19.2.0" />
+        <package name="next-auth" version="^4.24.13" />
+        <package name="zod" version="^4.1.12" />
+        <package name="dompurify" version="^3.3.0" />
+        <package name="isomorphic-dompurify" version="^2.32.0" />
+        <package name="date-fns" version="^4.1.0" />
+        <package name="@prisma/client" version="^6.19.0" />
+      </ecosystem>
+      <ecosystem name="dev">
+        <package name="jest" version="^30.2.0" />
+        <package name="@testing-library/react" version="^16.3.0" />
+        <package name="@testing-library/jest-dom" version="^6.9.1" />
+        <package name="@playwright/test" version="^1.56.1" />
+        <package name="prisma" version="^6.19.0" />
+        <package name="typescript" version="^5" />
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Server Actions Pattern: Use existing createCommentAction which already supports parentId parameter. Follow unified error response format: { success: true, data: T } | { success: false, error: { message: string, code: string } }</constraint>
+    <constraint>Component Organization: Comment components in components/comment/ directory. Client Components for interactive forms and reply buttons. Server Components for data fetching. Follow PascalCase naming convention.</constraint>
+    <constraint>Database Operations: Use Prisma ORM for all database operations. Use Prisma Client from lib/db/prisma.ts. Comment model already supports nested replies via parentId field (no migration needed).</constraint>
+    <constraint>Input Validation: Use Zod for schema validation. Validate on both client and server. Validate parent comment existence when creating reply. Validate maximum nesting depth (optional).</constraint>
+    <constraint>Authentication: Use NextAuth.js for user session management. Get user from session in Server Actions: await getServerSession(). Handle both logged-in and anonymous users (same as Story 5.1).</constraint>
+    <constraint>Error Handling: Use unified error format. Return user-friendly error messages. Log errors on server side.</constraint>
+    <constraint>Styling: Use Tailwind CSS for styling. Follow responsive design patterns. Ensure mobile-friendly layout. Use indentation or visual distinction for nested replies.</constraint>
+    <constraint>Code Documentation: All public functions, interfaces, and components MUST include JSDoc comments with @param, @returns, @example tags.</constraint>
+    <constraint>XSS Protection: Continue using DOMPurify for content sanitization (already implemented in Story 5.1). Remove all HTML tags from comments (plain text only).</constraint>
+    <constraint>Reuse Existing Infrastructure: createCommentAction already supports parentId, CommentForm already accepts parentId prop, getCommentsAction already returns nested replies, CommentItem already has reply button UI. Enhance existing components rather than creating new ones.</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="createCommentAction" kind="server-action" signature="createCommentAction(data: CreateCommentInput): Promise&lt;ActionResult&lt;Comment&gt;&gt;" path="lib/actions/comment.ts">
+      Server Action for creating comments. Already supports parentId parameter for replies. Needs enhancement to validate parent comment existence, article match, and nesting depth.
+    </interface>
+    <interface name="getCommentsAction" kind="server-action" signature="getCommentsAction(articleId: string): Promise&lt;Comment[]&gt;" path="lib/actions/comment.ts">
+      Server Action for fetching comments with nested replies. Already returns hierarchical structure. May need enhancement for reply count display.
+    </interface>
+    <interface name="Comment" kind="type" signature="interface Comment { id: string; content: string; articleId: string; userId: string | null; parentId: string | null; authorName: string | null; createdAt: Date; updatedAt: Date; user?: { id: string; name: string | null; image: string | null; } | null; replies?: Comment[]; }" path="lib/actions/comment.ts">
+      Comment data type with nested replies support. Includes parentId for reply relationship and replies array for nested structure.
+    </interface>
+    <interface name="CreateCommentInput" kind="type" signature="interface CreateCommentInput { content: string; articleId: string; userId?: string | null; parentId?: string | null; authorName?: string; }" path="lib/actions/comment.ts">
+      Input type for creating comments. Already includes parentId field for replies.
+    </interface>
+    <interface name="CommentFormProps" kind="component-props" signature="interface CommentFormProps { articleId: string; parentId?: string; onSuccess?: () =&gt; void; }" path="components/comment/CommentForm.tsx">
+      CommentForm component props. Already accepts parentId prop for reply mode.
+    </interface>
+    <interface name="CommentItemProps" kind="component-props" signature="interface CommentItemProps { comment: Comment; }" path="components/comment/CommentItem.tsx">
+      CommentItem component props. Comment includes nested replies structure.
+    </interface>
+    <interface name="createCommentSchema" kind="validation" signature="z.object({ content: z.string().min(1).max(5000), articleId: z.string().min(1), userId: z.string().optional().nullable(), parentId: z.string().optional().nullable(), authorName: z.string().optional() })" path="lib/validations/comment.ts">
+      Zod validation schema for comment creation. Already supports parentId field. Needs enhancement for parent comment validation and nesting depth.
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Testing standards follow patterns established in Story 5.1. Use Jest for unit tests, React Testing Library for component tests, and Playwright for E2E tests. Unit tests should cover validation schemas, component rendering, and form submission. Integration tests should mock Prisma Client and test Server Actions with database operations. E2E tests should cover complete user flows including reply creation, nested display, nesting depth limits, and "@username" indication. All tests should follow existing patterns in tests/__tests__/integration/comments.test.ts and tests/e2e/comments.spec.ts.
+    </standards>
+    <locations>
+      <location>tests/__tests__/unit/</location>
+      <location>tests/__tests__/integration/</location>
+      <location>tests/e2e/</location>
+    </locations>
+    <ideas>
+      <test ac="5.2.1" idea="Unit test: Reply validation schema with valid parentId, invalid parentId, missing parentId" />
+      <test ac="5.2.1" idea="Unit test: CommentForm component in reply mode - visual indication, cancel button, form visibility" />
+      <test ac="5.2.1" idea="Integration test: createCommentAction with parentId - validate parent comment exists, validate article match, test nested reply creation" />
+      <test ac="5.2.1" idea="E2E test: Complete reply creation flow - click reply button, fill form, submit, verify nested display" />
+      <test ac="5.2.2" idea="Unit test: CommentItem component - nested replies display with indentation, visual distinction" />
+      <test ac="5.2.2" idea="Integration test: getCommentsAction - verify nested replies structure, sorting, user information" />
+      <test ac="5.2.2" idea="E2E test: Nested reply display - verify replies appear under parent, proper indentation, can reply to replies" />
+      <test ac="5.2.3" idea="Unit test: Nesting depth validation - calculate depth, validate max depth, disable reply button at max depth" />
+      <test ac="5.2.3" idea="Integration test: createCommentAction - reject reply at maximum nesting depth, return appropriate error" />
+      <test ac="5.2.3" idea="E2E test: Nesting depth limit - try to reply at max depth, verify error message, verify reply button disabled" />
+      <test ac="5.2.4" idea="Unit test: CommentItem component - display '@username' indication for replies, scroll-to-parent functionality" />
+      <test ac="5.2.4" idea="E2E test: '@username' indication - verify indication appears, click to scroll to parent comment" />
+    </ideas>
+  </tests>
+</story-context>
+

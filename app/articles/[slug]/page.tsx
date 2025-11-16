@@ -83,20 +83,53 @@ async function fetchArticleBySlug(
     }
 
     // Transform tags to simple array format
+    // Explicitly construct the object to avoid Date serialization issues
+    // This is critical for Next.js Server Components in production (Vercel)
     // Type assertion is safe because we check for PUBLISHED status
     const transformedArticle: Article = {
-      ...article,
+      id: String(article.id),
+      title: String(article.title),
+      content: String(article.content),
+      excerpt: article.excerpt ? String(article.excerpt) : null,
+      slug: String(article.slug),
       status: "PUBLISHED" as const,
-      publishedAt: article.publishedAt?.toISOString() || null,
+      categoryId: article.categoryId ? String(article.categoryId) : null,
+      authorId: String(article.authorId),
+      publishedAt: article.publishedAt ? article.publishedAt.toISOString() : null,
       createdAt: article.createdAt.toISOString(),
       updatedAt: article.updatedAt.toISOString(),
-      tags: article.tags.map((at) => at.tag),
+      author: {
+        id: String(article.author.id),
+        name: article.author.name ? String(article.author.name) : null,
+        image: article.author.image ? String(article.author.image) : null,
+      },
+      category: article.category
+        ? {
+            id: String(article.category.id),
+            name: String(article.category.name),
+            slug: String(article.category.slug),
+          }
+        : null,
+      tags: article.tags
+        .map((at) => at.tag)
+        .filter((tag): tag is NonNullable<typeof tag> => tag !== null)
+        .map((tag) => ({
+          id: String(tag.id),
+          name: String(tag.name),
+          slug: String(tag.slug),
+        })),
     };
 
     return transformedArticle;
   } catch (error) {
-    console.error("Error fetching article:", error);
-    throw new Error("Failed to fetch article from database");
+    console.error("Error fetching article:", {
+      slug,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    // Return null instead of throwing to allow 404 handling
+    // This prevents 500 errors in production
+    return null;
   }
 }
 
@@ -175,42 +208,36 @@ async function ArticleDetailContent({
     notFound();
   }
 
-  try {
-    const article = await fetchArticleBySlug(slug);
+  const article = await fetchArticleBySlug(slug);
 
-    // Article not found or not published - show 404
-    if (!article) {
-      notFound();
-    }
-
-    return (
-      <>
-        <ArticleDetail {...article} />
-        
-        {/* Comments section */}
-        <div className="container mx-auto px-4 py-8 max-w-4xl border-t border-gray-200 mt-12">
-          <h2 className="text-2xl font-bold mb-6 text-gray-900">留言</h2>
-          
-          {/* Comment form */}
-          <div className="mb-8">
-            <CommentForm articleId={article.id} />
-          </div>
-          
-          {/* Comment list */}
-          <div>
-            <h3 className="text-xl font-semibold mb-4 text-gray-900">所有留言</h3>
-            <Suspense fallback={<CommentListLoading />}>
-              <CommentList articleId={article.id} />
-            </Suspense>
-          </div>
-        </div>
-      </>
-    );
-  } catch (error) {
-    console.error("Error loading article:", error);
-    // Re-throw to trigger error boundary or show error state
-    throw error;
+  // Article not found or not published - show 404
+  if (!article) {
+    notFound();
   }
+
+  return (
+    <>
+      <ArticleDetail {...article} />
+      
+      {/* Comments section */}
+      <div className="container mx-auto px-4 py-8 max-w-4xl border-t border-gray-200 mt-12">
+        <h2 className="text-2xl font-bold mb-6 text-gray-900">留言</h2>
+        
+        {/* Comment form */}
+        <div className="mb-8">
+          <CommentForm articleId={article.id} />
+        </div>
+        
+        {/* Comment list */}
+        <div>
+          <h3 className="text-xl font-semibold mb-4 text-gray-900">所有留言</h3>
+          <Suspense fallback={<CommentListLoading />}>
+            <CommentList articleId={article.id} />
+          </Suspense>
+        </div>
+      </div>
+    </>
+  );
 }
 
 /**

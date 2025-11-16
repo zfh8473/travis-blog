@@ -589,7 +589,7 @@ export default function EditArticlePage() {
           >
             ← 返回文章列表
           </Link>
-          <h1 className="text-3xl font-bold">编辑文章</h1>
+        <h1 className="text-3xl font-bold">编辑文章</h1>
         </div>
         <button
           onClick={handleDelete}

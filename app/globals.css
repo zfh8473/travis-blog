@@ -8,7 +8,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -22,5 +22,203 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* 使用 Inter 字体，更圆润友好 */
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* 方案2: 渐变背景 + 装饰性几何图形 - 更柔和的色调 */
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 30%, #e8f2ff 60%, #f0f9ff 100%);
+  position: relative;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* 方案2: 装饰性几何图形 - 右上角（更圆的椭圆） */
+body::before {
+  content: '';
+  position: fixed;
+  top: -20%;
+  right: -10%;
+  width: 950px;
+  height: 850px;
+  background: radial-gradient(ellipse, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.1) 25%, rgba(59, 130, 246, 0.08) 45%, rgba(59, 130, 246, 0.05) 65%, transparent 90%);
+  border-radius: 50%;
+  border: 2px solid rgba(148, 163, 184, 0.08);
+  box-shadow: 
+    0 0 0 1px rgba(148, 163, 184, 0.04),
+    0 0 40px rgba(148, 163, 184, 0.025);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* 方案2: 装饰性几何图形 - 左下角（更圆的椭圆） */
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -15%;
+  left: -8%;
+  width: 850px;
+  height: 750px;
+  background: radial-gradient(ellipse, rgba(99, 102, 241, 0.12) 0%, rgba(99, 102, 241, 0.08) 25%, rgba(99, 102, 241, 0.06) 45%, rgba(99, 102, 241, 0.04) 65%, transparent 90%);
+  border-radius: 50%;
+  border: 2px solid rgba(148, 163, 184, 0.07);
+  box-shadow: 
+    0 0 0 1px rgba(148, 163, 184, 0.035),
+    0 0 40px rgba(148, 163, 184, 0.02);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* 方案2: 额外的装饰性图形 - 中间偏右（更圆的椭圆） */
+.decorative-circle-1 {
+  position: fixed;
+  top: 30%;
+  right: 5%;
+  width: 450px;
+  height: 400px;
+  background: radial-gradient(ellipse, rgba(96, 165, 250, 0.1) 0%, rgba(96, 165, 250, 0.08) 30%, rgba(96, 165, 250, 0.06) 50%, rgba(96, 165, 250, 0.03) 70%, transparent 90%);
+  border-radius: 50%;
+  border: 1.5px solid rgba(148, 163, 184, 0.07);
+  box-shadow: 
+    0 0 0 1px rgba(148, 163, 184, 0.035),
+    0 0 30px rgba(148, 163, 184, 0.02);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* 方案2: 额外的装饰性图形 - 中间偏左（更圆的椭圆） */
+.decorative-circle-2 {
+  position: fixed;
+  bottom: 25%;
+  left: 3%;
+  width: 400px;
+  height: 350px;
+  background: radial-gradient(ellipse, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.06) 30%, rgba(59, 130, 246, 0.04) 50%, rgba(59, 130, 246, 0.02) 70%, transparent 90%);
+  border-radius: 50%;
+  border: 1.5px solid rgba(148, 163, 184, 0.07);
+  box-shadow: 
+    0 0 0 1px rgba(148, 163, 184, 0.035),
+    0 0 25px rgba(148, 163, 184, 0.02);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* 确保主要内容在装饰元素之上 */
+#__next {
+  position: relative;
+  z-index: 1;
+}
+
+/* 微交互和动画效果 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 文章卡片动画 */
+.article-card-animate {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* 按钮涟漪效果 */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* 平滑过渡 */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* 增强卡片悬停效果 */
+.article-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.article-card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* 按钮悬停效果 */
+.btn-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-hover:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.btn-hover:active {
+  transform: translateY(0);
+}
+
+/* 导航链接下划线动画 */
+.nav-link-underline {
+  position: relative;
+}
+
+.nav-link-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #3b82f6;
+  transition: width 0.3s ease;
+}
+
+.nav-link-underline:hover::after {
+  width: 100%;
+}
+
+/* 搜索框聚焦效果 */
+.search-input-focus:focus {
+  transform: scale(1.02);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* 标签悬停效果 */
+.tag-hover {
+  transition: all 0.2s ease;
+}
+
+.tag-hover:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 分页按钮悬停效果 */
+.pagination-btn-hover {
+  transition: all 0.2s ease;
+}
+
+.pagination-btn-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* 热门文章悬停效果 - 与文章卡片类似的流畅过渡 */
+.popular-article {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.popular-article:hover {
+  transform: translateX(4px);
+  background-color: #f8fafc; /* slate-50 */
 }

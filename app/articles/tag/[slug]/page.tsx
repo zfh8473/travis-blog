@@ -228,21 +228,23 @@ export async function generateMetadata({
  */
 function TagPageLoading() {
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl relative z-10">
       <div className="mb-8">
-        <div className="h-10 bg-gray-200 rounded w-48 mb-2 animate-pulse" />
-        <div className="h-5 bg-gray-200 rounded w-32 animate-pulse" />
+        <div className="bg-white/95 backdrop-blur-sm border border-slate-200/80 rounded-xl p-6 mb-6">
+          <div className="h-10 bg-slate-200 rounded w-48 mb-2 animate-pulse" />
+          <div className="h-5 bg-slate-200 rounded w-32 animate-pulse" />
+        </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className="border border-gray-200 rounded-lg p-6 bg-white"
+            className="bg-white/95 backdrop-blur-sm border border-slate-200/80 rounded-xl p-6"
           >
-            <div className="h-6 bg-gray-200 rounded w-3/4 mb-3 animate-pulse" />
-            <div className="h-4 bg-gray-200 rounded w-full mb-2 animate-pulse" />
-            <div className="h-4 bg-gray-200 rounded w-2/3 mb-4 animate-pulse" />
-            <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse" />
+            <div className="h-6 bg-slate-200 rounded w-3/4 mb-3 animate-pulse" />
+            <div className="h-4 bg-slate-200 rounded w-full mb-2 animate-pulse" />
+            <div className="h-4 bg-slate-200 rounded w-2/3 mb-4 animate-pulse" />
+            <div className="h-4 bg-slate-200 rounded w-1/2 animate-pulse" />
           </div>
         ))}
       </div>
@@ -282,11 +284,15 @@ async function TagPageContent({
     }
 
     return (
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl relative z-10">
         {/* Page header */}
         <header className="mb-8">
+          <div className="bg-white/95 backdrop-blur-sm border border-slate-200/80 rounded-xl p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-4xl font-bold text-gray-900">{tag.name}标签</h1>
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🏷️</span>
+                <h1 className="text-4xl font-bold text-slate-900">{tag.name}标签</h1>
+              </div>
             <Link
               href="/"
               className="text-blue-600 hover:text-blue-800 transition-colors text-sm font-medium"
@@ -294,11 +300,12 @@ async function TagPageContent({
               查看全部文章 →
             </Link>
           </div>
-          <p className="text-gray-600">
+            <p className="text-slate-600">
             {pagination.total > 0
               ? `共找到 ${pagination.total} 篇文章`
               : "暂无文章"}
           </p>
+          </div>
         </header>
 
         {/* Article list */}
@@ -306,7 +313,7 @@ async function TagPageContent({
 
         {/* Pagination */}
         {pagination.totalPages > 1 && (
-          <Suspense fallback={<div className="mt-8 text-center text-gray-500">加载分页...</div>}>
+          <Suspense fallback={<div className="mt-8 text-center text-slate-500">加载分页...</div>}>
             <TagPagination pagination={pagination} tagSlug={slug} />
           </Suspense>
         )}
@@ -392,12 +399,12 @@ function TagPagination({
         {pagination.page > 1 ? (
           <Link
             href={buildPageUrl(pagination.page - 1)}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700"
+            className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium text-slate-700"
           >
             上一页
           </Link>
         ) : (
-          <span className="px-4 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed text-sm font-medium">
+          <span className="px-4 py-2 border border-slate-300 rounded-lg text-slate-400 cursor-not-allowed text-sm font-medium">
             上一页
           </span>
         )}
@@ -410,7 +417,7 @@ function TagPagination({
             return (
               <span
                 key={`ellipsis-${index}`}
-                className="px-2 py-2 text-gray-400"
+                className="px-2 py-2 text-slate-400"
               >
                 ...
               </span>
@@ -426,7 +433,7 @@ function TagPagination({
               className={`px-4 py-2 border rounded-lg transition-colors text-sm font-medium ${
                 isCurrentPage
                   ? "bg-blue-600 text-white border-blue-600"
-                  : "border-gray-300 hover:bg-gray-50 text-gray-700"
+                  : "border-slate-300 hover:bg-slate-50 text-slate-700"
               }`}
             >
               {pageNum}
@@ -440,19 +447,19 @@ function TagPagination({
         {pagination.page < pagination.totalPages ? (
           <Link
             href={buildPageUrl(pagination.page + 1)}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700"
+            className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium text-slate-700"
           >
             下一页
           </Link>
         ) : (
-          <span className="px-4 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed text-sm font-medium">
+          <span className="px-4 py-2 border border-slate-300 rounded-lg text-slate-400 cursor-not-allowed text-sm font-medium">
             下一页
           </span>
         )}
       </div>
 
       {/* Page info */}
-      <div className="text-sm text-gray-600">
+      <div className="text-sm text-slate-600">
         第 {pagination.page} 页，共 {pagination.totalPages} 页
       </div>
     </div>

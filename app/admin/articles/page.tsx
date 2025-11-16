@@ -481,9 +481,9 @@ export default function ArticlesListPage() {
                       {article.title}
                     </div>
                     <div className="mt-1 flex flex-wrap gap-1">
-                      {article.category && (
+                    {article.category && (
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                          {article.category.name}
+                        {article.category.name}
                         </span>
                       )}
                       {article.tags && article.tags.length > 0 && (
@@ -498,7 +498,7 @@ export default function ArticlesListPage() {
                           ))}
                         </>
                       )}
-                    </div>
+                      </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
@@ -541,8 +541,8 @@ export default function ArticlesListPage() {
           </table>
 
           {/* Results info */}
-          <div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
-            <div className="text-sm text-gray-700">
+            <div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
+              <div className="text-sm text-gray-700">
               {filteredArticles.length === 0 ? (
                 <span>没有找到匹配的文章</span>
               ) : (

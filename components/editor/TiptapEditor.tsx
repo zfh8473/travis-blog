@@ -4,7 +4,8 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useState, useRef } from "react";
+import { htmlToMarkdown, markdownToHtml } from "@/lib/utils/markdown-converter";
 
 /**
  * Props for the TiptapEditor component.
@@ -77,6 +78,17 @@ export default function TiptapEditor({
 }: TiptapEditorProps) {
   // Error state for user-friendly error messages
   const [error, setError] = useState<string | null>(null);
+  
+  // Markdown mode states
+  const [isMarkdownMode, setIsMarkdownMode] = useState(false);
+  const [markdownContent, setMarkdownContent] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
+  const isMarkdownModeRef = useRef(isMarkdownMode);
+  
+  // Keep ref in sync with state
+  useEffect(() => {
+    isMarkdownModeRef.current = isMarkdownMode;
+  }, [isMarkdownMode]);
 
   /**
    * Handles image upload from drag-and-drop or paste.
@@ -139,9 +151,15 @@ export default function TiptapEditor({
     ],
     content: initialContent || "",
     editable: !readOnly,
+    immediatelyRender: false, // Prevent SSR hydration mismatches
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
       onChange?.(html);
+      // Sync markdown content when in visual mode
+      if (!isMarkdownModeRef.current) {
+        const markdown = htmlToMarkdown(html);
+        setMarkdownContent(markdown);
+      }
     },
     editorProps: {
       attributes: {
@@ -224,9 +242,73 @@ export default function TiptapEditor({
       const currentContent = editor.getHTML();
       if (currentContent !== initialContent) {
         editor.commands.setContent(initialContent);
+        // Sync markdown content
+        if (isMarkdownMode) {
+          setMarkdownContent(htmlToMarkdown(initialContent));
+        }
       }
     }
+  }, [editor, initialContent, isMarkdownMode]);
+
+  // Initialize markdown content from initial HTML
+  useEffect(() => {
+    if (editor && initialContent) {
+      const markdown = htmlToMarkdown(initialContent);
+      setMarkdownContent(markdown);
+    }
   }, [editor, initialContent]);
+
+  /**
+   * Handles switching between visual and markdown mode.
+   */
+  const handleModeSwitch = () => {
+    if (!editor) return;
+
+    if (isMarkdownMode) {
+      // Switching from Markdown to Visual: convert Markdown to HTML
+      const html = markdownToHtml(markdownContent);
+      editor.commands.setContent(html);
+      onChange?.(html);
+    } else {
+      // Switching from Visual to Markdown: convert HTML to Markdown
+      const html = editor.getHTML();
+      const markdown = htmlToMarkdown(html);
+      setMarkdownContent(markdown);
+    }
+    setIsMarkdownMode(!isMarkdownMode);
+  };
+
+  /**
+   * Handles Markdown content change in source mode.
+   */
+  const handleMarkdownChange = (value: string) => {
+    setMarkdownContent(value);
+    // Convert to HTML and notify parent
+    const html = markdownToHtml(value);
+    onChange?.(html);
+  };
+
+  /**
+   * Exports current content as Markdown file.
+   */
+  const handleExportMarkdown = () => {
+    if (!editor) return;
+
+    const markdown = isMarkdownMode 
+      ? markdownContent 
+      : htmlToMarkdown(editor.getHTML());
+
+    // Create download link
+    const blob = new Blob([markdown], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `article-${Date.now()}.md`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   // Handle save callback (can be triggered by parent component)
   useEffect(() => {
@@ -238,14 +320,14 @@ export default function TiptapEditor({
 
   if (!editor) {
     return (
-      <div className="border border-gray-300 rounded-lg p-4 min-h-[300px] flex items-center justify-center">
-        <p className="text-gray-500">Loading editor...</p>
+      <div className="border border-slate-300 rounded-lg p-4 min-h-[300px] flex items-center justify-center bg-white/80 backdrop-blur-sm">
+        <p className="text-slate-500">Loading editor...</p>
       </div>
     );
   }
 
   return (
-    <div className="border border-gray-300 rounded-lg">
+    <div className="border border-slate-300 rounded-lg bg-white/80 backdrop-blur-sm">
       {/* Error Message */}
       {error && (
         <div className="bg-red-50 border-b border-red-200 text-red-800 px-4 py-3 rounded-t-lg">
@@ -265,7 +347,52 @@ export default function TiptapEditor({
 
       {/* Toolbar */}
       {!readOnly && (
-        <div className="border-b border-gray-300 p-2 flex flex-wrap gap-2">
+        <div className="border-b border-slate-300 p-2 flex flex-wrap gap-2 items-center bg-white/50">
+          {/* Markdown Mode Toggle */}
+          <button
+            type="button"
+            onClick={handleModeSwitch}
+            className={`px-3 py-1 rounded text-sm transition-all ${
+              isMarkdownMode
+                ? "bg-blue-600 text-white hover:bg-blue-700"
+                : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+            }`}
+            title={isMarkdownMode ? "切换到可视化编辑" : "切换到 Markdown 源码"}
+          >
+            {isMarkdownMode ? "可视化" : "Markdown"}
+          </button>
+
+          {/* Preview Toggle (only in visual mode) */}
+          {!isMarkdownMode && (
+            <button
+              type="button"
+              onClick={() => setShowPreview(!showPreview)}
+              className={`px-3 py-1 rounded text-sm transition-all ${
+                showPreview
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+              }`}
+              title="切换预览"
+            >
+              {showPreview ? "隐藏预览" : "显示预览"}
+            </button>
+          )}
+
+          {/* Export Markdown */}
+          <button
+            type="button"
+            onClick={handleExportMarkdown}
+            className="px-3 py-1 rounded text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all"
+            title="导出为 Markdown 文件"
+          >
+            导出 MD
+          </button>
+
+          <div className="flex-1" /> {/* Spacer */}
+
+          {/* Formatting Buttons (only in visual mode) */}
+          {!isMarkdownMode && (
+            <>
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleBold().run()}
@@ -273,7 +400,7 @@ export default function TiptapEditor({
             className={`px-3 py-1 rounded ${
               editor.isActive("bold")
                 ? "bg-blue-500 text-white"
-                : "bg-gray-100 hover:bg-gray-200"
+                : "bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all"
             }`}
           >
             <strong>B</strong>
@@ -285,7 +412,7 @@ export default function TiptapEditor({
             className={`px-3 py-1 rounded ${
               editor.isActive("italic")
                 ? "bg-blue-500 text-white"
-                : "bg-gray-100 hover:bg-gray-200"
+                : "bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all"
             }`}
           >
             <em>I</em>
@@ -298,7 +425,7 @@ export default function TiptapEditor({
             className={`px-3 py-1 rounded ${
               editor.isActive("heading", { level: 1 })
                 ? "bg-blue-500 text-white"
-                : "bg-gray-100 hover:bg-gray-200"
+                : "bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all"
             }`}
           >
             H1
@@ -311,7 +438,7 @@ export default function TiptapEditor({
             className={`px-3 py-1 rounded ${
               editor.isActive("heading", { level: 2 })
                 ? "bg-blue-500 text-white"
-                : "bg-gray-100 hover:bg-gray-200"
+                : "bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all"
             }`}
           >
             H2
@@ -324,7 +451,7 @@ export default function TiptapEditor({
             className={`px-3 py-1 rounded ${
               editor.isActive("heading", { level: 3 })
                 ? "bg-blue-500 text-white"
-                : "bg-gray-100 hover:bg-gray-200"
+                : "bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all"
             }`}
           >
             H3
@@ -335,7 +462,7 @@ export default function TiptapEditor({
             className={`px-3 py-1 rounded ${
               editor.isActive("bulletList")
                 ? "bg-blue-500 text-white"
-                : "bg-gray-100 hover:bg-gray-200"
+                : "bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all"
             }`}
           >
             • List
@@ -346,7 +473,7 @@ export default function TiptapEditor({
             className={`px-3 py-1 rounded ${
               editor.isActive("orderedList")
                 ? "bg-blue-500 text-white"
-                : "bg-gray-100 hover:bg-gray-200"
+                : "bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all"
             }`}
           >
             1. List
@@ -357,7 +484,7 @@ export default function TiptapEditor({
             className={`px-3 py-1 rounded ${
               editor.isActive("blockquote")
                 ? "bg-blue-500 text-white"
-                : "bg-gray-100 hover:bg-gray-200"
+                : "bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all"
             }`}
           >
             "
@@ -368,7 +495,7 @@ export default function TiptapEditor({
             className={`px-3 py-1 rounded ${
               editor.isActive("codeBlock")
                 ? "bg-blue-500 text-white"
-                : "bg-gray-100 hover:bg-gray-200"
+                : "bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all"
             }`}
           >
             {"</>"}
@@ -399,16 +526,51 @@ export default function TiptapEditor({
             className={`px-3 py-1 rounded ${
               editor.isActive("link")
                 ? "bg-blue-500 text-white"
-                : "bg-gray-100 hover:bg-gray-200"
+                : "bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all"
             }`}
           >
             Link
           </button>
+            </>
+          )}
         </div>
       )}
 
-      {/* Editor Content */}
-      <EditorContent editor={editor} />
+      {/* Editor Content Area */}
+      <div className={showPreview && !isMarkdownMode ? "grid grid-cols-2 gap-0" : ""}>
+        {/* Visual Editor or Markdown Source */}
+        {isMarkdownMode ? (
+          <div className="p-4">
+            <textarea
+              value={markdownContent}
+              onChange={(e) => handleMarkdownChange(e.target.value)}
+              placeholder={placeholder}
+              className="w-full h-[500px] p-4 border border-slate-300 rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-white/80 backdrop-blur-sm transition-all"
+              spellCheck={false}
+            />
+            <p className="mt-2 text-xs text-slate-500">
+              提示：在此处直接编辑 Markdown 源码，切换回可视化模式查看效果
+            </p>
+          </div>
+        ) : (
+          <div className={showPreview ? "border-r border-slate-300" : ""}>
+            <EditorContent editor={editor} />
+          </div>
+        )}
+
+        {/* Preview Panel (only in visual mode with preview enabled) */}
+        {showPreview && !isMarkdownMode && editor && (
+          <div className="p-4 overflow-auto max-h-[600px] bg-slate-50/80 backdrop-blur-sm">
+            <div className="mb-3 text-sm font-semibold text-slate-700 border-b border-slate-200 pb-2">
+              预览
+            </div>
+            <div
+              className="prose prose-sm sm:prose lg:prose-lg xl:prose-2xl max-w-none"
+              dangerouslySetInnerHTML={{ __html: editor.getHTML() }}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

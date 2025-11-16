@@ -57,7 +57,11 @@ export default function CommentItem({
   const isAdmin = session?.user?.role === "ADMIN";
 
   // Get author name: from user.name (logged-in) or authorName (anonymous)
-  const authorName = comment.user?.name || comment.authorName || "匿名用户";
+  // For anonymous users, prefix with "访客："
+  const isGuest = !comment.user && comment.authorName;
+  const authorName = isGuest 
+    ? `访客：${comment.authorName}`
+    : (comment.user?.name || "匿名用户");
   
   // Get author avatar: from user.image (logged-in users only)
   const authorAvatar = comment.user?.image || null;
@@ -78,7 +82,11 @@ export default function CommentItem({
   const parentAuthorName = isReply && allComments.length > 0
     ? (() => {
         const parent = allComments.find(c => c.id === comment.parentId);
-        return parent ? (parent.user?.name || parent.authorName || "匿名用户") : null;
+        if (!parent) return null;
+        const isParentGuest = !parent.user && parent.authorName;
+        return isParentGuest 
+          ? `访客：${parent.authorName}`
+          : (parent.user?.name || "匿名用户");
       })()
     : null;
 

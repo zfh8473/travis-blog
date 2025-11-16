@@ -1,0 +1,169 @@
+<story-context id="4.6" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>6</storyId>
+    <title>前台导航栏和用户入口</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-15</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/4-6-前台导航栏和用户入口.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>reader or blog author</asA>
+    <iWant>to access navigation, search, login, and publish features from a global navigation bar</iWant>
+    <soThat>I can easily navigate the site, find content, and access authentication and content creation features</soThat>
+    <tasks>
+      <task id="1" description="Create NavigationBar Component" ac="4.6.1, 4.6.2, 4.6.3, 4.6.4, 4.6.5, 4.6.6, 4.6.15"/>
+      <task id="2" description="Integrate NextAuth Session" ac="4.6.5, 4.6.6"/>
+      <task id="3" description="Implement Mobile Responsive Menu" ac="4.6.7, 4.6.8, 4.6.9"/>
+      <task id="4" description="Implement Sticky Positioning and Background" ac="4.6.13, 4.6.14"/>
+      <task id="5" description="Implement Search Functionality" ac="4.6.12"/>
+      <task id="6" description="Integrate NavigationBar into Root Layout" ac="4.6.1"/>
+      <task id="7" description="Implement Navigation Links" ac="4.6.4"/>
+      <task id="8" description="Write Tests" ac="All ACs"/>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-4.6.1" description="Given I visit any page on the blog, When the page loads, Then I see a global navigation bar at the top"/>
+    <criterion id="AC-4.6.2" description="Given I view the navigation bar, Then it includes Logo with brand name and subtitle ('travis-blog' and '分享技术与思考')"/>
+    <criterion id="AC-4.6.3" description="Given I view the navigation bar, Then it includes Search box with search icon"/>
+    <criterion id="AC-4.6.4" description="Given I view the navigation bar, Then it includes Navigation links (首页、分类、标签、关于)"/>
+    <criterion id="AC-4.6.5" description="Given I am not logged in, When I view the navigation bar, Then I see a Login button"/>
+    <criterion id="AC-4.6.6" description="Given I am logged in as admin, When I view the navigation bar, Then I see a Publish Article button"/>
+    <criterion id="AC-4.6.7" description="Given I am on a mobile device, When I view the navigation bar, Then I see a hamburger menu icon"/>
+    <criterion id="AC-4.6.8" description="Given I am on a mobile device, When I click the hamburger menu, Then the navigation menu expands/collapses"/>
+    <criterion id="AC-4.6.9" description="Given I am on a mobile device, Then all navigation links and buttons have touch targets of at least 44x44px"/>
+    <criterion id="AC-4.6.10" description="Given I am not logged in, When I click the Login button, Then I am redirected to the login page (/login)"/>
+    <criterion id="AC-4.6.11" description="Given I am logged in as admin, When I click the Publish Article button, Then I am redirected to the article creation page (/admin/articles/new)"/>
+    <criterion id="AC-4.6.12" description="Given I enter a search query in the search box, When I submit the search (Enter key or search icon click), Then I am redirected to search results page with the query parameter"/>
+    <criterion id="AC-4.6.13" description="Given the navigation bar is visible, When I scroll down the page, Then the navigation bar remains fixed at the top (sticky positioning)"/>
+    <criterion id="AC-4.6.14" description="Given the navigation bar is visible, Then it has a semi-transparent background with blur effect"/>
+    <criterion id="AC-4.6.15" description="Given I view the navigation bar, Then the design follows the UX Design Specification (极简科技风 color system, Geist Sans font, 4px base unit spacing, hover/focus states, smooth transitions)"/>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics.md" title="Epic 4 Definition" section="Story 4.6: 前台导航栏和用户入口" snippet="As a reader or blog author, I want to access navigation, search, login, and publish features from a global navigation bar, So that I can easily navigate the site, find content, and access authentication and content creation features. Includes Logo with brand name and subtitle, Search box, Navigation links, Login/Publish buttons, Mobile hamburger menu, Sticky positioning, and UX Design Specification compliance."/>
+      <doc path="docs/ux-design-specification.md" title="UX Design Specification" section="Visual Foundation" snippet="极简科技风 color system: Primary Blue #3b82f6, Primary Dark #2563eb, Primary Light #60a5fa. Typography: Geist Sans for headings and body, Geist Mono for code. Spacing: 4px base unit. Design direction: 极简科技风 + 卡片式布局. Navigation mode: Top navigation bar with site logo, main navigation links, and user action entry points."/>
+      <doc path="docs/ux-layout-improvements.md" title="UX Layout Improvements" section="导航栏改进" snippet="Enhance brand recognition with Logo icon and subtitle. Optimize mobile navigation with hamburger menu. Add search functionality in navigation bar. Ensure touch targets are at least 44x44px. Add semi-transparent background with blur effect for sticky navigation."/>
+      <doc path="docs/ux-background-mockup-combined.html" title="UX Design Mockup" section="Navigation Bar Implementation" snippet="Complete navigation bar mockup with Logo section (logo icon + 'travis-blog' + '分享技术与思考'), Search box with search icon, Navigation links (首页、分类、标签、关于), Login/Publish buttons, Mobile hamburger menu, Sticky positioning with backdrop blur, Responsive design patterns."/>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Next.js App Router" snippet="Use Server Components for session access (getServerSession). Use Client Components for interactive features (mobile menu toggle, search). Use Next.js Link component for navigation. Component organization: components/layout/ directory for layout components."/>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Component Organization" snippet="Components organized in feature directories. Layout components in components/layout/. Follow PascalCase.tsx naming convention. Separate Server Components (data/session) from Client Components (interactivity)."/>
+      <doc path="docs/architecture.md" title="Architecture Document" section="Styling Architecture" snippet="Use Tailwind CSS for all styling. Mobile-first responsive design. Use Tailwind responsive breakpoints: sm:, md:, lg:, xl:. Apply UX Design Specification colors, typography, and spacing."/>
+      <doc path=".bmad-ephemeral/stories/tech-spec-epic-4.md" title="Epic 4 Technical Specification" section="System Architecture Alignment" snippet="Frontend architecture: Next.js App Router Server Components for SSR, Client Components for interactivity, Tailwind CSS for responsive design. Component organization: components/article/ directory. API architecture: Use existing public API endpoints. Routing: app/page.tsx for homepage, app/articles/[slug]/page.tsx for article detail."/>
+      <doc path=".bmad-ephemeral/stories/4-5-分页功能.md" title="Story 4.5: 分页功能" section="Learnings from Previous Story" snippet="Pagination component uses Client Component pattern for interactivity (useSearchParams). Responsive design uses flex-col sm:flex-row. URL parameter handling uses Next.js useSearchParams. Component organization: components/article/ directory. Server Components for data fetching, Client Components for interactivity."/>
+      <doc path=".bmad-ephemeral/stories/4-1-文章列表页面（首页）.md" title="Story 4.1: 文章列表页面（首页）" section="Dev Notes" snippet="Homepage uses Server Components for data fetching. Homepage is integrated into root layout. Use Next.js Link component for navigation. Follow Tailwind CSS styling patterns."/>
+    </docs>
+    <code>
+      <code path="app/layout.tsx" kind="layout" symbol="RootLayout" lines="21-35" reason="Root layout component where NavigationBar should be integrated. Currently includes Providers wrapper and basic structure. NavigationBar should be added here to appear on all pages."/>
+      <code path="app/api/auth/[...nextauth]/route.ts" kind="config" symbol="authOptions" lines="40-287" reason="NextAuth.js configuration with Credentials, GitHub, and Google providers. Exports authOptions for use with getServerSession in Server Components. JWT session strategy with 30-day expiration."/>
+      <code path="app/admin/layout.tsx" kind="layout" symbol="AdminLayout" lines="19-79" reason="Example of using getServerSession in Server Component layout. Shows pattern: import getServerSession and authOptions, await getServerSession(authOptions), check session and user role. NavigationBar should follow similar pattern for session access."/>
+      <code path="app/profile/page.tsx" kind="page" symbol="ProfilePage" lines="16-56" reason="Example of using getServerSession in Server Component page. Shows pattern: await getServerSession(authOptions), check if session exists, access session.user.role. NavigationBar can use similar pattern to check authentication and admin role."/>
+      <code path="lib/auth/permissions.ts" kind="module" symbol="Role" lines="1-20" reason="Role enum definition (ADMIN, USER). Use Role.ADMIN to check admin role. Also contains requireAdminInServerComponent function for Server Components, but NavigationBar can directly check session.user.role === Role.ADMIN."/>
+      <code path="lib/hooks/useUserRole.ts" kind="hook" symbol="useUserRole" lines="31-50" reason="Client Component hook for checking user role. Uses useSession from next-auth/react. Returns isAdmin, isAuthenticated, userRole. Can be used in Client Component parts of NavigationBar (mobile menu, search)."/>
+      <code path="components/article/Pagination.tsx" kind="component" symbol="Pagination" lines="1-177" reason="Example Client Component pattern. Uses 'use client' directive, useSearchParams hook for URL parameters. NavigationBar mobile menu and search can follow similar Client Component pattern for interactivity."/>
+      <code path="app/login/page.tsx" kind="page" symbol="LoginPage" lines="1-315" reason="Login page implementation. NavigationBar Login button should link to /login. Shows login page structure and styling patterns."/>
+      <code path="app/admin/articles/new/page.tsx" kind="page" symbol="NewArticlePage" reason="Article creation page. NavigationBar Publish Article button should link to /admin/articles/new. Requires admin authentication."/>
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="next" version="16.0.2"/>
+        <package name="react" version="19.2.0"/>
+        <package name="react-dom" version="19.2.0"/>
+        <package name="next-auth" version="^5.0.0-beta.25"/>
+        <package name="@prisma/client" version="^6.19.0"/>
+        <package name="tailwindcss" version="^4"/>
+      </ecosystem>
+      <ecosystem name="dev">
+        <package name="@testing-library/react" version="^16.3.0"/>
+        <package name="@testing-library/jest-dom" version="^6.9.1"/>
+        <package name="@playwright/test" version="^1.56.1"/>
+        <package name="jest" version="^30.2.0"/>
+        <package name="typescript" version="^5"/>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="architectural">NavigationBar component must be in components/layout/ directory following PascalCase.tsx naming convention.</constraint>
+    <constraint type="architectural">NavigationBar should use Server Component pattern for session access (getServerSession) and Client Component pattern for interactive features (mobile menu toggle, search). Consider splitting into Server Component wrapper + Client Component for interactive parts.</constraint>
+    <constraint type="architectural">Use Next.js Link component for all navigation links. Do not use anchor tags for internal navigation.</constraint>
+    <constraint type="authentication">Use getServerSession from next-auth with authOptions from app/api/auth/[...nextauth]/route.ts to check authentication status in Server Components.</constraint>
+    <constraint type="authentication">Check user role using session.user.role === Role.ADMIN to determine if Publish Article button should be visible.</constraint>
+    <constraint type="styling">Use Tailwind CSS for all styling. Apply UX Design Specification: Primary Blue #3b82f6, Geist Sans font, 4px base unit spacing.</constraint>
+    <constraint type="styling">Implement responsive design with mobile-first approach. Use Tailwind responsive breakpoints: sm: (640px), md: (768px), lg: (1024px).</constraint>
+    <constraint type="styling">Navigation bar must have sticky positioning (position: sticky, top: 0) with semi-transparent background and backdrop blur effect.</constraint>
+    <constraint type="accessibility">Ensure keyboard navigation works for all interactive elements.</constraint>
+    <constraint type="accessibility">Add ARIA labels for interactive elements (hamburger menu, search box, buttons).</constraint>
+    <constraint type="accessibility">Ensure focus states are visible for all interactive elements.</constraint>
+    <constraint type="accessibility">Ensure touch targets are at least 44x44px for mobile devices.</constraint>
+    <constraint type="mobile-menu">Mobile hamburger menu should only appear on screens max-width: 1024px (lg breakpoint).</constraint>
+    <constraint type="mobile-menu">Mobile menu should toggle expand/collapse state. Hide desktop navigation on mobile, show hamburger menu.</constraint>
+    <constraint type="search">Search functionality is basic redirect only (to /search?q=query). Full search implementation can be in future story.</constraint>
+    <constraint type="search">Search should handle Enter key press and search icon click to submit query.</constraint>
+    <constraint type="navigation-links">Navigation links: 首页 (/), 分类 (can be /categories or similar), 标签 (can be /tags or similar), 关于 (can be /about or similar).</constraint>
+    <constraint type="navigation-links">Add active state styling for current page navigation link.</constraint>
+    <constraint type="logo">Logo section should include: Logo icon (32x32px gradient background 'T'), Brand name ('travis-blog'), Subtitle ('分享技术与思考').</constraint>
+    <constraint type="interactions">Add hover and focus states for all interactive elements (links, buttons, search box).</constraint>
+    <constraint type="interactions">Add smooth transitions and micro-interactions (hover effects, focus animations).</constraint>
+    <constraint type="z-index">Sticky positioning may need z-index management to ensure navigation bar appears above page content when scrolling.</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="getServerSession" kind="NextAuth function" signature="async function getServerSession(options: NextAuthOptions): Promise&lt;Session | null&gt;" path="next-auth">
+      <description>Get server-side session in Server Components. Returns Session object with user information (id, email, name, role) or null if not authenticated.</description>
+      <example>const session = await getServerSession(authOptions); if (session?.user?.role === Role.ADMIN) { /* show admin features */ }</example>
+    </interface>
+    <interface name="useSession" kind="NextAuth hook" signature="function useSession(): { data: Session | null, status: 'loading' | 'authenticated' | 'unauthenticated' }" path="next-auth/react">
+      <description>Get client-side session in Client Components. Returns session data and loading status.</description>
+      <example>const { data: session, status } = useSession(); const isAdmin = session?.user?.role === Role.ADMIN;</example>
+    </interface>
+    <interface name="useUserRole" kind="custom hook" signature="function useUserRole(): { isAdmin: boolean, isAuthenticated: boolean, userRole: Role | null, ... }" path="lib/hooks/useUserRole.ts">
+      <description>Custom hook for checking user role in Client Components. Provides convenient methods: isAdmin, isAuthenticated, userRole.</description>
+      <example>const { isAdmin, isAuthenticated } = useUserRole();</example>
+    </interface>
+    <interface name="Link" kind="Next.js component" signature="function Link({ href, children, ...props }: LinkProps): JSX.Element" path="next/link">
+      <description>Next.js Link component for client-side navigation. Use for all internal navigation links.</description>
+      <example>&lt;Link href="/login"&gt;Login&lt;/Link&gt;</example>
+    </interface>
+    <interface name="useSearchParams" kind="Next.js hook" signature="function useSearchParams(): ReadonlyURLSearchParams" path="next/navigation">
+      <description>Hook for reading URL search parameters in Client Components. Can be used for search functionality.</description>
+      <example>const searchParams = useSearchParams(); const query = searchParams.get('q');</example>
+    </interface>
+    <interface name="useRouter" kind="Next.js hook" signature="function useRouter(): AppRouterInstance" path="next/navigation">
+      <description>Hook for programmatic navigation in Client Components. Can be used for search redirect.</description>
+      <example>const router = useRouter(); router.push('/search?q=query');</example>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use React Testing Library for unit tests of NavigationBar component. Test component rendering with different authentication states (logged in, logged out, admin, non-admin). Test mobile menu toggle functionality. Test search input handling. Test navigation links rendering. Use Playwright for E2E tests covering complete user flows: navigation through site, login button redirect, publish article button redirect (when logged in as admin), search functionality, mobile menu toggle, responsive behavior on mobile devices. Mock Next.js navigation in integration tests. Test sticky positioning behavior. Test responsive behavior on mobile, tablet, and desktop.
+    </standards>
+    <locations>
+      <location>tests/__tests__/unit/</location>
+      <location>tests/__tests__/integration/</location>
+      <location>tests/e2e/</location>
+    </locations>
+    <ideas>
+      <test ac="AC-4.6.1" description="Test NavigationBar renders on all pages (homepage, article detail, category, tag pages)"/>
+      <test ac="AC-4.6.2" description="Test Logo section displays brand name and subtitle correctly"/>
+      <test ac="AC-4.6.3" description="Test Search box with search icon renders correctly"/>
+      <test ac="AC-4.6.4" description="Test Navigation links (首页、分类、标签、关于) render correctly"/>
+      <test ac="AC-4.6.5" description="Test Login button appears when user is not authenticated"/>
+      <test ac="AC-4.6.6" description="Test Publish Article button appears when user is logged in as admin"/>
+      <test ac="AC-4.6.7" description="Test Hamburger menu icon appears on mobile devices (max-width: 1024px)"/>
+      <test ac="AC-4.6.8" description="Test Mobile menu expands/collapses when hamburger is clicked"/>
+      <test ac="AC-4.6.9" description="Test All navigation links and buttons have touch targets of at least 44x44px on mobile"/>
+      <test ac="AC-4.6.10" description="Test Login button redirects to /login page when clicked"/>
+      <test ac="AC-4.6.11" description="Test Publish Article button redirects to /admin/articles/new when clicked (when logged in as admin)"/>
+      <test ac="AC-4.6.12" description="Test Search functionality redirects to search results page with query parameter when submitted"/>
+      <test ac="AC-4.6.13" description="Test Navigation bar remains fixed at top when scrolling (sticky positioning)"/>
+      <test ac="AC-4.6.14" description="Test Navigation bar has semi-transparent background with blur effect"/>
+      <test ac="AC-4.6.15" description="Test Navigation bar design follows UX Design Specification (colors, typography, spacing, hover/focus states, transitions)"/>
+    </ideas>
+  </tests>
+</story-context>
+

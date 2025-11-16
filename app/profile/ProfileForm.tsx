@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
@@ -64,7 +64,7 @@ export function ProfileForm({
     ];
     if (!allowedTypes.includes(file.type)) {
       setErrors({
-        avatar: "File must be an image (jpg, jpeg, png, gif, or webp)",
+        avatar: "文件必须是图片格式（jpg、jpeg、png、gif 或 webp）",
       });
       return;
     }
@@ -72,7 +72,7 @@ export function ProfileForm({
     // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
       setErrors({
-        avatar: "File size must be less than 5MB",
+        avatar: "文件大小必须小于 5MB",
       });
       return;
     }
@@ -114,7 +114,7 @@ export function ProfileForm({
 
       if (!response.ok) {
         setErrors({
-          avatar: result.error?.message || "Failed to upload avatar",
+          avatar: result.error?.message || "头像上传失败",
         });
         return;
       }
@@ -133,12 +133,12 @@ export function ProfileForm({
         fileInputRef.current.value = "";
       }
 
-      setSuccessMessage("Avatar uploaded successfully!");
+      setSuccessMessage("头像上传成功！");
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (error) {
       console.error("Error uploading avatar:", error);
       setErrors({
-        avatar: "Failed to upload avatar. Please try again.",
+        avatar: "头像上传失败，请重试。",
       });
     } finally {
       setIsUploadingAvatar(false);
@@ -186,7 +186,7 @@ export function ProfileForm({
           setErrors(validationErrors);
         } else {
           setErrors({
-            general: result.error?.message || "Failed to update profile",
+            general: result.error?.message || "更新资料失败",
           });
         }
         return;
@@ -198,12 +198,12 @@ export function ProfileForm({
       // Refresh page to show updated data
       router.refresh();
 
-      setSuccessMessage("Profile updated successfully!");
+      setSuccessMessage("资料更新成功！");
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (error) {
       console.error("Error updating profile:", error);
       setErrors({
-        general: "Failed to update profile. Please try again.",
+        general: "更新资料失败，请重试。",
       });
     } finally {
       setIsLoading(false);
@@ -214,64 +214,58 @@ export function ProfileForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Success Message */}
       {successMessage && (
-        <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded">
+        <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
           {successMessage}
         </div>
       )}
 
       {/* General Error Message */}
       {errors.general && (
-        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
+        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
           {errors.general}
         </div>
       )}
 
-      {/* Email (Read-only) */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Email
-        </label>
-        <input
-          type="email"
-          value={initialData?.email || ""}
-          disabled
-          className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
-        />
-        <p className="mt-1 text-sm text-gray-500">
-          Email cannot be changed
-        </p>
-      </div>
-
-      {/* Avatar Upload */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Avatar
+      {/* Avatar Card */}
+      <div className="bg-white/95 backdrop-blur-sm border border-slate-200/80 rounded-xl p-6 shadow-sm article-card-hover">
+        <label className="block text-sm font-semibold text-slate-600 mb-4">
+          头像
         </label>
         <div className="flex items-center space-x-4">
           {avatarPreview ? (
-            <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-gray-300">
+            <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-slate-300 shadow-sm">
               <Image
                 src={avatarPreview}
-                alt="Avatar preview"
+                alt="头像预览"
                 fill
                 className="object-cover"
               />
             </div>
           ) : (
-            <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
-              <span className="text-gray-400 text-2xl">
-                {initialData?.name?.[0]?.toUpperCase() || "?"}
+            <div className="w-24 h-24 rounded-full bg-slate-200 flex items-center justify-center border-2 border-slate-300 shadow-sm">
+              <span className="text-slate-400 text-xs text-center px-2">
+                暂无头像
               </span>
             </div>
           )}
           <div className="flex-1">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-              onChange={handleFileSelect}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-            />
+            <label className="block cursor-pointer">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <div className="flex items-center gap-2">
+                <span className="px-4 py-2 text-sm font-semibold text-blue-700 bg-blue-50 rounded-md hover:bg-blue-100 transition-all btn-hover">
+                  选择文件
+                </span>
+                <span className="text-sm text-slate-500">
+                  {selectedFile ? selectedFile.name : "未选择文件"}
+                </span>
+              </div>
+            </label>
             {errors.avatar && (
               <p className="mt-1 text-sm text-red-600">{errors.avatar}</p>
             )}
@@ -280,77 +274,109 @@ export function ProfileForm({
                 type="button"
                 onClick={handleAvatarUpload}
                 disabled={isUploadingAvatar}
-                className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="mt-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 disabled:bg-slate-400 disabled:text-white disabled:cursor-not-allowed btn-hover transition-all"
               >
-                {isUploadingAvatar ? "Uploading..." : "Upload Avatar"}
+                {isUploadingAvatar ? "上传中..." : "上传头像"}
               </button>
             )}
           </div>
         </div>
       </div>
 
-      {/* Name */}
-      <div>
-        <label
-          htmlFor="name"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Name
-        </label>
-        <input
-          type="text"
-          id="name"
-          value={formData.name}
-          onChange={(e) =>
-            setFormData({ ...formData, name: e.target.value })
-          }
-          maxLength={100}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        {errors.name && (
-          <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-        )}
-        <p className="mt-1 text-sm text-gray-500">
-          {formData.name.length}/100 characters
-        </p>
+      {/* Basic Info Card */}
+      <div className="bg-white/95 backdrop-blur-sm border border-slate-200/80 rounded-xl p-6 shadow-sm article-card-hover">
+        <div className="space-y-6">
+          {/* Email (Read-only) */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-600 mb-2">
+              邮箱
+            </label>
+            <input
+              type="email"
+              value={initialData?.email || ""}
+              disabled
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-500 transition-all"
+            />
+            <p className="mt-1 text-sm text-slate-500">
+              邮箱无法修改
+            </p>
+          </div>
+
+          {/* Name */}
+          <div>
+            <label
+              htmlFor="name"
+              className="block text-sm font-semibold text-slate-600 mb-2"
+            >
+              姓名
+            </label>
+            <input
+              type="text"
+              id="name"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+              maxLength={100}
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            />
+            {errors.name && (
+              <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+            )}
+            <p className="mt-1 text-sm text-slate-500">
+              {formData.name.length}/100 字符
+            </p>
+          </div>
+
+          {/* Bio */}
+          <div>
+            <label
+              htmlFor="bio"
+              className="block text-sm font-semibold text-slate-600 mb-2"
+            >
+              简介
+            </label>
+            <textarea
+              id="bio"
+              value={formData.bio}
+              onChange={(e) =>
+                setFormData({ ...formData, bio: e.target.value })
+              }
+              maxLength={500}
+              rows={4}
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+              placeholder="介绍一下你自己..."
+            />
+            {errors.bio && (
+              <p className="mt-1 text-sm text-red-600">{errors.bio}</p>
+            )}
+            <p className="mt-1 text-sm text-slate-500">
+              {formData.bio.length}/500 字符
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* Bio */}
-      <div>
-        <label
-          htmlFor="bio"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Bio
-        </label>
-        <textarea
-          id="bio"
-          value={formData.bio}
-          onChange={(e) =>
-            setFormData({ ...formData, bio: e.target.value })
-          }
-          maxLength={500}
-          rows={4}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Tell us about yourself..."
-        />
-        {errors.bio && (
-          <p className="mt-1 text-sm text-red-600">{errors.bio}</p>
-        )}
-        <p className="mt-1 text-sm text-gray-500">
-          {formData.bio.length}/500 characters
-        </p>
-      </div>
-
-      {/* Submit Button */}
-      <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={isLoading || isUploadingAvatar}
-          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-        >
-          {isLoading ? "Saving..." : "Save Changes"}
-        </button>
+      {/* Actions Card */}
+      <div className="bg-white/95 backdrop-blur-sm border border-slate-200/80 rounded-xl p-6 shadow-sm article-card-hover">
+        <div className="flex justify-between items-center">
+          <button
+            type="button"
+            onClick={async () => {
+              await signOut({ callbackUrl: "/" });
+            }}
+            className="px-6 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 btn-hover transition-all"
+          >
+            退出登录
+          </button>
+          <button
+            type="submit"
+            disabled={isLoading || isUploadingAvatar}
+            className="px-6 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed btn-hover transition-all"
+          >
+            {isLoading ? "保存中..." : "保存更改"}
+          </button>
+        </div>
       </div>
     </form>
   );

@@ -402,337 +402,366 @@ export default function NewArticlePage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl relative z-10">
         <div className="flex items-center justify-center min-h-[400px]">
-          <p className="text-gray-500">加载中...</p>
+          <p className="text-slate-500">加载中...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">创建文章</h1>
-        <Link
-          href="/admin/articles"
-          className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          ← 返回文章列表
-        </Link>
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl relative z-10">
+      {/* Page Header Card */}
+      <div className="bg-white/95 backdrop-blur-sm border border-slate-200/80 rounded-xl p-6 shadow-sm mb-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-slate-900">创建文章</h1>
+          <Link
+            href="/admin/articles"
+            className="px-4 py-2 text-sm font-medium text-slate-700 bg-white/80 backdrop-blur-sm border border-slate-300 rounded-lg hover:bg-slate-50 hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
+          >
+            ← 返回文章列表
+          </Link>
+        </div>
       </div>
 
       {/* Success message */}
       {successMessage && (
-        <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-6">
-          <p>{successMessage}</p>
+        <div className="bg-green-50/95 backdrop-blur-sm border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-6 shadow-sm">
+          <p className="font-medium">{successMessage}</p>
         </div>
       )}
 
       {/* General error message */}
       {submitError && (
-        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6">
-          <p>{submitError}</p>
+        <div className="bg-red-50/95 backdrop-blur-sm border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6 shadow-sm">
+          <p className="font-medium">{submitError}</p>
         </div>
       )}
 
-      <form
-        onSubmit={(e) => handleSubmit(e, status)}
-        className="space-y-6"
-      >
-        {/* Title field */}
-        <div>
-          <label
-            htmlFor="title"
-            className="block text-sm font-medium text-gray-700 mb-2"
+      {/* Main Form Layout: Desktop - Grid, Mobile - Stack */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+        {/* Main Form Card */}
+        <div className="bg-white/95 backdrop-blur-sm border border-slate-200/80 rounded-xl p-6 shadow-sm">
+          <form
+            onSubmit={(e) => handleSubmit(e, status)}
+            className="space-y-6"
           >
-            标题 <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.title ? "border-red-500" : "border-gray-300"
-            }`}
-            placeholder="输入文章标题"
-            maxLength={200}
-            disabled={submitting}
-          />
-          {errors.title && (
-            <p className="mt-1 text-sm text-red-600">{errors.title}</p>
-          )}
-        </div>
-
-        {/* Content field (TiptapEditor) */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            内容 <span className="text-red-500">*</span>
-          </label>
-          <TiptapEditor
-            initialContent={content}
-            onChange={(html) => setContent(html)}
-            placeholder="开始写作..."
-            readOnly={submitting}
-          />
-          {errors.content && (
-            <p className="mt-1 text-sm text-red-600">{errors.content}</p>
-          )}
-        </div>
-
-        {/* Excerpt field */}
-        <div>
-          <label
-            htmlFor="excerpt"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            摘要（可选）
-          </label>
-          <textarea
-            id="excerpt"
-            value={excerpt}
-            onChange={(e) => setExcerpt(e.target.value)}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.excerpt ? "border-red-500" : "border-gray-300"
-            }`}
-            placeholder="输入文章摘要（最多 500 个字符）"
-            rows={3}
-            maxLength={500}
-            disabled={submitting}
-          />
-          {errors.excerpt && (
-            <p className="mt-1 text-sm text-red-600">{errors.excerpt}</p>
-          )}
-        </div>
-
-        {/* Category field */}
-        <div>
-          <label
-            htmlFor="category"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            分类（可选）
-          </label>
-          <select
-            id="category"
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.categoryId ? "border-red-500" : "border-gray-300"
-            }`}
-            disabled={submitting}
-          >
-            <option value="">选择分类</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-          {errors.categoryId && (
-            <p className="mt-1 text-sm text-red-600">{errors.categoryId}</p>
-          )}
-        </div>
-
-        {/* Tags field */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            标签（可选）
-          </label>
-          
-          {/* Selected tags display */}
-          {tagIds.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-3">
-              {tagIds.map((tagId) => {
-                const tag = tags.find((t) => t.id === tagId);
-                if (!tag) return null;
-                return (
-                  <span
-                    key={tagId}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
-                  >
-                    {tag.name}
-                    <button
-                      type="button"
-                      onClick={() => handleTagRemove(tagId)}
-                      className="ml-2 text-blue-600 hover:text-blue-800 focus:outline-none"
-                      disabled={submitting}
-                      aria-label={`移除标签 ${tag.name}`}
-                    >
-                      ×
-                    </button>
-                  </span>
-                );
-              })}
+            {/* Title field */}
+            <div>
+              <label
+                htmlFor="title"
+                className="block text-sm font-semibold text-slate-600 mb-2"
+              >
+                标题 <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className={`w-full px-4 py-2 border rounded-lg bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                  errors.title ? "border-red-500" : "border-slate-300"
+                }`}
+                placeholder="输入文章标题"
+                maxLength={200}
+                disabled={submitting}
+              />
+              {errors.title && (
+                <p className="mt-1 text-sm text-red-600">{errors.title}</p>
+              )}
             </div>
-          )}
 
-          {/* Tag input with autocomplete */}
-          <div className="relative">
-            <input
-              type="text"
-              value={tagInput}
-              onChange={(e) => handleTagInputChange(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
+            {/* Content field (TiptapEditor) */}
+            <div>
+              <label className="block text-sm font-semibold text-slate-600 mb-2">
+                内容 <span className="text-red-500">*</span>
+              </label>
+              <TiptapEditor
+                initialContent={content}
+                onChange={(html) => setContent(html)}
+                placeholder="开始写作..."
+                readOnly={submitting}
+              />
+              {errors.content && (
+                <p className="mt-1 text-sm text-red-600">{errors.content}</p>
+              )}
+            </div>
+
+            {/* Submit buttons */}
+            <div className="flex space-x-4 pt-4 border-t border-slate-200">
+              <button
+                type="submit"
+                onClick={(e) => {
                   e.preventDefault();
-                  if (tagSuggestions.length > 0) {
-                    handleTagSelect(tagSuggestions[0].id);
-                  } else {
-                    handleTagSelect();
-                  }
-                } else if (e.key === "Escape") {
-                  setShowTagSuggestions(false);
-                }
-              }}
-              onFocus={() => {
-                if (tagInput.trim().length > 0) {
-                  setShowTagSuggestions(true);
-                }
-              }}
-              onBlur={() => {
-                // Delay to allow click on suggestion
-                setTimeout(() => setShowTagSuggestions(false), 200);
-              }}
-              placeholder="输入标签名称（按 Enter 创建新标签）"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  setStatus("DRAFT");
+                  handleSubmit(e as any, "DRAFT");
+                }}
+                disabled={submitting}
+                className="px-6 py-2 text-sm font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                {submitting ? "保存中..." : "保存为草稿"}
+              </button>
+              <button
+                type="submit"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setStatus("PUBLISHED");
+                  handleSubmit(e as any, "PUBLISHED");
+                }}
+                disabled={submitting}
+                className="px-6 py-2 text-sm font-semibold text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                {submitting ? "发布中..." : "发布"}
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* Sidebar Card - Metadata */}
+        <div className="space-y-6">
+          {/* Excerpt field */}
+          <div className="bg-white/95 backdrop-blur-sm border border-slate-200/80 rounded-xl p-6 shadow-sm">
+            <label
+              htmlFor="excerpt"
+              className="block text-sm font-semibold text-slate-600 mb-2"
+            >
+              摘要（可选）
+            </label>
+            <textarea
+              id="excerpt"
+              value={excerpt}
+              onChange={(e) => setExcerpt(e.target.value)}
+              className={`w-full px-4 py-2 border rounded-lg bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                errors.excerpt ? "border-red-500" : "border-slate-300"
+              }`}
+              placeholder="输入文章摘要（最多 500 个字符）"
+              rows={3}
+              maxLength={500}
               disabled={submitting}
             />
+            {errors.excerpt && (
+              <p className="mt-1 text-sm text-red-600">{errors.excerpt}</p>
+            )}
+          </div>
 
-            {/* Tag suggestions dropdown */}
-            {showTagSuggestions && tagSuggestions.length > 0 && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                {tagSuggestions.map((tag) => (
-                  <button
-                    key={tag.id}
-                    type="button"
-                    onClick={() => handleTagSelect(tag.id)}
-                    className="w-full px-4 py-2 text-left hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-                  >
-                    {tag.name}
-                  </button>
+          {/* Category field */}
+          <div className="bg-white/95 backdrop-blur-sm border border-slate-200/80 rounded-xl p-6 shadow-sm">
+            <label
+              htmlFor="category"
+              className="block text-sm font-semibold text-slate-600 mb-2"
+            >
+              分类（可选）
+            </label>
+            <div className="relative">
+              <select
+                id="category"
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+                className={`w-full pl-4 pr-10 py-2 border rounded-lg bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none ${
+                  errors.categoryId ? "border-red-500 focus:border-red-500" : "border-slate-300"
+                }`}
+                disabled={submitting}
+              >
+                <option value="">选择分类</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
                 ))}
+              </select>
+              <div className="absolute right-3 top-0 bottom-0 flex items-center pointer-events-none">
+                <svg
+                  className="w-4 h-4 text-slate-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
+            </div>
+            {errors.categoryId && (
+              <p className="mt-1 text-sm text-red-600">{errors.categoryId}</p>
+            )}
+          </div>
+
+          {/* Tags field */}
+          <div className="bg-white/95 backdrop-blur-sm border border-slate-200/80 rounded-xl p-6 shadow-sm">
+            <label className="block text-sm font-semibold text-slate-600 mb-2">
+              标签（可选）
+            </label>
+          
+            {/* Selected tags display */}
+            {tagIds.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {tagIds.map((tagId) => {
+                  const tag = tags.find((t) => t.id === tagId);
+                  if (!tag) return null;
+                  return (
+                    <span
+                      key={tagId}
+                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+                    >
+                      {tag.name}
+                      <button
+                        type="button"
+                        onClick={() => handleTagRemove(tagId)}
+                        className="ml-2 text-blue-600 hover:text-blue-800 focus:outline-none transition-colors"
+                        disabled={submitting}
+                        aria-label={`移除标签 ${tag.name}`}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  );
+                })}
               </div>
             )}
 
-            {/* Create new tag hint */}
-            {showTagSuggestions &&
-              tagInput.trim().length > 0 &&
-              tagSuggestions.length === 0 && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
-                  <button
-                    type="button"
-                    onClick={() => handleTagSelect()}
-                    className="w-full px-4 py-2 text-left hover:bg-gray-100 focus:outline-none focus:bg-gray-100 text-blue-600"
-                  >
-                    创建新标签: "{tagInput.trim()}"
-                  </button>
-                </div>
-              )}
-          </div>
+            {/* Tag input with autocomplete */}
+            <div className="relative">
+              <input
+                type="text"
+                value={tagInput}
+                onChange={(e) => handleTagInputChange(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    if (tagSuggestions.length > 0) {
+                      handleTagSelect(tagSuggestions[0].id);
+                    } else {
+                      handleTagSelect();
+                    }
+                  } else if (e.key === "Escape") {
+                    setShowTagSuggestions(false);
+                  }
+                }}
+                onFocus={() => {
+                  if (tagInput.trim().length > 0) {
+                    setShowTagSuggestions(true);
+                  }
+                }}
+                onBlur={() => {
+                  // Delay to allow click on suggestion
+                  setTimeout(() => setShowTagSuggestions(false), 200);
+                }}
+                placeholder="输入标签并按 Enter 创建"
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                disabled={submitting}
+              />
 
-          {/* All tags checkbox list (fallback) */}
-          {tags.length > 0 && (
-            <details className="mt-3">
-              <summary className="text-sm text-gray-600 cursor-pointer hover:text-gray-800">
-                查看所有标签
-              </summary>
-              <div className="mt-2 border border-gray-300 rounded-lg p-4 max-h-48 overflow-y-auto">
-                <div className="flex flex-wrap gap-2">
-                  {tags.map((tag) => (
-                    <label
+              {/* Tag suggestions dropdown */}
+              {showTagSuggestions && tagSuggestions.length > 0 && (
+                <div className="absolute z-10 w-full mt-1 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                  {tagSuggestions.map((tag) => (
+                    <button
                       key={tag.id}
-                      className="flex items-center space-x-2 cursor-pointer"
+                      type="button"
+                      onClick={() => handleTagSelect(tag.id)}
+                      className="w-full px-4 py-2 text-left hover:bg-slate-50 focus:outline-none focus:bg-slate-50 transition-colors"
                     >
-                      <input
-                        type="checkbox"
-                        checked={tagIds.includes(tag.id)}
-                        onChange={() => handleTagToggle(tag.id)}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        disabled={submitting}
-                      />
-                      <span className="text-sm">{tag.name}</span>
-                    </label>
+                      {tag.name}
+                    </button>
                   ))}
                 </div>
-              </div>
-            </details>
-          )}
+              )}
 
-          {errors.tagIds && (
-            <p className="mt-1 text-sm text-red-600">{errors.tagIds}</p>
-          )}
-        </div>
+              {/* Create new tag hint */}
+              {showTagSuggestions &&
+                tagInput.trim().length > 0 &&
+                tagSuggestions.length === 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-lg shadow-lg">
+                    <button
+                      type="button"
+                      onClick={() => handleTagSelect()}
+                      className="w-full px-4 py-2 text-left hover:bg-slate-50 focus:outline-none focus:bg-slate-50 text-blue-600 transition-colors"
+                    >
+                      创建新标签: "{tagInput.trim()}"
+                    </button>
+                  </div>
+                )}
+            </div>
 
-        {/* Status field */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            状态 <span className="text-red-500">*</span>
-          </label>
-          <div className="flex space-x-4">
-            <label className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="radio"
-                name="status"
-                value="DRAFT"
-                checked={status === "DRAFT"}
-                onChange={(e) =>
-                  setStatus(e.target.value as "DRAFT" | "PUBLISHED")
-                }
-                className="text-blue-600 focus:ring-blue-500"
-                disabled={submitting}
-              />
-              <span>草稿</span>
-            </label>
-            <label className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="radio"
-                name="status"
-                value="PUBLISHED"
-                checked={status === "PUBLISHED"}
-                onChange={(e) =>
-                  setStatus(e.target.value as "DRAFT" | "PUBLISHED")
-                }
-                className="text-blue-600 focus:ring-blue-500"
-                disabled={submitting}
-              />
-              <span>已发布</span>
-            </label>
+            {/* All tags checkbox list (fallback) */}
+            {tags.length > 0 && (
+              <details className="mt-3">
+                <summary className="text-sm text-slate-600 cursor-pointer hover:text-slate-800 transition-colors">
+                  查看所有标签
+                </summary>
+                <div className="mt-2 border border-slate-300 rounded-lg p-4 max-h-48 overflow-y-auto bg-white/50">
+                  <div className="flex flex-wrap gap-2">
+                    {tags.map((tag) => (
+                      <label
+                        key={tag.id}
+                        className="flex items-center space-x-2 cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={tagIds.includes(tag.id)}
+                          onChange={() => handleTagToggle(tag.id)}
+                          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                          disabled={submitting}
+                        />
+                        <span className="text-sm text-slate-700">{tag.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </details>
+            )}
+
+            {errors.tagIds && (
+              <p className="mt-1 text-sm text-red-600">{errors.tagIds}</p>
+            )}
           </div>
-          {errors.status && (
-            <p className="mt-1 text-sm text-red-600">{errors.status}</p>
-          )}
-        </div>
 
-        {/* Submit buttons */}
-        <div className="flex space-x-4 pt-4">
-          <button
-            type="submit"
-            onClick={(e) => {
-              e.preventDefault();
-              setStatus("DRAFT");
-              handleSubmit(e as any, "DRAFT");
-            }}
-            disabled={submitting}
-            className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {submitting ? "保存中..." : "保存为草稿"}
-          </button>
-          <button
-            type="submit"
-            onClick={(e) => {
-              e.preventDefault();
-              setStatus("PUBLISHED");
-              handleSubmit(e as any, "PUBLISHED");
-            }}
-            disabled={submitting}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {submitting ? "发布中..." : "发布"}
-          </button>
+          {/* Status field */}
+          <div className="bg-white/95 backdrop-blur-sm border border-slate-200/80 rounded-xl p-6 shadow-sm">
+            <label className="block text-sm font-semibold text-slate-600 mb-2">
+              状态 <span className="text-red-500">*</span>
+            </label>
+            <div className="flex space-x-4">
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="status"
+                  value="DRAFT"
+                  checked={status === "DRAFT"}
+                  onChange={(e) =>
+                    setStatus(e.target.value as "DRAFT" | "PUBLISHED")
+                  }
+                  className="text-blue-600 focus:ring-blue-500"
+                  disabled={submitting}
+                />
+                <span className="text-slate-700">草稿</span>
+              </label>
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="status"
+                  value="PUBLISHED"
+                  checked={status === "PUBLISHED"}
+                  onChange={(e) =>
+                    setStatus(e.target.value as "DRAFT" | "PUBLISHED")
+                  }
+                  className="text-blue-600 focus:ring-blue-500"
+                  disabled={submitting}
+                />
+                <span className="text-slate-700">已发布</span>
+              </label>
+            </div>
+            {errors.status && (
+              <p className="mt-1 text-sm text-red-600">{errors.status}</p>
+            )}
+          </div>
         </div>
-      </form>
+      </div>
     </div>
   );
 }

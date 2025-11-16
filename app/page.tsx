@@ -2,6 +2,8 @@ import { Suspense } from "react";
 import { prisma } from "@/lib/db/prisma";
 import ArticleList from "@/components/article/ArticleList";
 import Pagination from "@/components/article/Pagination";
+import Sidebar from "@/components/layout/Sidebar";
+import ArticleFiltersWrapper from "@/components/article/ArticleFiltersWrapper";
 
 /**
  * Article response interface from API.
@@ -73,16 +75,41 @@ interface ArticlesResponse {
  */
 async function fetchArticles(
   page: number = 1,
-  limit: number = 20
+  limit: number = 20,
+  category?: string,
+  sort?: string
 ): Promise<{ articles: Article[]; pagination: PaginationData }> {
   try {
     const skip = (page - 1) * limit;
     const take = Math.min(100, Math.max(1, limit));
 
     // Build where clause - only published articles
-    const where = {
+    const where: any = {
       status: "PUBLISHED" as const,
     };
+
+    // Add category filter if specified
+    if (category && category !== "全部") {
+      where.category = {
+        name: category,
+      };
+    }
+
+    // Determine sort order
+    let orderBy: any = {
+      publishedAt: "desc", // Default: newest first
+    };
+
+    if (sort === "最热") {
+      // For "最热", we'll use publishedAt desc as a proxy (can be enhanced with view count later)
+      orderBy = { publishedAt: "desc" };
+    } else if (sort === "最多评论") {
+      // For "最多评论", we'll use publishedAt desc as a proxy (can be enhanced with comment count later)
+      orderBy = { publishedAt: "desc" };
+    } else {
+      // "最新" or default
+      orderBy = { publishedAt: "desc" };
+    }
 
     // Get total count for pagination
     const total = await prisma.article.count({ where });
@@ -95,9 +122,7 @@ async function fetchArticles(
       where,
       skip,
       take,
-      orderBy: {
-        publishedAt: "desc", // Sort by publish date, newest first
-      },
+      orderBy,
       include: {
         author: {
           select: {
@@ -151,35 +176,45 @@ async function fetchArticles(
 async function HomePageContent({
   searchParams,
 }: {
-  searchParams: { page?: string; limit?: string };
+  searchParams: { page?: string; limit?: string; category?: string; sort?: string };
 }) {
   const page = Math.max(1, parseInt(searchParams.page || "1", 10));
   const limit = Math.min(100, Math.max(1, parseInt(searchParams.limit || "20", 10)));
+  const category = searchParams.category || "全部";
+  const sort = searchParams.sort || "最新";
 
   try {
-    const { articles, pagination } = await fetchArticles(page, limit);
+    const { articles, pagination } = await fetchArticles(page, limit, category, sort);
 
     return (
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Page header */}
-        <header className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 text-gray-900">最新文章</h1>
-          <p className="text-gray-600">
-            {pagination.total > 0
-              ? `共找到 ${pagination.total} 篇文章`
-              : "暂无文章"}
-          </p>
-        </header>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
+          {/* Main content */}
+          <div>
+            {/* Page header with filters */}
+            <header className="mb-8">
+              <ArticleFiltersWrapper />
+              <p className="text-slate-600 mt-2">
+                {pagination.total > 0
+                  ? `共找到 ${pagination.total} 篇文章`
+                  : "暂无文章"}
+              </p>
+            </header>
 
-        {/* Article list */}
-        <ArticleList articles={articles} />
+            {/* Article list */}
+            <ArticleList articles={articles} />
 
-        {/* Pagination */}
-        {pagination.totalPages > 1 && (
-          <Suspense fallback={<div className="mt-8 text-center text-gray-500">加载分页...</div>}>
-            <Pagination pagination={pagination} />
-          </Suspense>
-        )}
+            {/* Pagination */}
+            {pagination.totalPages > 1 && (
+              <Suspense fallback={<div className="mt-8 text-center text-slate-500">加载分页...</div>}>
+                <Pagination pagination={pagination} />
+              </Suspense>
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <Sidebar />
+        </div>
       </div>
     );
   } catch (error) {

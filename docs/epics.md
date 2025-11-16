@@ -798,9 +798,78 @@ So that **I can browse all blog content**.
 - Add page parameter to API queries
 - Calculate total pages based on article count
 - Update URL with page parameter
-- Handle edge cases (first page, last page)
-- Show page numbers with ellipsis for many pages
-- Make pagination responsive
+- Handle edge cases (first page, last page, invalid page numbers)
+- Add loading states during page transitions
+
+---
+
+### Story 4.6: 前台导航栏和用户入口
+
+As a **reader or blog author**,  
+I want **to access navigation, search, login, and publish features from a global navigation bar**,  
+So that **I can easily navigate the site, find content, and access authentication and content creation features**.
+
+**Acceptance Criteria:**
+
+**Given** I visit any page on the blog  
+**When** the page loads  
+**Then** I see a global navigation bar at the top  
+**And** the navigation bar includes:
+- Logo with brand name and subtitle ("travis-blog" and "分享技术与思考")
+- Search box with search icon
+- Navigation links (首页、分类、标签、关于)
+- Login button (if not authenticated) or User menu (if authenticated)
+- Publish Article button (if authenticated as admin)
+
+**Given** I am on a mobile device  
+**When** I view the navigation bar  
+**Then** I see a hamburger menu icon  
+**When** I click the hamburger menu  
+**Then** the navigation menu expands/collapses  
+**And** all navigation links and buttons are accessible  
+**And** touch targets are at least 44x44px
+
+**Given** I am not logged in  
+**When** I click the Login button  
+**Then** I am redirected to the login page (`/login`)
+
+**Given** I am logged in as admin  
+**When** I click the Publish Article button  
+**Then** I am redirected to the article creation page (`/admin/articles/new`)
+
+**Given** I enter a search query in the search box  
+**When** I submit the search (Enter key or search icon click)  
+**Then** I am redirected to search results page with the query parameter  
+**And** the search functionality works correctly
+
+**Given** the navigation bar is visible  
+**When** I scroll down the page  
+**Then** the navigation bar remains fixed at the top (sticky positioning)  
+**And** the navigation bar has a semi-transparent background with blur effect
+
+**Given** I view the navigation bar  
+**Then** the design follows the UX Design Specification:
+- Uses "极简科技风" color system (Primary Blue: #3b82f6)
+- Uses Geist Sans font family
+- Follows spacing system (4px base unit)
+- Has proper hover and focus states
+- Includes smooth transitions and micro-interactions
+
+**Prerequisites:** Story 4.5, Epic 2 (authentication), UX Design Specification completed
+
+**Technical Notes:**
+- Create global NavigationBar component: `components/layout/NavigationBar.tsx`
+- Integrate NavigationBar into root layout: `app/layout.tsx`
+- Use NextAuth session to check authentication status
+- Implement responsive design with mobile hamburger menu
+- Apply UX design system (colors, typography, spacing from `docs/ux-design-specification.md`)
+- Add search functionality (can be basic implementation, full search in future story)
+- Use shadcn/ui components where applicable
+- Implement sticky positioning for navigation bar
+- Add semi-transparent background with backdrop blur
+- Ensure accessibility (keyboard navigation, ARIA labels, focus states)
+- Add micro-interactions (hover effects, transitions)
+- Test on desktop, tablet, and mobile devices
 
 ---
 

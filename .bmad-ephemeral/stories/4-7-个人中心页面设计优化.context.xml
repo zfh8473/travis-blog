@@ -1,0 +1,126 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>7</storyId>
+    <title>个人中心页面设计优化</title>
+    <status>approved</status>
+    <generatedAt>2025-11-15</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>.bmad-ephemeral/stories/4-7-个人中心页面设计优化.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>my profile page to match the overall design style of the blog</iWant>
+    <soThat>I have a consistent and professional user experience across all pages</soThat>
+    <tasks>
+      - Task 1: Update Page Container Layout (AC: 4.7.1)
+      - Task 2: Create Card-Based Header Section (AC: 4.7.2, 4.7.4)
+      - Task 3: Refactor Avatar Section into Card (AC: 4.7.2, 4.7.4)
+      - Task 4: Refactor Form Fields into Card (AC: 4.7.2, 4.7.4)
+      - Task 5: Create Actions Card (AC: 4.7.2, 4.7.4)
+      - Task 6: Unify Color System (AC: 4.7.3)
+      - Task 7: Update Form Field Styling (AC: 4.7.3, 4.7.5)
+      - Task 8: Update Button Styling (AC: 4.7.3, 4.7.5)
+      - Task 9: Update Avatar Preview Styling (AC: 4.7.3)
+      - Task 10: Update Message Styling (AC: 4.7.3)
+      - Task 11: Add Interactive Effects (AC: 4.7.5)
+      - Task 12: Responsive Design Optimization (AC: 4.7.6)
+      - Task 13: Testing and Validation (AC: 4.7.6)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    - AC-4.7.1: The profile page inherits the global gradient background and decorative elements
+    - AC-4.7.2: All form fields are organized in card-based containers with consistent styling
+    - AC-4.7.3: Color system is unified (slate color scheme instead of gray)
+    - AC-4.7.4: Visual hierarchy is clear with proper grouping (avatar, basic info, actions)
+    - AC-4.7.5: Interactive elements have hover effects and smooth transitions
+    - AC-4.7.6: The page maintains all existing functionality while improving visual presentation
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/ux-profile-page-redesign.md" title="个人中心页面 UX 设计评估与改进方案" section="设计目标">
+        Comprehensive UX design assessment and improvement plan for profile page. Includes design goals, layout structure, color system, spacing system, and component style specifications.
+      </doc>
+      <doc path="docs/ux-design-specification.md" title="UX 设计规范" section="Design System">
+        Project design system documentation including typography, spacing, layout, and color specifications.
+      </doc>
+      <doc path="docs/ux-article-creation-page-redesign.md" title="创建文章页面 UI 设计评估与改进方案" section="设计方案">
+        Similar redesign for article creation page, provides reference for card-based layout patterns and color system unification.
+      </doc>
+      <doc path="app/globals.css" title="Global Styles" section="Background and Decorations">
+        Global CSS with gradient background, decorative elements, and interactive class definitions (article-card-hover, btn-hover).
+      </doc>
+    </docs>
+    <code>
+      <file path="app/profile/page.tsx" kind="page" symbol="ProfilePage" lines="1-56" reason="Main profile page component that needs layout and container updates">
+        Server component that renders profile page. Currently uses simple container layout without card-based design. Needs to inherit global background and use card containers.
+      </file>
+      <file path="app/profile/ProfileForm.tsx" kind="component" symbol="ProfileForm" lines="1-367" reason="Client component containing all form fields, avatar upload, and buttons that need styling updates">
+        Client component with form fields, avatar upload, and buttons. Uses gray color scheme that needs to be changed to slate. Needs card-based grouping and interactive effects.
+      </file>
+      <file path="components/article/ArticleCard.tsx" kind="component" symbol="ArticleCard" lines="92-100" reason="Reference component showing card styling pattern with bg-white/95 backdrop-blur-sm border border-slate-200/80 rounded-xl">
+        Reference component demonstrating the card styling pattern used throughout the project: bg-white/95 backdrop-blur-sm border border-slate-200/80 rounded-xl p-6 article-card-hover.
+      </file>
+      <file path="app/page.tsx" kind="page" symbol="Home" lines="190-218" reason="Homepage reference showing container layout pattern with max-w-7xl relative z-10">
+        Homepage component showing the container layout pattern: container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl relative z-10.
+      </file>
+      <file path="app/layout.tsx" kind="layout" symbol="RootLayout" lines="30-46" reason="Root layout that provides global background and decorative elements">
+        Root layout component that provides global gradient background and decorative circle elements that should be inherited by profile page.
+      </file>
+      <file path="app/globals.css" kind="stylesheet" symbol="GlobalStyles" lines="22-102" reason="Global CSS with gradient background, decorative elements, and interactive classes">
+        Global stylesheet containing gradient background definition, decorative circle elements, and interactive class definitions (article-card-hover, btn-hover).
+      </file>
+    </code>
+    <dependencies>
+      <node>
+        <package name="next" version="16.0.2" />
+        <package name="react" version="19.2.0" />
+        <package name="react-dom" version="19.2.0" />
+        <package name="next-auth" version="4.24.13" />
+        <package name="tailwindcss" version="^4" />
+        <package name="next/image" reason="Used for avatar image display" />
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Must preserve all existing functionality (form submission, avatar upload, validation, error handling)
+    - Must maintain Next.js Server/Client Component architecture (page.tsx is Server Component, ProfileForm is Client Component)
+    - Must use Tailwind CSS for styling (no custom CSS files)
+    - Must follow project design system (slate color scheme, card-based layout, interactive effects)
+    - Must be responsive (mobile, tablet, desktop)
+    - Must maintain accessibility (form labels, error messages, keyboard navigation)
+    - Must use existing CSS classes from globals.css (article-card-hover, btn-hover)
+    - Must not break existing API integrations (/api/profile, /api/profile/avatar)
+  </constraints>
+
+  <interfaces>
+    <interface name="ProfileForm Props" kind="Component Props" signature="ProfileForm({ initialData: { id: string; email: string; name: string | null; image: string | null; bio: string | null; role: string; } | null })" path="app/profile/ProfileForm.tsx" />
+    <interface name="Profile API PUT" kind="REST Endpoint" signature="PUT /api/profile - Body: { name: string | null; bio: string | null }" path="app/api/profile/route.ts" />
+    <interface name="Avatar Upload API POST" kind="REST Endpoint" signature="POST /api/profile/avatar - Body: FormData with file" path="app/api/profile/avatar/route.ts" />
+  </interfaces>
+
+  <tests>
+    <standards>
+      Project uses Jest for unit tests and Playwright for E2E tests. Tests should verify visual consistency, form functionality, and responsive behavior. Use @testing-library/react for component testing.
+    </standards>
+    <locations>
+      - tests/__tests__/unit/ - Unit tests for components
+      - tests/e2e/ - End-to-end tests
+    </locations>
+    <ideas>
+      <test ac="AC-4.7.1">Test that profile page inherits global gradient background and decorative elements are visible</test>
+      <test ac="AC-4.7.2">Test that all form sections are wrapped in card containers with correct styling classes</test>
+      <test ac="AC-4.7.3">Test that all gray-* colors are replaced with slate-* colors in ProfileForm component</test>
+      <test ac="AC-4.7.4">Test that visual hierarchy is clear with proper grouping (avatar card, form card, actions card)</test>
+      <test ac="AC-4.7.5">Test that cards have hover effects (article-card-hover class) and buttons have hover effects (btn-hover class)</test>
+      <test ac="AC-4.7.6">Test that all existing functionality works: form submission, avatar upload, validation, error messages, sign out</test>
+      <test ac="AC-4.7.6">Test responsive design on mobile (< 768px), tablet (768px - 1024px), and desktop (> 1024px)</test>
+      <test ac="AC-4.7.6">Visual regression test comparing profile page with homepage design consistency</test>
+    </ideas>
+  </tests>
+</story-context>
+

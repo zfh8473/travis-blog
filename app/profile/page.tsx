@@ -46,10 +46,17 @@ export default async function ProfilePage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Profile Settings</h1>
-      <div className="bg-white rounded-lg shadow p-6">
-        <ProfileForm initialData={profileData} />
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl relative z-10">
+      <div className="space-y-6">
+        {/* Header Card */}
+        <div className="bg-white/95 backdrop-blur-sm border border-slate-200/80 rounded-xl p-6 shadow-sm article-card-hover">
+          <h1 className="text-3xl font-bold text-slate-900">个人设置</h1>
+        </div>
+
+        {/* Profile Form Card */}
+        <div className="bg-white/95 backdrop-blur-sm border border-slate-200/80 rounded-xl p-6 shadow-sm article-card-hover">
+          <ProfileForm initialData={profileData} />
+        </div>
       </div>
     </div>
   );

@@ -107,12 +107,12 @@ export default function Pagination({
         {pagination.page > 1 ? (
           <Link
             href={buildPageUrl(pagination.page - 1)}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700"
+            className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium text-slate-700 pagination-btn-hover"
           >
             上一页
           </Link>
         ) : (
-          <span className="px-4 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed text-sm font-medium">
+          <span className="px-4 py-2 border border-slate-300 rounded-lg text-slate-400 cursor-not-allowed text-sm font-medium">
             上一页
           </span>
         )}
@@ -125,7 +125,7 @@ export default function Pagination({
             return (
               <span
                 key={`ellipsis-${index}`}
-                className="px-2 py-2 text-gray-400"
+                className="px-2 py-2 text-slate-400"
               >
                 ...
               </span>
@@ -138,10 +138,10 @@ export default function Pagination({
             <Link
               key={pageNum}
               href={buildPageUrl(pageNum)}
-              className={`px-4 py-2 border rounded-lg transition-colors text-sm font-medium ${
+              className={`px-4 py-2 border rounded-lg transition-colors text-sm font-medium pagination-btn-hover ${
                 isCurrentPage
                   ? "bg-blue-600 text-white border-blue-600"
-                  : "border-gray-300 hover:bg-gray-50 text-gray-700"
+                  : "border-slate-300 hover:bg-slate-50 text-slate-700"
               }`}
             >
               {pageNum}
@@ -155,19 +155,19 @@ export default function Pagination({
         {pagination.page < pagination.totalPages ? (
           <Link
             href={buildPageUrl(pagination.page + 1)}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700"
+            className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium text-slate-700 pagination-btn-hover"
           >
             下一页
           </Link>
         ) : (
-          <span className="px-4 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed text-sm font-medium">
+          <span className="px-4 py-2 border border-slate-300 rounded-lg text-slate-400 cursor-not-allowed text-sm font-medium">
             下一页
           </span>
         )}
       </div>
 
       {/* Page info */}
-      <div className="text-sm text-gray-600">
+      <div className="text-sm text-slate-600">
         第 {pagination.page} 页，共 {pagination.totalPages} 页
       </div>
     </div>

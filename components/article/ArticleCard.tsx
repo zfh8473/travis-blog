@@ -41,6 +41,7 @@ export interface ArticleCardProps {
   category: Category | null;
   tags: Tag[];
   author: Author;
+  isLatest?: boolean; // Mark as latest article
 }
 
 /**
@@ -76,7 +77,9 @@ export default function ArticleCard({
   category,
   tags,
   author,
-}: ArticleCardProps) {
+  isLatest = false,
+  animationDelay = 0,
+}: ArticleCardProps & { animationDelay?: number }) {
   // Format publish date
   const formattedDate = publishedAt
     ? format(new Date(publishedAt), "yyyy年MM月dd日", { locale: zhCN })
@@ -86,24 +89,52 @@ export default function ArticleCard({
   const displayExcerpt = excerpt || "暂无摘要";
 
   return (
-    <article className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow bg-white">
-      {/* Article title - clickable link */}
-      <Link href={`/articles/${slug}`}>
-        <h2 className="text-2xl font-bold mb-3 text-gray-900 hover:text-blue-600 transition-colors">
-          {title}
-        </h2>
+    <div
+      className={`block bg-white/95 backdrop-blur-sm border rounded-xl p-6 article-card-hover article-card-animate relative ${
+        isLatest
+          ? "border-blue-300 shadow-md"
+          : "border-slate-200/80"
+      }`}
+      style={{ animationDelay: `${animationDelay}s` }}
+    >
+      {/* 最新文章徽章 */}
+      {isLatest && (
+        <div className="absolute top-4 right-4 px-2 py-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-bold rounded-lg shadow-sm">
+          ✨ 最新
+        </div>
+      )}
+
+      {/* 1. 分类标签（顶部） */}
+      {category && (
+        <Link
+          href={`/articles/category/${category.slug}`}
+          className="inline-block px-3 py-1 bg-indigo-100 text-indigo-600 rounded-xl text-xs font-semibold mb-3 uppercase tracking-wide hover:bg-indigo-200 transition-colors"
+        >
+          {category.name}
+        </Link>
+      )}
+
+      {/* 2. 文章标题（最大，最突出） */}
+      <Link 
+        href={`/articles/${slug}`}
+        className="block"
+      >
+        <h2 className="text-[1.375rem] font-bold text-slate-900 mb-3 leading-snug hover:text-blue-600 transition-colors cursor-pointer">
+        {title}
+      </h2>
       </Link>
 
-      {/* Article excerpt */}
-      <p className="text-gray-600 mb-4 line-clamp-2">{displayExcerpt}</p>
+      {/* 3. 摘要（适中，可读性强） */}
+      <p className="text-slate-600 text-[0.9375rem] leading-relaxed mb-4 line-clamp-2">
+        {displayExcerpt}
+      </p>
 
-      {/* Article metadata */}
-      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
-        {/* Publish date */}
+      {/* 4. 元数据（日期、阅读量等，较小） */}
+      <div className="flex gap-4 text-[0.8125rem] text-slate-500 mb-4 pt-3 border-t border-slate-200/50">
         {formattedDate && (
-          <span className="flex items-center">
+          <span className="flex items-center gap-1">
             <svg
-              className="w-4 h-4 mr-1"
+              className="w-3.5 h-3.5 opacity-60"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -118,53 +149,46 @@ export default function ArticleCard({
             {formattedDate}
           </span>
         )}
-
-        {/* Author */}
-        {author.name && (
-          <span className="flex items-center">
-            <svg
-              className="w-4 h-4 mr-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-              />
-            </svg>
-            {author.name}
-          </span>
-        )}
-
-        {/* Category */}
-        {category && (
-          <Link
-            href={`/articles/category/${category.slug}`}
-            className="text-blue-600 hover:text-blue-800 transition-colors"
+        {/* 阅读量占位符（未来可以添加） */}
+        <span className="flex items-center gap-1">
+          <svg
+            className="w-3.5 h-3.5 opacity-60"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
           >
-            {category.name}
-          </Link>
-        )}
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+            />
+          </svg>
+          <span>0 阅读</span>
+        </span>
       </div>
 
-      {/* Tags */}
+      {/* 5. 标签（底部，小标签） */}
       {tags.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2">
           {tags.map((tag) => (
             <Link
               key={tag.id}
               href={`/articles/tag/${tag.slug}`}
-              className="inline-flex items-center px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+              className="inline-flex items-center px-3 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-xs font-medium transition-all duration-200 ease-out hover:bg-blue-600 hover:text-white hover:border-blue-600"
             >
-              #{tag.name}
+              {tag.name}
             </Link>
           ))}
         </div>
       )}
-    </article>
+    </div>
   );
 }
 

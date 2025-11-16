@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>travis-blog - 设计方向 Mockups</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        /* 页面背景层 - 台灯和电脑图片 */
+        .page-background-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        /* 台灯和电脑背景图片 - 使用真实图片，虚化效果 */
+        .page-background-layer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            /* 使用真实图片 - 请将图片保存到 docs/images/desk-lamp-computer.jpg */
+            /* 或者保存到 public/images/desk-lamp-computer.jpg，然后使用：url('../public/images/desk-lamp-computer.jpg') */
+            background-image: url('images/desk-lamp-computer.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            /* 虚化效果 - 进一步降低虚化程度，让背景更清晰 */
+            filter: blur(10px);
+            /* 透明度 - 进一步提高透明度，让背景更明显 */
+            opacity: 0.95;
+        }
+
+        /* 半透明遮罩层 - 进一步降低遮罩层透明度，让背景更明显 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #f8fafc;
+            opacity: 0.15;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Page background with image */
+        .page-wrapper {
+            position: relative;
+            min-height: 100vh;
+        }
+
+        .page-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080"><defs><linearGradient id="grad" x1="0%25" y1="0%25" x2="100%25" y2="100%25"><stop offset="0%25" style="stop-color:%23dbeafe;stop-opacity:0.3"/><stop offset="50%25" style="stop-color:%23e0e7ff;stop-opacity:0.2"/><stop offset="100%25" style="stop-color:%23f0f9ff;stop-opacity:0.3"/></linearGradient><pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M 60 0 L 0 0 0 60" fill="none" stroke="%233b82f6" stroke-width="0.5" opacity="0.08"/></pattern></defs><rect width="100%25" height="100%25" fill="url(%23grad)"/><rect width="100%25" height="100%25" fill="url(%23grid)"/><circle cx="300" cy="200" r="150" fill="%233b82f6" opacity="0.04"/><circle cx="1600" cy="800" r="200" fill="%236366f1" opacity="0.05"/><circle cx="1200" cy="300" r="100" fill="%2360a5fa" opacity="0.06"/></svg>');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            opacity: 0.4;
+            filter: blur(30px);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .page-content-overlay {
+            position: relative;
+            z-index: 1;
+            background: rgba(248, 250, 252, 0.7);
+            backdrop-filter: blur(10px);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #0f172a;
+        }
+
+        .subtitle {
+            font-size: 1.125rem;
+            color: #64748b;
+            margin-bottom: 1rem;
+        }
+
+        .nav-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 0.625rem 1.25rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #1e293b;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: #f1f5f9;
+            border-color: #3b82f6;
+        }
+
+        .nav-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .mockup-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 3rem;
+        }
+
+        .mockup-header {
+            background: #f8fafc;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mockup-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .mockup-description {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+
+        .mockup-content {
+            padding: 2rem;
+            min-height: 600px;
+        }
+
+        /* Navigation Bar */
+        .nav-bar {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: #3b82f6;
+        }
+
+        .nav-link.active {
+            color: #3b82f6;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #e2e8f0;
+            color: #1e293b;
+        }
+
+        .btn-outline:hover {
+            background: #f1f5f9;
+            border-color: #3b82f6;
+        }
+
+        /* Article List */
+        .articles-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            font-size: 1rem;
+            color: #64748b;
+        }
+
+        .articles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .article-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .article-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+        }
+
+        .article-meta {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        .article-category {
+            color: #3b82f6;
+            font-weight: 500;
+        }
+
+        .article-date {
+            color: #94a3b8;
+        }
+
+        .article-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+        }
+
+        .article-excerpt {
+            font-size: 0.875rem;
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .article-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 0.25rem 0.75rem;
+            background: #f1f5f9;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: #475569;
+        }
+
+        /* Article Detail */
+        .article-detail {
+            max-width: 768px;
+            margin: 0 auto;
+        }
+
+        .article-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .article-detail-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .article-detail-meta {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        .article-content {
+            font-size: 1.125rem;
+            line-height: 1.8;
+            color: #1e293b;
+            margin-bottom: 3rem;
+        }
+
+        .article-content p {
+            margin-bottom: 1.5rem;
+        }
+
+        .article-content h2 {
+            font-size: 1.875rem;
+            font-weight: 600;
+            color: #0f172a;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .article-content h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #0f172a;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        /* Mobile Navigation */
+        .mobile-nav {
+            display: none;
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .hamburger span {
+            width: 24px;
+            height: 2px;
+            background: #1e293b;
+            border-radius: 2px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .nav-bar {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+
+            .articles-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .article-detail-title {
+                font-size: 2rem;
+            }
+
+            .nav-actions {
+                gap: 0.5rem;
+            }
+
+            .btn {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8125rem;
+            }
+        }
+
+        /* Hidden by default */
+        .mockup {
+            display: none;
+        }
+
+        .mockup.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-background-layer"></div>
+    <div class="container" style="position: relative; z-index: 1;">
+        <div class="header">
+            <h1>🎨 travis-blog 设计方向 Mockups</h1>
+            <p class="subtitle">极简科技风 - 现代、简洁、专业</p>
+            
+            <div class="nav-controls">
+                <button class="nav-btn active" onclick="showMockup('homepage')">主页</button>
+                <button class="nav-btn" onclick="showMockup('article-detail')">文章详情</button>
+                <button class="nav-btn" onclick="showMockup('navigation')">导航栏</button>
+            </div>
+        </div>
+
+        <!-- Homepage Mockup -->
+        <div id="homepage" class="mockup active">
+            <div class="mockup-container">
+                <div class="mockup-header">
+                    <div>
+                        <div class="mockup-title">主页 - 文章列表</div>
+                        <div class="mockup-description">卡片式布局，页面背景使用虚化图片/水印，增加视觉层次而不干扰阅读</div>
+                    </div>
+                </div>
+                <div class="mockup-content">
+                    <!-- Navigation Bar -->
+                    <div class="nav-bar">
+                        <a href="#" class="nav-logo">travis-blog</a>
+                        <div class="nav-links">
+                            <a href="#" class="nav-link active">首页</a>
+                            <a href="#" class="nav-link">分类</a>
+                            <a href="#" class="nav-link">标签</a>
+                            <a href="#" class="nav-link">关于</a>
+                        </div>
+                        <div class="nav-actions">
+                            <a href="#" class="btn btn-outline">登录</a>
+                            <a href="#" class="btn btn-primary">发布文章</a>
+                        </div>
+                        <div class="hamburger">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+
+                    <!-- Page Content -->
+                    <div class="articles-container">
+                        <div class="page-header">
+                            <h1 class="page-title">最新文章</h1>
+                            <p class="page-subtitle">共找到 12 篇文章</p>
+                        </div>
+
+                        <div class="articles-grid">
+                            <div class="article-card">
+                                <div class="article-meta">
+                                    <span class="article-category">技术</span>
+                                    <span class="article-date">2025-11-15</span>
+                                </div>
+                                <h2 class="article-title">Next.js 14 新特性深度解析</h2>
+                                <p class="article-excerpt">
+                                    本文将深入探讨 Next.js 14 的新特性，包括 Server Components、App Router 等核心功能的改进和使用技巧...
+                                </p>
+                                <div class="article-tags">
+                                    <span class="tag">Next.js</span>
+                                    <span class="tag">React</span>
+                                    <span class="tag">Web开发</span>
+                                </div>
+                            </div>
+
+                            <div class="article-card">
+                                <div class="article-meta">
+                                    <span class="article-category">生活</span>
+                                    <span class="article-date">2025-11-14</span>
+                                </div>
+                                <h2 class="article-title">如何保持高效的学习节奏</h2>
+                                <p class="article-excerpt">
+                                    分享一些我在学习新技术时的经验和方法，希望能帮助到正在学习路上的朋友们...
+                                </p>
+                                <div class="article-tags">
+                                    <span class="tag">学习方法</span>
+                                    <span class="tag">效率</span>
+                                </div>
+                            </div>
+
+                            <div class="article-card">
+                                <div class="article-meta">
+                                    <span class="article-category">技术</span>
+                                    <span class="article-date">2025-11-13</span>
+                                </div>
+                                <h2 class="article-title">TypeScript 类型系统实战</h2>
+                                <p class="article-excerpt">
+                                    通过实际项目案例，讲解 TypeScript 类型系统的使用技巧和最佳实践...
+                                </p>
+                                <div class="article-tags">
+                                    <span class="tag">TypeScript</span>
+                                    <span class="tag">编程</span>
+                                </div>
+                            </div>
+
+                            <div class="article-card">
+                                <div class="article-meta">
+                                    <span class="article-category">技术</span>
+                                    <span class="article-date">2025-11-12</span>
+                                </div>
+                                <h2 class="article-title">Tailwind CSS 设计系统实践</h2>
+                                <p class="article-excerpt">
+                                    介绍如何使用 Tailwind CSS 构建一致的设计系统，提高开发效率和代码质量...
+                                </p>
+                                <div class="article-tags">
+                                    <span class="tag">CSS</span>
+                                    <span class="tag">设计系统</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Article Detail Mockup -->
+        <div id="article-detail" class="mockup">
+            <div class="mockup-container">
+                <div class="mockup-header">
+                    <div>
+                        <div class="mockup-title">文章详情页</div>
+                        <div class="mockup-description">清晰的排版，舒适的阅读体验，突出内容本身</div>
+                    </div>
+                </div>
+                <div class="mockup-content">
+                    <!-- Navigation Bar -->
+                    <div class="nav-bar">
+                        <a href="#" class="nav-logo">travis-blog</a>
+                        <div class="nav-links">
+                            <a href="#" class="nav-link">首页</a>
+                            <a href="#" class="nav-link active">分类</a>
+                            <a href="#" class="nav-link">标签</a>
+                            <a href="#" class="nav-link">关于</a>
+                        </div>
+                        <div class="nav-actions">
+                            <a href="#" class="btn btn-outline">登录</a>
+                            <a href="#" class="btn btn-primary">发布文章</a>
+                        </div>
+                    </div>
+
+                    <!-- Article Content -->
+                    <div class="article-detail">
+                        <div class="article-header">
+                            <h1 class="article-detail-title">Next.js 14 新特性深度解析</h1>
+                            <div class="article-detail-meta">
+                                <span class="article-category">技术</span>
+                                <span class="article-date">2025-11-15</span>
+                                <span>•</span>
+                                <span>5 分钟阅读</span>
+                            </div>
+                            <div class="article-tags" style="margin-top: 1rem;">
+                                <span class="tag">Next.js</span>
+                                <span class="tag">React</span>
+                                <span class="tag">Web开发</span>
+                            </div>
+                        </div>
+
+                        <div class="article-content">
+                            <p>
+                                Next.js 14 带来了许多令人兴奋的新特性，其中最引人注目的是对 Server Components 的全面支持。
+                                这些改进不仅提升了开发体验，还显著提高了应用的性能。
+                            </p>
+
+                            <h2>Server Components 的优势</h2>
+                            <p>
+                                Server Components 允许我们在服务器端渲染组件，减少了客户端 JavaScript 的打包体积。
+                                这意味着更快的页面加载速度和更好的 SEO 表现。
+                            </p>
+
+                            <h3>实际应用场景</h3>
+                            <p>
+                                在实际项目中，我们可以将数据获取逻辑放在 Server Components 中，这样可以直接访问数据库，
+                                而不需要通过 API 路由。这大大简化了数据流，提高了开发效率。
+                            </p>
+
+                            <p>
+                                此外，Server Components 还支持流式渲染，这意味着页面可以逐步加载内容，
+                                用户不需要等待整个页面加载完成就能看到部分内容。
+                            </p>
+
+                            <h2>App Router 的改进</h2>
+                            <p>
+                                App Router 在 Next.js 14 中得到了进一步完善，提供了更好的文件系统路由和布局支持。
+                                新的路由系统更加直观，减少了配置的复杂性。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Bar Mockup -->
+        <div id="navigation" class="mockup">
+            <div class="mockup-container">
+                <div class="mockup-header">
+                    <div>
+                        <div class="mockup-title">导航栏设计</div>
+                        <div class="mockup-description">顶部导航栏，包含站点标志、主要链接和用户操作入口</div>
+                    </div>
+                </div>
+                <div class="mockup-content">
+                    <!-- Navigation Bar - Not Logged In -->
+                    <div style="margin-bottom: 3rem;">
+                        <h3 style="font-size: 1rem; font-weight: 600; color: #475569; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em;">未登录状态</h3>
+                        <div class="nav-bar">
+                            <a href="#" class="nav-logo">travis-blog</a>
+                            <div class="nav-links">
+                                <a href="#" class="nav-link active">首页</a>
+                                <a href="#" class="nav-link">分类</a>
+                                <a href="#" class="nav-link">标签</a>
+                                <a href="#" class="nav-link">关于</a>
+                            </div>
+                            <div class="nav-actions">
+                                <a href="#" class="btn btn-outline">登录</a>
+                                <a href="#" class="btn btn-primary">发布文章</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Bar - Logged In -->
+                    <div>
+                        <h3 style="font-size: 1rem; font-weight: 600; color: #475569; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em;">已登录状态（管理员）</h3>
+                        <div class="nav-bar">
+                            <a href="#" class="nav-logo">travis-blog</a>
+                            <div class="nav-links">
+                                <a href="#" class="nav-link active">首页</a>
+                                <a href="#" class="nav-link">分类</a>
+                                <a href="#" class="nav-link">标签</a>
+                                <a href="#" class="nav-link">关于</a>
+                            </div>
+                            <div class="nav-actions">
+                                <a href="#" class="btn btn-primary">发布文章</a>
+                                <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
+                                    <div style="width: 32px; height: 32px; border-radius: 50%; background: #3b82f6; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.875rem;">T</div>
+                                    <span style="font-size: 0.875rem; color: #1e293b; font-weight: 500;">Travis</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Navigation -->
+                    <div style="margin-top: 3rem;">
+                        <h3 style="font-size: 1rem; font-weight: 600; color: #475569; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em;">移动端导航（响应式）</h3>
+                        <div class="nav-bar" style="max-width: 400px; margin: 0 auto;">
+                            <a href="#" class="nav-logo" style="font-size: 1.25rem;">travis-blog</a>
+                            <div class="nav-links" style="display: none;"></div>
+                            <div class="nav-actions">
+                                <a href="#" class="btn btn-primary" style="padding: 0.5rem 0.75rem; font-size: 0.8125rem;">发布</a>
+                            </div>
+                            <div class="hamburger" style="display: flex;">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                        <p style="text-align: center; color: #64748b; font-size: 0.875rem; margin-top: 1rem;">
+                            移动端使用汉堡菜单，导航链接在侧边栏中显示
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showMockup(id) {
+            // Hide all mockups
+            document.querySelectorAll('.mockup').forEach(m => m.classList.remove('active'));
+            // Remove active class from all buttons
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            // Show selected mockup
+            document.getElementById(id).classList.add('active');
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+    </script>
+    </div>
+</body>
+</html>
+

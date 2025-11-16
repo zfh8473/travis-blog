@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>travis-blog - 极简科技风颜色主题</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #0f172a;
+        }
+
+        .subtitle {
+            font-size: 1.125rem;
+            color: #64748b;
+            margin-bottom: 3rem;
+        }
+
+        .theme-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2.5rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-title {
+            font-size: 1.875rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #0f172a;
+        }
+
+        .theme-description {
+            color: #64748b;
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .color-swatch {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .color-block {
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .color-info {
+            padding: 1rem;
+            background: white;
+        }
+
+        .color-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: #0f172a;
+        }
+
+        .color-hex {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        .color-usage {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 0.5rem;
+        }
+
+        .components-showcase {
+            margin-top: 2.5rem;
+        }
+
+        .components-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #0f172a;
+        }
+
+        .component-group {
+            margin-bottom: 2rem;
+        }
+
+        .component-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .buttons-demo {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #cbd5e1;
+            color: #1e293b;
+        }
+
+        .btn-outline:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: #1e293b;
+        }
+
+        .btn-ghost:hover {
+            background: #f1f5f9;
+        }
+
+        .form-demo {
+            max-width: 400px;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .card-demo {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            max-width: 400px;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #0f172a;
+        }
+
+        .card-content {
+            color: #64748b;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        .nav-demo {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-weight: 700;
+            font-size: 1.125rem;
+            color: #0f172a;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            flex: 1;
+        }
+
+        .nav-link {
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: #3b82f6;
+        }
+
+        .nav-link.active {
+            color: #3b82f6;
+            font-weight: 500;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .typography-demo {
+            margin-top: 1.5rem;
+        }
+
+        .typo-h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+
+        .typo-h2 {
+            font-size: 1.875rem;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+
+        .typo-body {
+            font-size: 1rem;
+            color: #1e293b;
+            line-height: 1.7;
+            margin-bottom: 0.5rem;
+        }
+
+        .typo-small {
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .theme-section {
+                padding: 1.5rem;
+            }
+
+            .color-palette {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 travis-blog 颜色主题</h1>
+        <p class="subtitle">极简科技风 - 现代、简洁、专业</p>
+
+        <div class="theme-section">
+            <h2 class="theme-title">极简科技风主题</h2>
+            <p class="theme-description">
+                这个主题采用蓝色系作为主色调，传达信任、专业和现代感。整体设计极简、清晰，
+                注重内容展示，非常适合技术博客和个人博客。配色方案低冲击力，确保舒适的阅读体验。
+            </p>
+
+            <div class="color-palette">
+                <!-- Primary Colors -->
+                <div class="color-swatch">
+                    <div class="color-block" style="background: #3b82f6;">
+                        Primary
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Primary Blue</div>
+                        <div class="color-hex">#3b82f6</div>
+                        <div class="color-usage">主要操作、链接、强调元素</div>
+                    </div>
+                </div>
+
+                <div class="color-swatch">
+                    <div class="color-block" style="background: #2563eb;">
+                        Primary Dark
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Primary Dark</div>
+                        <div class="color-hex">#2563eb</div>
+                        <div class="color-usage">悬停状态、激活状态</div>
+                    </div>
+                </div>
+
+                <div class="color-swatch">
+                    <div class="color-block" style="background: #60a5fa;">
+                        Primary Light
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Primary Light</div>
+                        <div class="color-hex">#60a5fa</div>
+                        <div class="color-usage">次要操作、背景高亮</div>
+                    </div>
+                </div>
+
+                <!-- Semantic Colors -->
+                <div class="color-swatch">
+                    <div class="color-block" style="background: #10b981;">
+                        Success
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Success Green</div>
+                        <div class="color-hex">#10b981</div>
+                        <div class="color-usage">成功消息、确认操作</div>
+                    </div>
+                </div>
+
+                <div class="color-swatch">
+                    <div class="color-block" style="background: #f59e0b;">
+                        Warning
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Warning Orange</div>
+                        <div class="color-hex">#f59e0b</div>
+                        <div class="color-usage">警告消息、注意事项</div>
+                    </div>
+                </div>
+
+                <div class="color-swatch">
+                    <div class="color-block" style="background: #ef4444;">
+                        Error
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Error Red</div>
+                        <div class="color-hex">#ef4444</div>
+                        <div class="color-usage">错误消息、删除操作</div>
+                    </div>
+                </div>
+
+                <div class="color-swatch">
+                    <div class="color-block" style="background: #6366f1;">
+                        Info
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Info Purple</div>
+                        <div class="color-hex">#6366f1</div>
+                        <div class="color-usage">信息提示、次要信息</div>
+                    </div>
+                </div>
+
+                <!-- Neutral Colors -->
+                <div class="color-swatch">
+                    <div class="color-block" style="background: #0f172a; color: white;">
+                        Text Primary
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Text Primary</div>
+                        <div class="color-hex">#0f172a</div>
+                        <div class="color-usage">主要文本、标题</div>
+                    </div>
+                </div>
+
+                <div class="color-swatch">
+                    <div class="color-block" style="background: #1e293b; color: white;">
+                        Text Secondary
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Text Secondary</div>
+                        <div class="color-hex">#1e293b</div>
+                        <div class="color-usage">正文、次要文本</div>
+                    </div>
+                </div>
+
+                <div class="color-swatch">
+                    <div class="color-block" style="background: #64748b; color: white;">
+                        Text Tertiary
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Text Tertiary</div>
+                        <div class="color-hex">#64748b</div>
+                        <div class="color-usage">辅助文本、占位符</div>
+                    </div>
+                </div>
+
+                <div class="color-swatch">
+                    <div class="color-block" style="background: #f8fafc; color: #1e293b;">
+                        Background
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Background</div>
+                        <div class="color-hex">#f8fafc</div>
+                        <div class="color-usage">页面背景</div>
+                    </div>
+                </div>
+
+                <div class="color-swatch">
+                    <div class="color-block" style="background: #ffffff; color: #1e293b; border: 1px solid #e2e8f0;">
+                        Surface
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Surface</div>
+                        <div class="color-hex">#ffffff</div>
+                        <div class="color-usage">卡片、面板背景</div>
+                    </div>
+                </div>
+
+                <div class="color-swatch">
+                    <div class="color-block" style="background: #e2e8f0; color: #1e293b;">
+                        Border
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Border</div>
+                        <div class="color-hex">#e2e8f0</div>
+                        <div class="color-usage">边框、分隔线</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="components-showcase">
+                <h3 class="components-title">组件示例</h3>
+
+                <!-- Buttons -->
+                <div class="component-group">
+                    <div class="component-label">按钮</div>
+                    <div class="buttons-demo">
+                        <button class="btn btn-primary">主要按钮</button>
+                        <button class="btn btn-secondary">次要按钮</button>
+                        <button class="btn btn-outline">轮廓按钮</button>
+                        <button class="btn btn-ghost">幽灵按钮</button>
+                    </div>
+                </div>
+
+                <!-- Forms -->
+                <div class="component-group">
+                    <div class="component-label">表单</div>
+                    <div class="form-demo">
+                        <div class="form-group">
+                            <label class="form-label">邮箱地址</label>
+                            <input type="email" class="form-input" placeholder="your@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">密码</label>
+                            <input type="password" class="form-input" placeholder="••••••••">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cards -->
+                <div class="component-group">
+                    <div class="component-label">卡片</div>
+                    <div class="card-demo">
+                        <div class="card-title">文章标题</div>
+                        <div class="card-content">
+                            这是一篇文章的摘要内容，展示了卡片组件在极简科技风主题下的视觉效果。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerts -->
+                <div class="component-group">
+                    <div class="component-label">提示消息</div>
+                    <div class="alert alert-success">✓ 操作成功完成</div>
+                    <div class="alert alert-error">✕ 操作失败，请重试</div>
+                    <div class="alert alert-info">ℹ 这是一条信息提示</div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="component-group">
+                    <div class="component-label">导航栏</div>
+                    <div class="nav-demo">
+                        <div class="nav-logo">travis-blog</div>
+                        <div class="nav-links">
+                            <a href="#" class="nav-link active">首页</a>
+                            <a href="#" class="nav-link">分类</a>
+                            <a href="#" class="nav-link">标签</a>
+                            <a href="#" class="nav-link">关于</a>
+                        </div>
+                        <div class="nav-actions">
+                            <button class="btn btn-outline" style="font-size: 0.875rem; padding: 0.5rem 1rem;">登录</button>
+                            <button class="btn btn-primary" style="font-size: 0.875rem; padding: 0.5rem 1rem;">发布文章</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Typography -->
+                <div class="component-group">
+                    <div class="component-label">字体样式</div>
+                    <div class="typography-demo">
+                        <div class="typo-h1">标题 H1</div>
+                        <div class="typo-h2">标题 H2</div>
+                        <div class="typo-body">
+                            这是正文内容，展示了在极简科技风主题下的文本样式。字体清晰易读，行高适中，确保舒适的阅读体验。
+                        </div>
+                        <div class="typo-small">这是小号文本，用于辅助信息和说明文字。</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

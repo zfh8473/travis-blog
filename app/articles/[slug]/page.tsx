@@ -92,6 +92,19 @@ async function fetchArticleBySlug(
       return null;
     }
 
+    // Validate required fields before transformation
+    if (!article.id || !article.title || !article.content || !article.slug || !article.author) {
+      console.error("Article missing required fields:", {
+        slug: decodedSlug,
+        hasId: !!article.id,
+        hasTitle: !!article.title,
+        hasContent: !!article.content,
+        hasSlug: !!article.slug,
+        hasAuthor: !!article.author,
+      });
+      return null;
+    }
+
     // Transform tags to simple array format
     // Explicitly construct the object to avoid Date serialization issues
     // This is critical for Next.js Server Components in production (Vercel)

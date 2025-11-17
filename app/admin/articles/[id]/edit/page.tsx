@@ -3,7 +3,7 @@
 import { useState, useEffect, FormEvent } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import TiptapEditor from "@/components/editor/TiptapEditor";
+import MarkdownEditor from "@/components/editor/MarkdownEditor";
 
 /**
  * Category interface for form state.
@@ -651,12 +651,12 @@ export default function EditArticlePage() {
           )}
         </div>
 
-        {/* Content field (TiptapEditor) */}
+        {/* Content field (MarkdownEditor) */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             内容 <span className="text-red-500">*</span>
           </label>
-          <TiptapEditor
+          <MarkdownEditor
             initialContent={content}
             onChange={(html) => setContent(html)}
             placeholder="开始写作..."

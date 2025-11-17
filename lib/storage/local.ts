@@ -20,6 +20,7 @@ import { StorageInterface, FileMetadata } from "./interface";
  */
 export class LocalStorage implements StorageInterface {
   private readonly uploadDir: string;
+  private readonly isVercel: boolean;
 
   /**
    * Creates a new LocalStorage instance.
@@ -27,7 +28,21 @@ export class LocalStorage implements StorageInterface {
    * @param uploadDir - Directory to store uploaded files (default: 'public/uploads')
    */
   constructor(uploadDir: string = "public/uploads") {
-    this.uploadDir = uploadDir;
+    // In Vercel, file system is read-only except /tmp
+    // Use /tmp for temporary storage (files will be lost after function execution)
+    this.isVercel = !!process.env.VERCEL || !!process.env.VERCEL_ENV;
+    
+    if (this.isVercel) {
+      // Use /tmp in Vercel environment
+      this.uploadDir = "/tmp/uploads";
+      console.warn(
+        "[LocalStorage] Running in Vercel environment. " +
+        "Files stored in /tmp will be lost after function execution. " +
+        "Consider using cloud storage (Vercel Blob, S3, etc.) for production."
+      );
+    } else {
+      this.uploadDir = uploadDir;
+    }
   }
 
   /**
@@ -106,6 +121,16 @@ export class LocalStorage implements StorageInterface {
         mimeType = "application/octet-stream";
       }
 
+      // In Vercel, we can't write to public directory or serve files from /tmp
+      // Store file in /tmp and return a special path that will be handled by getUrl
+      if (this.isVercel) {
+        const filePath = path.join(this.uploadDir, filename);
+        await fs.writeFile(filePath, fileBuffer);
+        // Return a special path prefix to indicate it's in /tmp
+        return `tmp/${filename}`;
+      }
+
+      // Local development: write to public directory
       const filePath = path.join(this.uploadDir, filename);
       await fs.writeFile(filePath, fileBuffer);
 
@@ -224,8 +249,11 @@ export class LocalStorage implements StorageInterface {
    * For local storage, returns a relative path that can be used
    * in the application (e.g., '/uploads/filename.jpg').
    * 
-   * @param filePath - Relative file path (e.g., 'uploads/filename.jpg')
-   * @returns Promise resolving to the public URL
+   * In Vercel environment, returns a base64 data URL since /tmp files
+   * cannot be served via HTTP.
+   * 
+   * @param filePath - Relative file path (e.g., 'uploads/filename.jpg' or 'tmp/filename.jpg')
+   * @returns Promise resolving to the public URL or data URL
    * @throws {Error} If the file doesn't exist
    * 
    * @example
@@ -236,6 +264,21 @@ export class LocalStorage implements StorageInterface {
    */
   async getUrl(filePath: string): Promise<string> {
     try {
+      // Handle Vercel /tmp files
+      if (this.isVercel && filePath.startsWith("tmp/")) {
+        const filename = filePath.substring(4); // Remove 'tmp/' prefix
+        const fullPath = path.join(this.uploadDir, filename);
+        
+        // Read file and convert to base64 data URL
+        const fileBuffer = await fs.readFile(fullPath);
+        const mimeType = this.getMimeTypeFromFilename(filename);
+        const base64 = fileBuffer.toString("base64");
+        
+        // Return data URL
+        return `data:${mimeType};base64,${base64}`;
+      }
+
+      // Local development: return HTTP URL
       // Ensure path starts with 'uploads/' and normalize
       const normalizedPath = filePath.startsWith("uploads/")
         ? filePath
@@ -256,6 +299,28 @@ export class LocalStorage implements StorageInterface {
         `Failed to get URL for file: ${error instanceof Error ? error.message : "Unknown error"}`
       );
     }
+  }
+
+  /**
+   * Gets MIME type from filename extension.
+   * 
+   * @private
+   * @param filename - Filename with extension
+   * @returns MIME type string
+   */
+  private getMimeTypeFromFilename(filename: string): string {
+    const ext = path.extname(filename).toLowerCase();
+    const mimeTypes: Record<string, string> = {
+      ".jpg": "image/jpeg",
+      ".jpeg": "image/jpeg",
+      ".png": "image/png",
+      ".gif": "image/gif",
+      ".webp": "image/webp",
+      ".pdf": "application/pdf",
+      ".txt": "text/plain",
+      ".json": "application/json",
+    };
+    return mimeTypes[ext] || "application/octet-stream";
   }
 }
 

@@ -87,6 +87,21 @@ export async function middleware(request: NextRequest) {
       secret: process.env.NEXTAUTH_SECRET,
     });
 
+    // Debug logging (remove in production if needed)
+    if (process.env.NODE_ENV === "development" || process.env.VERCEL_ENV) {
+      console.log("[Middleware] Path:", pathname);
+      console.log("[Middleware] Method:", request.method);
+      console.log("[Middleware] Token exists:", !!token);
+      if (token) {
+        console.log("[Middleware] User:", token.email, "Role:", token.role);
+      }
+      const cookies = request.cookies.getAll();
+      console.log("[Middleware] Cookies count:", cookies.length);
+      if (cookies.length > 0) {
+        console.log("[Middleware] Cookie names:", cookies.map(c => c.name).join(", "));
+      }
+    }
+
     if (!token) {
       return NextResponse.json(
         {

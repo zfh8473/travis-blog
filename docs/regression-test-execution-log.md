@@ -190,6 +190,24 @@
     - `app/admin/articles/[id]/edit/page.tsx`
     - `app/admin/media/page.tsx`
 - **下一步：** 重新测试会话管理功能，继续执行剩余测试
+- **会话问题修复后测试：** ⚠️ 问题仍然存在
+  - 测试时间：2025-01-XX [当前时间]
+  - 测试结果：API 请求仍然返回 401
+  - 控制台错误：`Failed to load resource: the server responded with a status of 401 () @ https://travis-blog.vercel.app/api/articles?limit=1000`
+  - 可能原因：
+    1. 代码可能还未完全部署
+    2. Cookie 的 secure 标志在 HTTPS 环境下可能有问题
+    3. 中间件配置可能需要调整
+  - 需要进一步调查
+- **第二次修复尝试：** ✅ 已实施
+  - 修复时间：2025-01-XX [当前时间]
+  - 修复内容：
+    1. 将 NextAuth cookie 的 `secure` 标志显式设置为 `true`（而不是依赖 NODE_ENV）
+    2. 在中间件中添加详细的调试日志
+  - 修改文件：
+    - `app/api/auth/[...nextauth]/route.ts`
+    - `middleware.ts`
+  - 等待部署和测试
 
 ---
 

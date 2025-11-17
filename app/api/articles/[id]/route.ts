@@ -140,8 +140,25 @@ export async function PUT(
   const { id } = await params;
   const articleId = id;
 
-  // Get user information from request (with fallback to direct token reading)
-  const user = await getUserFromRequestOrHeaders(request, request.headers);
+  // Try multiple methods to get user information
+  let user = await getUserFromRequestOrHeaders(request, request.headers);
+  
+  // Fallback to getServerSession if getUserFromRequestOrHeaders fails
+  if (!user) {
+    try {
+      const session = await getServerSession(authOptions);
+      if (session?.user) {
+        user = {
+          id: session.user.id,
+          email: session.user.email,
+          name: session.user.name,
+          role: session.user.role,
+        };
+      }
+    } catch (error) {
+      console.error("Error getting session in PUT /api/articles/[id]:", error);
+    }
+  }
 
   // Check if user is authenticated and has ADMIN role
   const adminError = requireAdmin(user);
@@ -369,8 +386,25 @@ export async function DELETE(
   const { id } = await params;
   const articleId = id;
 
-  // Get user information from request (with fallback to direct token reading)
-  const user = await getUserFromRequestOrHeaders(request, request.headers);
+  // Try multiple methods to get user information
+  let user = await getUserFromRequestOrHeaders(request, request.headers);
+  
+  // Fallback to getServerSession if getUserFromRequestOrHeaders fails
+  if (!user) {
+    try {
+      const session = await getServerSession(authOptions);
+      if (session?.user) {
+        user = {
+          id: session.user.id,
+          email: session.user.email,
+          name: session.user.name,
+          role: session.user.role,
+        };
+      }
+    } catch (error) {
+      console.error("Error getting session in PUT /api/articles/[id]:", error);
+    }
+  }
 
   // Check if user is authenticated and has ADMIN role
   const adminError = requireAdmin(user);

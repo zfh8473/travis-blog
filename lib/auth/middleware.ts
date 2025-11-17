@@ -121,8 +121,9 @@ export async function getUserFromRequestOrHeaders(
       }
 
       // Try to get token with explicit cookie name handling
-      // In production, NextAuth may use __Secure- prefix
-      const cookieName = process.env.NODE_ENV === "production" 
+      // In production/Vercel, NextAuth may use __Secure- prefix
+      const isProduction = process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "production";
+      const cookieName = isProduction
         ? "__Secure-next-auth.session-token" 
         : "next-auth.session-token";
       

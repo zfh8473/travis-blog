@@ -106,14 +106,33 @@ export async function getUserFromRequestOrHeaders(
   // First try to get from headers (set by middleware)
   let user = getUserFromHeaders(headers);
 
+  // Debug logging
+  if (process.env.NODE_ENV === "development" || process.env.VERCEL_ENV) {
+    console.log("[getUserFromRequestOrHeaders] User from headers:", !!user);
+  }
+
   // Fallback: If middleware didn't set headers, try to get token directly
   if (!user) {
     try {
-      const { getToken } = await import("next-auth/jwt");
       const token = await getToken({
         req: request,
         secret: process.env.NEXTAUTH_SECRET,
       });
+
+      // Debug logging
+      if (process.env.NODE_ENV === "development" || process.env.VERCEL_ENV) {
+        console.log("[getUserFromRequestOrHeaders] Token exists:", !!token);
+        if (token) {
+          console.log("[getUserFromRequestOrHeaders] Token data:", {
+            id: !!token.id,
+            email: !!token.email,
+            role: !!token.role,
+          });
+        }
+        // Log cookie names for debugging
+        const cookies = request.cookies.getAll();
+        console.log("[getUserFromRequestOrHeaders] Cookies:", cookies.map(c => c.name).join(", "));
+      }
 
       if (token && token.id && token.email && token.role) {
         user = {
@@ -125,6 +144,9 @@ export async function getUserFromRequestOrHeaders(
       }
     } catch (error) {
       console.error("Error getting token in getUserFromRequestOrHeaders:", error);
+      if (process.env.NODE_ENV === "development" || process.env.VERCEL_ENV) {
+        console.error("[getUserFromRequestOrHeaders] Error details:", error);
+      }
     }
   }
 

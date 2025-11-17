@@ -114,10 +114,33 @@ export async function getUserFromRequestOrHeaders(
   // Fallback: If middleware didn't set headers, try to get token directly
   if (!user) {
     try {
-      const token = await getToken({
+      // Log cookie names for debugging before getToken
+      if (process.env.NODE_ENV === "development" || process.env.VERCEL_ENV) {
+        const cookies = request.cookies.getAll();
+        console.log("[getUserFromRequestOrHeaders] Cookies before getToken:", cookies.map(c => `${c.name}=${c.value.substring(0, 20)}...`).join(", "));
+      }
+
+      // Try to get token with explicit cookie name handling
+      // In production, NextAuth may use __Secure- prefix
+      const cookieName = process.env.NODE_ENV === "production" 
+        ? "__Secure-next-auth.session-token" 
+        : "next-auth.session-token";
+      
+      // First try with default getToken (handles cookie name automatically)
+      let token = await getToken({
         req: request,
         secret: process.env.NEXTAUTH_SECRET,
       });
+
+      // If that fails, try reading cookie directly
+      if (!token) {
+        const cookieValue = request.cookies.get(cookieName)?.value || 
+                           request.cookies.get("next-auth.session-token")?.value;
+        
+        if (cookieValue && process.env.NODE_ENV === "development" || process.env.VERCEL_ENV) {
+          console.log("[getUserFromRequestOrHeaders] Found cookie but getToken returned null");
+        }
+      }
 
       // Debug logging
       if (process.env.NODE_ENV === "development" || process.env.VERCEL_ENV) {
@@ -129,9 +152,6 @@ export async function getUserFromRequestOrHeaders(
             role: !!token.role,
           });
         }
-        // Log cookie names for debugging
-        const cookies = request.cookies.getAll();
-        console.log("[getUserFromRequestOrHeaders] Cookies:", cookies.map(c => c.name).join(", "));
       }
 
       if (token && token.id && token.email && token.role) {

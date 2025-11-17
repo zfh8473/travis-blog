@@ -82,6 +82,8 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
+    // Get token from cookie
+    // NextAuth automatically uses __Secure- prefix for secure cookies in production
     const token = await getToken({
       req: request,
       secret: process.env.NEXTAUTH_SECRET,

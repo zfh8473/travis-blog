@@ -38,6 +38,8 @@ validateAuthEnv();
  * @see https://next-auth.js.org/configuration/options
  */
 export const authOptions: NextAuthOptions = {
+  // Trust host for Vercel deployment
+  trustHost: true,
   providers: [
     CredentialsProvider({
       name: "Credentials",

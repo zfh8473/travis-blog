@@ -179,3 +179,44 @@ sameSite: "lax", // 或尝试 "none"（需要 secure: true）
 **修复完成时间：** 2025-01-XX  
 **等待部署和测试**
 
+---
+
+## 第三次修复尝试
+
+### 修复内容（2025-01-XX）
+
+根据搜索结果和 NextAuth 文档，发现以下问题：
+
+1. **添加 `trustHost: true` 选项**
+   - NextAuth 在 Vercel 等托管平台上需要此选项
+   - 允许 NextAuth 信任请求的 host header
+   - 这是 Vercel 部署的常见要求
+
+2. **确保 Cookie 配置正确**
+   - NextAuth 在生产环境中会自动使用 `__Secure-` 前缀（当 secure 为 true 时）
+   - `getToken` 应该能够自动检测 cookie 名称
+
+### 修改文件
+
+- `app/api/auth/[...nextauth]/route.ts` - 添加 `trustHost: true`
+- `middleware.ts` - 确保 `getToken` 正确配置（添加注释说明）
+
+### 预期效果
+
+- `trustHost: true` 应该解决 Vercel 环境中的 host 信任问题
+- Cookie 应该能够正确传递和读取
+- 中间件应该能够正确获取 token
+
+### 测试计划
+
+1. 部署修复后的代码
+2. 重新登录（清除旧的 session）
+3. 访问 `/admin/articles` 页面
+4. 检查是否能够正常加载文章列表
+5. 检查 Vercel 日志中的中间件调试输出
+
+---
+
+**修复完成时间：** 2025-01-XX  
+**等待部署和测试**
+

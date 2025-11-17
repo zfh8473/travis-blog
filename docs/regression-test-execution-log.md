@@ -208,11 +208,50 @@
     - `app/api/auth/[...nextauth]/route.ts`
     - `middleware.ts`
   - 等待部署和测试
+- **第二次修复后测试：** ⚠️ 问题仍然存在
+  - 测试时间：2025-01-XX [当前时间]
+  - 测试结果：API 请求仍然返回 401
+  - 控制台错误：`Failed to load resource: the server responded with a status of 401 () @ https://travis-blog.vercel.app/api/articles?limit=1000`
+  - 观察：
+    - 登录成功，页面布局正常显示
+    - 显示用户名"Fenghua Zhang"
+    - 但客户端组件中的 fetch 请求仍然失败
+  - 需要检查 Vercel 日志中的中间件调试输出
+  - 可能需要考虑其他解决方案（如使用 Server Actions 或 Server Components）
+- **第三次修复尝试：** ✅ 已实施
+  - 修复时间：2025-01-XX [当前时间]
+  - 修复内容：
+    1. 在 NextAuth 配置中添加 `trustHost: true`（Vercel 环境需要）
+    2. 确保 `getToken` 正确配置以读取 cookie
+  - 修改文件：
+    - `app/api/auth/[...nextauth]/route.ts`（添加 trustHost）
+    - `middleware.ts`（确保配置正确）
+  - 等待部署和测试
 
 ---
 
 **最后更新：** 2025-01-XX [当前时间]  
 **下次更新：** 每 2 小时或重大进展时
+
+---
+
+## 📊 当前测试状态总结
+
+- **总测试用例数：** 11
+- **已执行：** 4
+- **通过：** 3
+- **部分通过：** 1
+- **失败：** 0
+- **阻塞：** 1（会话管理问题）
+- **通过率：** 75%（关键测试通过）
+
+### 关键成果
+✅ **核心问题已解决**：Markdown 编辑器输入问题（`## 标题` 被删除和光标跳转）已完全解决
+
+### 阻塞问题
+🔴 **会话管理问题**：客户端组件中的 API 请求返回 401，需要进一步调查和修复
+
+详细状态请参考：`docs/regression-test-current-status.md`
 
 ---
 

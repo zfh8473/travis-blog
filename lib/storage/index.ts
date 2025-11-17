@@ -1,5 +1,6 @@
 import { StorageInterface } from "./interface";
 import { LocalStorage } from "./local";
+import { VercelBlobStorage } from "./vercel-blob";
 
 /**
  * Storage type configuration.
@@ -38,13 +39,13 @@ export function getStorage(): StorageInterface {
   switch (storageType) {
     case "local":
       return new LocalStorage();
+    case "vercel-blob":
+      return new VercelBlobStorage();
     // Future implementations:
     // case "s3":
     //   return new S3Storage();
     // case "cloudinary":
     //   return new CloudinaryStorage();
-    // case "vercel-blob":
-    //   return new VercelBlobStorage();
     default:
       // Default to local storage if unknown type is specified
       console.warn(
@@ -57,4 +58,5 @@ export function getStorage(): StorageInterface {
 // Re-export types and classes for convenience
 export type { StorageInterface, FileMetadata } from "./interface";
 export { LocalStorage } from "./local";
+export { VercelBlobStorage } from "./vercel-blob";
 

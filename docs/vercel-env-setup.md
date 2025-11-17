@@ -32,7 +32,9 @@ muHsNCbwL/X6waFfiKEaWS+ACAbF268F4mwL0aYnOmo=
 
 | 变量名 | 值 | 说明 |
 |--------|-----|------|
-| `STORAGE_TYPE` | `local` | 存储类型（默认：local） |
+| `STORAGE_TYPE` | `local` 或 `vercel-blob` | 存储类型（默认：local） |
+| `BLOB_READ_WRITE_TOKEN` | `vercel_blob_xxx...` | Vercel Blob 读写令牌（使用 vercel-blob 时必需） |
+| `BLOB_STORE_NAME` | `travis-blog` | Vercel Blob Store 名称（默认：travis-blog） |
 
 ### 3. 环境变量配置说明
 
@@ -60,10 +62,29 @@ postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/dbname?sslmode=require
 - 必须包含 `?sslmode=require` 参数
 - 确保数据库允许来自 Vercel 的连接
 
+## Vercel Blob Storage 配置
+
+如果您想使用 Vercel Blob Storage 作为文件存储后端：
+
+1. **创建 Blob Store**（如果还没有）：
+   - 在 Vercel Dashboard 中，进入项目设置
+   - 导航到 **Storage** → **Blob**
+   - 创建名为 `travis-blog` 的 Blob Store
+
+2. **获取 Blob Token**：
+   - 在 Blob Store 设置中，复制 **Read/Write Token**
+   - 这个 token 将作为 `BLOB_READ_WRITE_TOKEN` 环境变量
+
+3. **配置环境变量**：
+   - `STORAGE_TYPE` = `vercel-blob`
+   - `BLOB_READ_WRITE_TOKEN` = 您的 Blob Token
+   - `BLOB_STORE_NAME` = `travis-blog`（可选，默认值）
+
 ## 验证配置
 
 配置完成后，触发一次部署并检查：
 1. 构建日志中无错误
 2. 数据库连接成功
 3. 应用正常运行
+4. 如果使用 Vercel Blob，测试图片上传功能
 

@@ -173,7 +173,49 @@ export default function ArticleDetail({
 
       {/* Article content */}
       <article
-        className="prose prose-lg max-w-none prose-headings:font-bold prose-p:text-gray-700 prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-strong:text-gray-900 prose-code:text-blue-600 prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-blockquote:border-l-blue-500 prose-blockquote:border-l-4 prose-blockquote:pl-4 prose-blockquote:italic"
+        className="prose prose-lg prose-slate max-w-none
+          prose-headings:font-bold prose-headings:text-gray-900
+          prose-headings:mt-8 prose-headings:mb-4
+          prose-h1:text-4xl prose-h1:font-extrabold prose-h1:mt-12 prose-h1:mb-6
+          prose-h1:border-b prose-h1:border-gray-200 prose-h1:pb-3
+          prose-h2:text-3xl prose-h2:font-bold prose-h2:mt-10 prose-h2:mb-4
+          prose-h3:text-2xl prose-h3:font-semibold prose-h3:mt-8 prose-h3:mb-3
+          prose-h4:text-xl prose-h4:font-semibold prose-h4:mt-6 prose-h4:mb-2
+          prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6
+          prose-p:text-base
+          prose-a:text-blue-600 prose-a:no-underline 
+          hover:prose-a:underline prose-a:font-medium
+          prose-a:transition-colors
+          prose-strong:text-gray-900 prose-strong:font-semibold
+          prose-em:text-gray-800 prose-em:italic
+          prose-code:text-blue-600 prose-code:bg-blue-50 
+          prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded 
+          prose-code:font-mono prose-code:text-sm prose-code:font-medium
+          prose-code:before:content-none prose-code:after:content-none
+          prose-pre:bg-gray-900 prose-pre:text-gray-100 
+          prose-pre:rounded-lg prose-pre:p-4 prose-pre:overflow-x-auto
+          prose-pre:border prose-pre:border-gray-800 prose-pre:shadow-lg
+          prose-pre:my-6
+          prose-pre:code:text-gray-100 prose-pre:code:bg-transparent
+          prose-pre:code:p-0 prose-pre:code:rounded-none
+          prose-pre:code:before:content-none prose-pre:code:after:content-none
+          prose-blockquote:border-l-blue-500 prose-blockquote:border-l-4 
+          prose-blockquote:pl-6 prose-blockquote:italic 
+          prose-blockquote:bg-blue-50 prose-blockquote:py-3 prose-blockquote:pr-4
+          prose-blockquote:rounded-r prose-blockquote:my-6
+          prose-blockquote:text-gray-700
+          prose-ul:list-disc prose-ul:pl-6 prose-ul:my-6
+          prose-ol:list-decimal prose-ol:pl-6 prose-ol:my-6
+          prose-li:my-2 prose-li:leading-relaxed prose-li:text-gray-700
+          prose-li:marker:text-gray-500
+          prose-img:rounded-lg prose-img:shadow-md prose-img:my-8
+          prose-img:max-w-full prose-img:h-auto
+          prose-table:w-full prose-table:border-collapse prose-table:my-6
+          prose-th:bg-gray-100 prose-th:font-semibold prose-th:p-3
+          prose-th:text-left prose-th:text-gray-900 prose-th:border prose-th:border-gray-300
+          prose-td:p-3 prose-td:border prose-td:border-gray-200 prose-td:text-gray-700
+          prose-tr:border-b prose-tr:border-gray-200
+          prose-hr:border-gray-300 prose-hr:my-8 prose-hr:border-t-2"
         dangerouslySetInnerHTML={{ __html: content }}
       />
     </div>

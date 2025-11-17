@@ -76,7 +76,8 @@ travis-blog/
 │   │   ├── CommentList.tsx
 │   │   └── CommentItem.tsx
 │   ├── editor/
-│   │   └── TiptapEditor.tsx
+│   │   ├── MarkdownEditor.tsx
+│   │   └── TiptapEditor.tsx (legacy, replaced by MarkdownEditor)
 │   └── layout/
 │       ├── Header.tsx
 │       ├── Footer.tsx
@@ -121,7 +122,7 @@ travis-blog/
 |------|----------------------|----------------|
 | **Epic 1: Foundation** | `app/`, `prisma/`, `lib/db/` | Project structure, database schema, ORM config |
 | **Epic 2: Authentication** | `app/(auth)/`, `lib/auth/`, `app/api/auth/` | NextAuth.js config, login/register pages |
-| **Epic 3: Content Management** | `app/admin/`, `components/editor/`, `lib/storage/` | Admin dashboard, Tiptap editor, storage layer |
+| **Epic 3: Content Management** | `app/admin/`, `components/editor/`, `lib/storage/` | Admin dashboard, Markdown editor, storage layer |
 | **Epic 4: Content Display** | `app/page.tsx`, `app/posts/`, `components/article/` | Homepage, article pages, article components |
 | **Epic 5: Reader Interaction** | `components/comment/`, `app/api/comments/` | Comment components, comment API |
 | **Epic 6: Admin Dashboard** | `app/admin/`, `components/admin/` | Admin layout, admin components |
@@ -138,7 +139,9 @@ travis-blog/
 - **TypeScript** - Type safety
 - **Tailwind CSS** - Utility-first CSS framework
 - **shadcn/ui** or **Headless UI** - Component library
-- **Tiptap** - Rich text editor
+- **@uiw/react-md-editor** - Markdown editor
+- **Shiki** - Code syntax highlighting
+- **markdown-it** - Markdown to HTML conversion
 - **date-fns** - Date manipulation library
 
 **Backend:**
@@ -173,8 +176,11 @@ travis-blog/
 - Future: Storage abstraction layer → Cloud storage (S3, Cloudinary)
 
 **Editor Integration:**
-- Tiptap → Article content editing
-- Tiptap → Markdown support
+- MarkdownEditor (@uiw/react-md-editor) → Article content editing
+- MarkdownEditor → Native Markdown syntax support
+- markdown-it → Markdown to HTML conversion
+- turndown → HTML to Markdown conversion
+- Shiki → Code syntax highlighting
 - Storage layer → Image upload
 
 ---
@@ -615,7 +621,7 @@ getCommentsAction(articleId: string): Promise<Comment[]>
 
 **XSS Prevention:**
 - React automatic escaping
-- Sanitize HTML content (Tiptap handles this)
+- Sanitize HTML content (markdown-it and custom sanitization)
 - Content Security Policy (CSP) headers
 
 ### Security Headers
@@ -635,7 +641,7 @@ getCommentsAction(articleId: string): Promise<Comment[]>
 **Next.js Automatic Code Splitting:**
 - Route-based splitting (automatic)
 - Dynamic imports for heavy components
-- Lazy load Tiptap editor
+- Lazy load MarkdownEditor (dynamic import)
 
 ### Image Optimization
 
@@ -725,7 +731,7 @@ npm install
 
 # 3. Install additional dependencies
 npm install prisma @prisma/client next-auth date-fns
-npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-markdown
+npm install @uiw/react-md-editor shiki markdown-it turndown
 npm install @radix-ui/react-* # For shadcn/ui components
 
 # 4. Initialize Prisma

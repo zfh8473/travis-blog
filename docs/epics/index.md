@@ -19,7 +19,7 @@
     - [Story 2.6: 用户资料管理](./epic-2-用户认证和授权user-authentication-authorization.md#story-26-用户资料管理)
   - [Epic 3: 内容创作和管理（Content Creation & Management）](./epic-3-内容创作和管理content-creation-management.md)
     - [Story 3.1: 文章数据模型和基础 API](./epic-3-内容创作和管理content-creation-management.md#story-31-文章数据模型和基础-api)
-    - [Story 3.2: Tiptap 编辑器集成](./epic-3-内容创作和管理content-creation-management.md#story-32-tiptap-编辑器集成)
+    - [Story 3.2: Markdown 编辑器集成](./epic-3-内容创作和管理content-creation-management.md#story-32-markdown-编辑器集成)
     - [Story 3.3: 文章创建功能](./epic-3-内容创作和管理content-creation-management.md#story-33-文章创建功能)
     - [Story 3.4: 文章编辑功能](./epic-3-内容创作和管理content-creation-management.md#story-34-文章编辑功能)
     - [Story 3.5: 文章删除功能](./epic-3-内容创作和管理content-creation-management.md#story-35-文章删除功能)

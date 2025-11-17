@@ -71,10 +71,10 @@ So that **I can manage my content efficiently**.
 **Given** I am logged in as an admin  
 **When** I click "New Article" in the admin dashboard  
 **Then** I am taken to the article creation page  
-**And** I can create articles using the Tiptap editor  
+**And** I can create articles using the Markdown editor  
 **When** I click "Edit" on an existing article  
 **Then** I am taken to the article edit page  
-**And** I can edit the article using the Tiptap editor  
+**And** I can edit the article using the Markdown editor  
 **And** changes are saved correctly
 
 **Prerequisites:** Story 6.2, Story 3.3, Story 3.4
@@ -82,7 +82,7 @@ So that **I can manage my content efficiently**.
 **Technical Notes:**
 - Integrate article creation page into admin dashboard
 - Integrate article edit page into admin dashboard
-- Ensure Tiptap editor works in admin context
+- Ensure MarkdownEditor works in admin context
 - Add navigation back to articles list
 - Show save status (saving, saved, error)
 - Add draft/publish toggle in admin interface

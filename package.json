@@ -15,7 +15,9 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
     "seed": "tsx prisma/seed.ts",
-    "seed:test": "tsx prisma/seed-test-data.ts"
+    "seed:test": "tsx prisma/seed-test-data.ts",
+    "docs:check": "bash scripts/check-documentation-consistency.sh",
+    "docs:review": "echo '执行文档审查：1. 检查 PRD 和 Epics 一致性 2. 检查技术栈准确性 3. 检查功能描述完整性'"
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.19",

@@ -38,18 +38,18 @@
 
 ### 🟢 低优先级 (Low Priority)
 
-#### IMP-002: E2E 测试 - Tiptap 编辑器交互验证
+#### IMP-002: E2E 测试 - Markdown 编辑器交互验证
 - **来源**: Epic 6 回顾 (Story 6.3)
-- **描述**: 验证并调整 E2E 测试中 Tiptap 编辑器的交互方式（如果需要）
-- **当前实现**: E2E 测试使用 `editor.fill()` 来填充 Tiptap 编辑器
-- **问题**: Tiptap 编辑器是 contenteditable div，可能需要更具体的交互方式
+- **描述**: 验证并调整 E2E 测试中 Markdown 编辑器的交互方式（如果需要）
+- **当前实现**: E2E 测试使用 `editor.fill()` 来填充 Markdown 编辑器
+- **问题**: Markdown 编辑器（@uiw/react-md-editor）可能需要更具体的交互方式
 - **建议方案**:
   1. 实际运行 E2E 测试验证当前实现是否工作
   2. 如果测试失败，使用更具体的交互方式（例如点击编辑器，然后输入文本）
-  3. 参考 Tiptap 官方文档的测试建议
+  3. 参考 @uiw/react-md-editor 官方文档的测试建议
 - **预计工作量**: 2-4 小时
 - **相关文件**: 
-  - `tests/e2e/admin-article-integration.spec.ts:148` - Tiptap 编辑器交互
+  - `tests/e2e/admin-article-integration.spec.ts:148` - Markdown 编辑器交互
 - **状态**: 待验证（需要实际运行测试）
 - **触发条件**: 当 E2E 测试失败或需要改进测试可靠性时
 

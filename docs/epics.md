@@ -409,48 +409,43 @@ So that **articles can be stored and retrieved from the database**.
 
 ---
 
-### Story 3.2: Tiptap 编辑器集成
+### Story 3.2: Markdown 编辑器集成
 
 As a **blog author**,  
-I want **to use Tiptap editor to create and edit articles**,  
-So that **I can write rich text content with formatting options**.
+I want **to use a Markdown editor to create and edit articles**,  
+So that **I can write content with native Markdown syntax support and better editing experience**.
 
 **Acceptance Criteria:**
 
 **Given** I am logged in as an admin  
 **When** I navigate to the article creation page  
-**Then** I see the Tiptap editor  
-**And** I can type and format text (bold, italic, headings, lists, etc.)  
+**Then** I see the Markdown editor  
+**And** I can type and format text using Markdown syntax  
 **And** I can see a real-time preview  
-**And** the editor supports Markdown input  
+**And** the editor provides native Markdown editing experience  
 **And** I can upload images by dragging and dropping or pasting  
 **When** I upload an image  
 **Then** the image is uploaded to the storage layer  
-**And** the image URL is inserted into the editor  
-**And** the image is displayed in the editor  
+**And** the image URL is inserted into the editor as Markdown syntax  
+**And** the image is displayed in the preview  
 **When** I save the article  
-**Then** the formatted content (including images) is saved to the database
+**Then** the Markdown content is converted to HTML and saved to the database
 
 **Prerequisites:** Story 3.1, Story 1.5 (存储抽象层)
 
 **Technical Notes:**
-- Install and configure Tiptap
-- Set up Tiptap extensions (bold, italic, headings, lists, links, etc.)
-- Create article editor component
-- Implement Markdown support
-- Add real-time preview (optional)
+- Install and configure `@uiw/react-md-editor` (MarkdownEditor)
+- Create `MarkdownEditor` component (`components/editor/MarkdownEditor.tsx`)
+- Implement HTML ↔ Markdown bidirectional conversion using `turndown` and `markdown-it`
 - **图片上传功能实现：**
-  - Install `@tiptap/extension-image` extension
-  - Configure image upload handler in Tiptap editor
   - Create image upload API endpoint: `POST /api/upload`
   - Use storage abstraction layer (`lib/storage/`) for file storage
   - Implement drag-and-drop image upload
   - Implement paste image upload (clipboard)
   - Validate image format (jpg, png, gif, webp) and size (max 5MB)
   - Generate unique filename for uploaded images
-  - Return image URL to editor for insertion
-  - Store image path in article content (HTML)
-- Save editor content to database
+  - Return image URL to editor for insertion as Markdown syntax: `![alt](url)`
+- Save Markdown content to database (converted to HTML)
 - Handle editor state management
 
 ---
@@ -705,7 +700,7 @@ So that **I can read the complete blog post**.
 **Technical Notes:**
 - Create article detail page/component
 - Fetch article by slug or ID from API
-- Render article content (HTML from Tiptap)
+- Render article content (HTML from Markdown conversion)
 - Display article metadata (title, date, category, tags)
 - Implement responsive typography and layout
 - Handle article not found errors
@@ -1044,10 +1039,10 @@ So that **I can manage my content efficiently**.
 **Given** I am logged in as an admin  
 **When** I click "New Article" in the admin dashboard  
 **Then** I am taken to the article creation page  
-**And** I can create articles using the Tiptap editor  
+**And** I can create articles using the Markdown editor  
 **When** I click "Edit" on an existing article  
 **Then** I am taken to the article edit page  
-**And** I can edit the article using the Tiptap editor  
+**And** I can edit the article using the Markdown editor  
 **And** changes are saved correctly
 
 **Prerequisites:** Story 6.2, Story 3.3, Story 3.4
@@ -1055,7 +1050,7 @@ So that **I can manage my content efficiently**.
 **Technical Notes:**
 - Integrate article creation page into admin dashboard
 - Integrate article edit page into admin dashboard
-- Ensure Tiptap editor works in admin context
+- Ensure MarkdownEditor works in admin context
 - Add navigation back to articles list
 - Show save status (saving, saved, error)
 - Add draft/publish toggle in admin interface

@@ -1,0 +1,44 @@
+name: Documentation Consistency Check
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'docs/epics/**'
+      - 'scripts/check-documentation-consistency.sh'
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'docs/epics/**'
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  check-docs:
+    name: Check Documentation Consistency
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Check documentation consistency
+        run: |
+          chmod +x scripts/check-documentation-consistency.sh
+          ./scripts/check-documentation-consistency.sh
+      
+      - name: Comment PR (if PR)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const output = fs.readFileSync('${{ github.workspace }}/docs-check-output.txt', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 📋 文档一致性检查结果\n\n${output}`
+            });
+

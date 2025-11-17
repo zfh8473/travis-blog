@@ -4,6 +4,7 @@ import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import MarkdownEditor from "@/components/editor/MarkdownEditor";
+import { createArticleAction } from "@/lib/actions/article";
 
 /**
  * Category interface for form state.
@@ -236,73 +237,39 @@ export default function NewArticlePage() {
         requestBody.tagIds = tagIds;
       }
 
-      // Submit to API
-      const response = await fetch("/api/articles", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      });
+      // Submit using Server Action
+      const result = await createArticleAction(requestBody);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Handle API errors
-        if (response.status === 401) {
-          // Unauthorized - user not authenticated
+      if (!result.success) {
+        // Handle errors
+        if (result.error.code === "UNAUTHORIZED") {
           setSubmitError("请先登录");
           return;
         }
 
-        if (response.status === 403) {
-          // Forbidden - user doesn't have permission
+        if (result.error.code === "FORBIDDEN") {
           setSubmitError("权限不足，需要管理员权限");
           return;
         }
 
-        if (response.status === 400 && data.error?.details) {
-          // Validation errors from API
-          const apiErrors: FormErrors = {};
-          data.error.details.forEach((issue: { path: string[]; message: string }) => {
-            const field = issue.path[0];
-            // Map field names to FormErrors interface
-            if (field === "title") {
-              apiErrors.title = issue.message;
-            } else if (field === "content") {
-              apiErrors.content = issue.message;
-            } else if (field === "excerpt") {
-              apiErrors.excerpt = issue.message;
-            } else if (field === "categoryId") {
-              apiErrors.categoryId = issue.message;
-            } else if (field === "tagIds") {
-              apiErrors.tagIds = issue.message;
-            } else if (field === "status") {
-              apiErrors.status = issue.message;
-            }
-          });
-          setErrors(apiErrors);
-        } else {
-          setSubmitError(
-            data.error?.message || "创建文章失败，请重试"
-          );
+        if (result.error.code === "VALIDATION_ERROR") {
+          // Validation errors
+          setSubmitError(result.error.message);
+          return;
         }
+
+        setSubmitError(result.error.message || "创建文章失败，请重试");
         return;
       }
 
-      if (data.success && data.data) {
-        // Success - show success message and redirect
-        setSuccessMessage("文章创建成功！");
-        
-        // Redirect to articles list after a brief delay to show success message
-        // This allows users to immediately see the newly created article in the list
-        setTimeout(() => {
-          router.push("/admin/articles");
-        }, 1000);
-      } else {
-        setSubmitError("创建文章失败，请重试");
-      }
+      // Success - show success message and redirect
+      setSuccessMessage("文章创建成功！");
+      
+      // Redirect to articles list after a brief delay to show success message
+      // This allows users to immediately see the newly created article in the list
+      setTimeout(() => {
+        router.push("/admin/articles");
+      }, 1000);
     } catch (error) {
       console.error("Error creating article:", error);
       setSubmitError("网络错误，请检查连接后重试");

@@ -4,6 +4,7 @@ import { useState, useEffect, FormEvent } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import MarkdownEditor from "@/components/editor/MarkdownEditor";
+import { updateArticleAction } from "@/lib/actions/article";
 
 /**
  * Category interface for form state.

@@ -251,23 +251,21 @@ async function ArticleDetailContent({
     <>
       <ArticleDetail {...article} />
       
-      {/* Comments section */}
-      <div className="container mx-auto px-4 py-8 max-w-4xl border-t border-gray-200 mt-12">
+      {/* Comments section - temporarily disabled for debugging */}
+      {/* <div className="container mx-auto px-4 py-8 max-w-4xl border-t border-gray-200 mt-12">
         <h2 className="text-2xl font-bold mb-6 text-gray-900">留言</h2>
         
-        {/* Comment form */}
         <div className="mb-8">
           <CommentForm articleId={article.id} />
         </div>
         
-        {/* Comment list */}
         <div>
           <h3 className="text-xl font-semibold mb-4 text-gray-900">所有留言</h3>
           <Suspense fallback={<CommentListLoading />}>
             <CommentList articleId={article.id} />
           </Suspense>
         </div>
-      </div>
+      </div> */}
     </>
   );
 }

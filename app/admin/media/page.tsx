@@ -417,6 +417,10 @@ export default function MediaLibraryPage() {
               height={800}
               className="max-w-full max-h-[90vh] object-contain"
               unoptimized
+              onError={(e) => {
+                console.error("Preview image load error:", previewImage);
+                e.currentTarget.style.display = "none";
+              }}
             />
           </div>
         </div>

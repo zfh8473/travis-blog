@@ -383,79 +383,44 @@ export default function EditArticlePage() {
 
       requestBody.status = submitStatus;
 
-      // Submit to API
-      const response = await fetch(`/api/articles/${articleId}`, {
-        method: "PUT",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      });
+      // Submit using Server Action
+      const result = await updateArticleAction(articleId, requestBody);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Handle API errors
-        if (response.status === 401) {
-          // Unauthorized - user not authenticated
+      if (!result.success) {
+        // Handle errors
+        if (result.error.code === "UNAUTHORIZED") {
           setSubmitError("请先登录");
           return;
         }
 
-        if (response.status === 403) {
-          // Forbidden - user doesn't have permission
+        if (result.error.code === "FORBIDDEN") {
           setSubmitError("权限不足，需要管理员权限");
           return;
         }
 
-        if (response.status === 404) {
-          // Article not found
+        if (result.error.code === "ARTICLE_NOT_FOUND") {
           setSubmitError("文章不存在");
           return;
         }
 
-        if (response.status === 400 && data.error?.details) {
-          // Validation errors from API
-          const apiErrors: FormErrors = {};
-          data.error.details.forEach((issue: { path: string[]; message: string }) => {
-            const field = issue.path[0];
-            // Map field names to FormErrors interface
-            if (field === "title") {
-              apiErrors.title = issue.message;
-            } else if (field === "content") {
-              apiErrors.content = issue.message;
-            } else if (field === "excerpt") {
-              apiErrors.excerpt = issue.message;
-            } else if (field === "categoryId") {
-              apiErrors.categoryId = issue.message;
-            } else if (field === "tagIds") {
-              apiErrors.tagIds = issue.message;
-            } else if (field === "status") {
-              apiErrors.status = issue.message;
-            }
-          });
-          setErrors(apiErrors);
-        } else {
-          setSubmitError(
-            data.error?.message || "更新文章失败，请重试"
-          );
+        if (result.error.code === "VALIDATION_ERROR") {
+          // Validation errors
+          setSubmitError(result.error.message);
+          return;
         }
+
+        setSubmitError(result.error.message || "更新文章失败，请重试");
         return;
       }
 
-      if (data.success && data.data) {
-        // Success - show success message
-        setSuccessMessage("文章更新成功！");
-        
-        // Redirect to articles list after a brief delay to show success message
-        // This allows users to immediately see the updated article in the list
-        setTimeout(() => {
-          router.push("/admin/articles");
-        }, 1000);
-      } else {
-        setSubmitError("更新文章失败，请重试");
-      }
+      // Success - show success message
+      setSuccessMessage("文章更新成功！");
+      
+      // Redirect to articles list after a brief delay to show success message
+      // This allows users to immediately see the updated article in the list
+      setTimeout(() => {
+        router.push("/admin/articles");
+      }, 1000);
     } catch (error) {
       console.error("Error updating article:", error);
       setSubmitError("网络错误，请检查连接后重试");

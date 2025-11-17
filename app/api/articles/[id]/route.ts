@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getUserFromHeaders } from "@/lib/auth/middleware";
+import { getUserFromRequestOrHeaders } from "@/lib/auth/middleware";
 import { requireAdmin } from "@/lib/auth/permissions";
 import { prisma } from "@/lib/db/prisma";
 import { updateArticleSchema } from "@/lib/validations/article";
@@ -63,7 +63,7 @@ export async function GET(
     }
 
     // Check article status and permissions
-    const user = getUserFromHeaders(request.headers);
+    const user = await getUserFromRequestOrHeaders(request, request.headers);
 
     // If article is DRAFT, require ADMIN role
     if (article.status === "DRAFT") {
@@ -138,8 +138,8 @@ export async function PUT(
   const { id } = await params;
   const articleId = id;
 
-  // Get user information from request headers (set by middleware)
-  const user = getUserFromHeaders(request.headers);
+  // Get user information from request (with fallback to direct token reading)
+  const user = await getUserFromRequestOrHeaders(request, request.headers);
 
   // Check if user is authenticated and has ADMIN role
   const adminError = requireAdmin(user);
@@ -367,8 +367,8 @@ export async function DELETE(
   const { id } = await params;
   const articleId = id;
 
-  // Get user information from request headers (set by middleware)
-  const user = getUserFromHeaders(request.headers);
+  // Get user information from request (with fallback to direct token reading)
+  const user = await getUserFromRequestOrHeaders(request, request.headers);
 
   // Check if user is authenticated and has ADMIN role
   const adminError = requireAdmin(user);

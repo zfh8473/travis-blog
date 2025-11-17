@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getUserFromHeaders } from "@/lib/auth/middleware";
+import { getUserFromRequestOrHeaders } from "@/lib/auth/middleware";
 import { requireAdmin } from "@/lib/auth/permissions";
 import { prisma } from "@/lib/db/prisma";
 import { createArticleSchema } from "@/lib/validations/article";
@@ -29,8 +29,8 @@ import { generateUniqueSlug } from "@/lib/utils/slug";
  * ```
  */
 export async function GET(request: NextRequest) {
-  // Get user information from request headers (set by middleware)
-  const user = getUserFromHeaders(request.headers);
+  // Get user information from request (with fallback to direct token reading)
+  const user = await getUserFromRequestOrHeaders(request, request.headers);
 
   // Check if user is authenticated and has ADMIN role
   const adminError = requireAdmin(user);
@@ -173,8 +173,8 @@ export async function GET(request: NextRequest) {
  * ```
  */
 export async function POST(request: NextRequest) {
-  // Get user information from request headers (set by middleware)
-  const user = getUserFromHeaders(request.headers);
+  // Get user information from request (with fallback to direct token reading)
+  const user = await getUserFromRequestOrHeaders(request, request.headers);
 
   // Check if user is authenticated and has ADMIN role
   const adminError = requireAdmin(user);

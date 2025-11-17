@@ -105,16 +105,16 @@ export async function middleware(request: NextRequest) {
     }
 
     if (!token) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            message: "Authentication required",
-            code: "UNAUTHORIZED",
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              message: "Authentication required",
+              code: "UNAUTHORIZED",
+            },
           },
-        },
-        { status: 401 }
-      );
+          { status: 401 }
+        );
     }
 
     const userRole = token.role || "";
@@ -127,16 +127,16 @@ export async function middleware(request: NextRequest) {
         userRole,
       });
 
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            message: "Admin access required",
-            code: "FORBIDDEN",
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              message: "Admin access required",
+              code: "FORBIDDEN",
+            },
           },
-        },
-        { status: 403 }
-      );
+          { status: 403 }
+        );
     }
 
     const requestHeaders = new Headers(request.headers);
@@ -155,16 +155,16 @@ export async function middleware(request: NextRequest) {
   } catch (error) {
     console.error("Middleware authentication error:", error);
 
-    return NextResponse.json(
-      {
-        success: false,
-        error: {
-          message: "Authentication failed",
-          code: "AUTH_ERROR",
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            message: "Authentication failed",
+            code: "AUTH_ERROR",
+          },
         },
-      },
-      { status: 401 }
-    );
+        { status: 401 }
+      );
   }
 }
 

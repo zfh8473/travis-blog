@@ -140,7 +140,7 @@ export default function ArticleCard({
       )}
 
       {/* 2. 文章标题（最大，最突出） */}
-      <h2 className="text-[1.375rem] font-bold text-slate-900 mb-3 leading-snug hover:text-blue-600 transition-colors cursor-pointer">
+        <h2 className="text-[1.375rem] font-bold text-slate-900 mb-3 leading-snug hover:text-blue-600 transition-colors cursor-pointer">
         {title}
       </h2>
 

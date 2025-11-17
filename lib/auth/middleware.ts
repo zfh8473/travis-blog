@@ -75,3 +75,59 @@ export function getUserFromHeaders(headers: Headers): {
   };
 }
 
+/**
+ * Gets user information from request, with fallback to direct token reading.
+ * 
+ * First tries to get user from headers (set by middleware), then falls back
+ * to reading token directly from request. This ensures authentication works
+ * even if middleware doesn't set headers correctly (e.g., in Vercel edge runtime).
+ * 
+ * @param request - Next.js request object
+ * @param headers - Request headers object
+ * @returns User information, or null if not authenticated
+ * 
+ * @example
+ * ```typescript
+ * const user = await getUserFromRequestOrHeaders(request, request.headers);
+ * if (!user) {
+ *   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+ * }
+ * ```
+ */
+export async function getUserFromRequestOrHeaders(
+  request: NextRequest,
+  headers: Headers
+): Promise<{
+  id: string;
+  email: string;
+  name: string | null;
+  role: string;
+} | null> {
+  // First try to get from headers (set by middleware)
+  let user = getUserFromHeaders(headers);
+
+  // Fallback: If middleware didn't set headers, try to get token directly
+  if (!user) {
+    try {
+      const { getToken } = await import("next-auth/jwt");
+      const token = await getToken({
+        req: request,
+        secret: process.env.NEXTAUTH_SECRET,
+      });
+
+      if (token && token.id && token.email && token.role) {
+        user = {
+          id: token.id as string,
+          email: token.email as string,
+          name: token.name as string | null,
+          role: token.role as string,
+        };
+      }
+    } catch (error) {
+      console.error("Error getting token in getUserFromRequestOrHeaders:", error);
+    }
+  }
+
+  return user;
+}
+

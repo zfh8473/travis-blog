@@ -2,7 +2,6 @@
 
 import dynamic from "next/dynamic";
 import { useState, useEffect, useCallback } from "react";
-import "@uiw/react-md-editor/markdown-editor.css";
 import { markdownToHtml, htmlToMarkdown } from "@/lib/utils/markdown-converter";
 
 // 动态导入 MDEditor 以避免 SSR 问题
@@ -221,7 +220,7 @@ export default function MarkdownEditor({
           onChange={handleChange}
           preview="edit"
           hideToolbar={readOnly}
-          visibleDragBar={false}
+          visibleDragbar={false}
           textareaProps={{
             placeholder: placeholder,
             disabled: readOnly,

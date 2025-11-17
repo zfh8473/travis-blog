@@ -84,7 +84,7 @@ export async function middleware(request: NextRequest) {
   try {
     // Get token from cookie
     // NextAuth automatically uses __Secure- prefix for secure cookies in production
-    const token = await getToken({
+    let token = await getToken({
       req: request,
       secret: process.env.NEXTAUTH_SECRET,
     });
@@ -93,14 +93,51 @@ export async function middleware(request: NextRequest) {
     if (process.env.NODE_ENV === "development" || process.env.VERCEL_ENV) {
       console.log("[Middleware] Path:", pathname);
       console.log("[Middleware] Method:", request.method);
-      console.log("[Middleware] Token exists:", !!token);
-      if (token) {
-        console.log("[Middleware] User:", token.email, "Role:", token.role);
-      }
+      console.log("[Middleware] Token exists (first attempt):", !!token);
       const cookies = request.cookies.getAll();
       console.log("[Middleware] Cookies count:", cookies.length);
       if (cookies.length > 0) {
         console.log("[Middleware] Cookie names:", cookies.map(c => c.name).join(", "));
+        // Try to find the session token cookie
+        const sessionCookie = cookies.find(c => 
+          c.name === "next-auth.session-token" || 
+          c.name === "__Secure-next-auth.session-token" ||
+          c.name === "__Host-next-auth.session-token"
+        );
+        if (sessionCookie) {
+          console.log("[Middleware] Found session cookie:", sessionCookie.name, "Length:", sessionCookie.value.length);
+        } else {
+          console.log("[Middleware] Session cookie not found in cookie list");
+        }
+      }
+    }
+
+    // If getToken failed, log more details for debugging
+    if (!token) {
+      if (process.env.NODE_ENV === "development" || process.env.VERCEL_ENV) {
+        const sessionCookie = request.cookies.get("next-auth.session-token");
+        const secureCookie = request.cookies.get("__Secure-next-auth.session-token");
+        const hostCookie = request.cookies.get("__Host-next-auth.session-token");
+        
+        console.log("[Middleware] Session cookie exists:", !!sessionCookie);
+        console.log("[Middleware] Secure cookie exists:", !!secureCookie);
+        console.log("[Middleware] Host cookie exists:", !!hostCookie);
+        
+        if (sessionCookie) {
+          console.log("[Middleware] Session cookie length:", sessionCookie.value.length);
+          console.log("[Middleware] Session cookie preview:", sessionCookie.value.substring(0, 50) + "...");
+        }
+        
+        console.log("[Middleware] NEXTAUTH_SECRET exists:", !!process.env.NEXTAUTH_SECRET);
+        console.log("[Middleware] NEXTAUTH_SECRET length:", process.env.NEXTAUTH_SECRET?.length || 0);
+      }
+    }
+
+    if (process.env.NODE_ENV === "development" || process.env.VERCEL_ENV) {
+      if (token) {
+        console.log("[Middleware] User:", token.email, "Role:", token.role);
+      } else {
+        console.log("[Middleware] All token retrieval attempts failed");
       }
     }
 

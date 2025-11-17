@@ -41,13 +41,17 @@ Travis-blog 是一个个人博客网站项目，旨在通过完整的 Vibe 开�
 **Complexity:** Low
 
 **技术栈：**
-- **前端：** Next.js + Tailwind CSS + 组件库（shadcn/ui 或 Headless UI）
+- **前端：** Next.js (App Router) + Tailwind CSS + 组件库（shadcn/ui 或 Headless UI）
+- **架构模式：** Server Components + Server Actions
 - **后端：** Node.js
 - **数据库：** PostgreSQL
+- **ORM：** Prisma
 - **部署：** Vercel
 - **存储：** 本地存储（抽象层设计）
-- **认证：** OAuth + JWT
-- **编辑器：** Tiptap
+- **认证：** NextAuth.js (OAuth + JWT)
+- **编辑器：** @uiw/react-md-editor (Markdown Editor)
+- **Markdown 渲染：** markdown-it + @tailwindcss/typography (自定义实现)
+- **语法高亮：** Shiki
 
 **项目类型：** 个人博客平台 + 实验性学习项目
 
@@ -107,7 +111,7 @@ Travis-blog 是一个个人博客网站项目，旨在通过完整的 Vibe 开�
 **核心功能（必须）：**
 
 **1. 写文章和发布**
-- 后台文章编辑器（Tiptap）
+- 后台文章编辑器（Markdown Editor）
 - 文章创建、编辑、删除
 - 草稿功能
 - 发布状态管理
@@ -226,7 +230,7 @@ Travis-blog 是一个个人博客网站项目，旨在通过完整的 Vibe 开�
 **FR-2.1 文章创建**
 - **描述：** 博主可以在后台创建新文章
 - **接受标准：**
-  - 使用 Tiptap 编辑器
+  - 使用 Markdown 编辑器
   - 支持 Markdown 格式
   - 支持富文本编辑
   - 支持实时预览
@@ -338,13 +342,14 @@ Travis-blog 是一个个人博客网站项目，旨在通过完整的 Vibe 开�
 
 ### 5. 内容创作能力
 
-**FR-5.1 富文本编辑器**
-- **描述：** 博主使用 Tiptap 编辑器创建和编辑文章
+**FR-5.1 Markdown 编辑器**
+- **描述：** 博主使用 Markdown 编辑器创建和编辑文章
 - **接受标准：**
-  - Tiptap 编辑器正常工作
-  - 支持 Markdown 格式
+  - Markdown 编辑器正常工作（@uiw/react-md-editor）
+  - 原生 Markdown 语法支持
   - 支持实时预览
-  - 支持常用格式（粗体、斜体、链接、列表等）
+  - 支持常用格式（粗体、斜体、链接、列表、代码块等）
+  - HTML ↔ Markdown 双向转换
 
 **FR-5.2 图片上传**
 - **描述：** 博主可以在文章中插入图片
@@ -555,9 +560,10 @@ Travis-blog 是一个个人博客网站项目，旨在通过完整的 Vibe 开�
 - **导航：** 简单直观的导航菜单
 
 **2. 内容创作**
-- **编辑器：** Tiptap 编辑器，支持实时预览
+- **编辑器：** Markdown 编辑器（@uiw/react-md-editor），支持实时预览和原生 Markdown 语法
 - **媒体上传：** 拖拽、粘贴上传图片
 - **发布流程：** 简单的发布按钮，清晰的状态提示
+- **Markdown 渲染：** 增强的 Markdown 渲染样式和代码语法高亮（Shiki）
 
 **3. 互动体验**
 - **留言：** 简单的留言表单，清晰的留言展示

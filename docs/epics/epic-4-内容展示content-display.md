@@ -45,19 +45,33 @@ So that **I can read the complete blog post**.
 **And** I see the full article content  
 **And** I see the article title, publish date, category, and tags  
 **And** the content is well-formatted and readable  
+**And** code blocks display with syntax highlighting  
 **And** the page is responsive  
 **And** images in the article are displayed correctly
 
 **Prerequisites:** Story 4.1
 
 **Technical Notes:**
-- Create article detail page/component
-- Fetch article by slug or ID from API
-- Render article content (HTML from Tiptap)
+- Create article detail page as Server Component (`app/articles/[slug]/page.tsx`)
+- Fetch article by slug directly from database using Prisma (Server Component)
+- **Markdown 渲染增强：**
+  - Use custom Typography styles (based on `@tailwindcss/typography` concepts)
+  - Implement comprehensive prose classes for headings, paragraphs, links, lists, etc.
+  - Create distinct content container with card-like layout
+  - Optimize title hierarchy and visual design
+  - Apply gradient text effects and decorative elements to main title
+- **代码语法高亮：**
+  - Integrate Shiki syntax highlighter
+  - Use `enhanceHtmlWithSyntaxHighlighting` function to process existing HTML content
+  - Support multiple programming languages (JavaScript, TypeScript, Python, Go, Rust, etc.)
+  - Use GitHub Dark theme matching existing code block styles
+  - Apply syntax highlighting to all code blocks in article content
+- Render article content (HTML from MarkdownEditor)
 - Display article metadata (title, date, category, tags)
 - Implement responsive typography and layout
 - Handle article not found errors
 - Add SEO meta tags (title, description)
+- **架构优势：** Server Component provides better performance and SEO, direct database access eliminates API overhead
 
 ---
 

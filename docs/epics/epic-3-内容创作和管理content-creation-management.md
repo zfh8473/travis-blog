@@ -33,49 +33,52 @@ So that **articles can be stored and retrieved from the database**.
 
 ---
 
-## Story 3.2: Tiptap 编辑器集成
+## Story 3.2: Markdown 编辑器集成
 
 As a **blog author**,  
-I want **to use Tiptap editor to create and edit articles**,  
-So that **I can write rich text content with formatting options**.
+I want **to use a Markdown editor to create and edit articles**,  
+So that **I can write content with native Markdown syntax support and better editing experience**.
 
 **Acceptance Criteria:**
 
 **Given** I am logged in as an admin  
 **When** I navigate to the article creation page  
-**Then** I see the Tiptap editor  
-**And** I can type and format text (bold, italic, headings, lists, etc.)  
+**Then** I see the Markdown editor  
+**And** I can type and format text using Markdown syntax (bold, italic, headings, lists, etc.)  
 **And** I can see a real-time preview  
-**And** the editor supports Markdown input  
+**And** the editor provides native Markdown editing experience  
 **And** I can upload images by dragging and dropping or pasting  
 **When** I upload an image  
 **Then** the image is uploaded to the storage layer  
-**And** the image URL is inserted into the editor  
-**And** the image is displayed in the editor  
+**And** the image URL is inserted into the editor as Markdown syntax  
+**And** the image is displayed in the preview  
 **When** I save the article  
-**Then** the formatted content (including images) is saved to the database
+**Then** the Markdown content is converted to HTML  
+**And** the formatted content (including images) is saved to the database
 
 **Prerequisites:** Story 3.1, Story 1.5 (存储抽象层)
 
 **Technical Notes:**
-- Install and configure Tiptap
-- Set up Tiptap extensions (bold, italic, headings, lists, links, etc.)
-- Create article editor component
-- Implement Markdown support
-- Add real-time preview (optional)
+- Install and configure `@uiw/react-md-editor` (MarkdownEditor)
+- Create `MarkdownEditor` component (`components/editor/MarkdownEditor.tsx`)
+- Implement HTML ↔ Markdown bidirectional conversion using `turndown` and `markdown-it`
 - **图片上传功能实现：**
-  - Install `@tiptap/extension-image` extension
-  - Configure image upload handler in Tiptap editor
+  - Configure image upload handler in MarkdownEditor
   - Create image upload API endpoint: `POST /api/upload`
   - Use storage abstraction layer (`lib/storage/`) for file storage
   - Implement drag-and-drop image upload
   - Implement paste image upload (clipboard)
   - Validate image format (jpg, png, gif, webp) and size (max 5MB)
   - Generate unique filename for uploaded images
-  - Return image URL to editor for insertion
-  - Store image path in article content (HTML)
-- Save editor content to database
+  - Return image URL to editor for insertion as Markdown syntax: `![alt](url)`
+  - Store image path in article content (HTML format after conversion)
+- **Markdown 转换实现：**
+  - Use `turndown` for HTML to Markdown conversion (when loading existing articles)
+  - Use `markdown-it` for Markdown to HTML conversion (when saving articles)
+  - Handle code blocks, images, links, and other Markdown elements
+- Save editor content to database (as HTML)
 - Handle editor state management
+- **变更说明：** 从 Tiptap 富文本编辑器改为 Markdown 编辑器，提供更好的 Markdown 编辑体验，避免富文本编辑器在处理 Markdown 语法时的异常行为（如字符删除、光标跳转等问题）
 
 ---
 
@@ -102,13 +105,20 @@ So that **I can publish content on my blog**.
 **Prerequisites:** Story 3.2
 
 **Technical Notes:**
-- Create article creation page/component
+- Create article creation page/component (`app/admin/articles/new/page.tsx`)
 - Implement article form with validation
 - Add category and tag selection
 - Implement draft/publish status toggle
-- Save article to database
+- **使用 Server Actions 保存文章：**
+  - Create `createArticleAction` in `lib/actions/article.ts`
+  - Use `getServerSession` for authentication
+  - Use `ActionResult<T>` type for consistent error handling
+  - Validate input using Zod schemas
+  - Save article to database using Prisma
+  - Handle errors gracefully with user-friendly messages
 - Redirect to article list or article detail after creation
 - Show success/error messages
+- **架构优势：** Server Actions 提供更好的类型安全、自动会话管理和简化的错误处理
 
 ---
 
@@ -133,13 +143,25 @@ So that **I can update and improve my content**.
 **Prerequisites:** Story 3.3
 
 **Technical Notes:**
-- Create article edit page/component
-- Load existing article data
-- Pre-fill editor with article content
-- Implement update API endpoint
+- Create article edit page as Server Component (`app/admin/articles/[id]/edit/page.tsx`)
+- Create Client Component for form interaction (`EditArticleClient.tsx`)
+- **数据获取：**
+  - Use Server Component to fetch article data directly from database (Prisma)
+  - Fetch categories and tags in Server Component
+  - Pass initial data as props to Client Component
+- Pre-fill editor with article content (convert HTML to Markdown)
+- **使用 Server Actions 更新文章：**
+  - Create `updateArticleAction` in `lib/actions/article.ts`
+  - Use `getServerSession` for authentication
+  - Use `ActionResult<T>` type for consistent error handling
+  - Validate input using Zod schemas
+  - Handle slug regeneration if title changes
+  - Update article in database using Prisma
+  - Handle errors gracefully with user-friendly messages
 - Handle article not found errors
 - Validate user has permission to edit (admin only)
 - Show success/error messages
+- **架构优势：** Server Components + Server Actions 架构解决了会话管理问题，提供更好的性能和类型安全
 
 ---
 
@@ -287,10 +309,11 @@ So that **I can view and delete media files I've uploaded**.
    - 实现了输入验证和错误处理
    - 添加了数据库索引优化性能
 
-2. **Story 3.2: Tiptap 编辑器集成** ✅
-   - 集成了 Tiptap 富文本编辑器
+2. **Story 3.2: Markdown 编辑器集成** ✅
+   - 集成了 `@uiw/react-md-editor` Markdown 编辑器
+   - 实现了 HTML ↔ Markdown 双向转换
    - 实现了图片上传功能（拖拽、粘贴）
-   - 支持 Markdown 输入
+   - 提供原生 Markdown 编辑体验，避免富文本编辑器的 Markdown 语法处理问题
    - 实现了存储抽象层集成
 
 3. **Story 3.3: 文章创建功能** ✅
@@ -352,7 +375,8 @@ So that **I can view and delete media files I've uploaded**.
 - ✅ 公开页面：`/articles`, `/articles/[slug]`, `/articles/category/[slug]`, `/articles/tag/[slug]`
 
 **用户体验：**
-- ✅ 富文本编辑器（Tiptap）集成
+- ✅ Markdown 编辑器（@uiw/react-md-editor）集成
+- ✅ HTML ↔ Markdown 双向转换
 - ✅ 图片上传（拖拽、粘贴）
 - ✅ 分类和标签选择组件
 - ✅ 高级标签输入（自动完成、创建新标签）
@@ -375,10 +399,11 @@ So that **I can view and delete media files I've uploaded**.
 ### 架构对齐
 
 - ✅ 遵循 Next.js App Router 架构
+- ✅ 使用 Server Components 和 Server Actions 进行数据操作
 - ✅ 使用 Prisma ORM 进行数据库操作
-- ✅ 遵循 RESTful API 设计模式
+- ✅ 遵循 RESTful API 设计模式（保留 API 路由作为备用）
 - ✅ 实现了存储抽象层
-- ✅ 遵循统一错误响应格式
+- ✅ 遵循统一错误响应格式（`ActionResult<T>` 类型）
 - ✅ 实现了权限控制（管理员 vs 公开）
 
 ### 下一步计划

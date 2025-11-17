@@ -26,9 +26,9 @@ export default async function ArticlesListPage() {
   // Check if user has admin role
   if (session.user.role !== Role.ADMIN) {
     redirect("/?error=admin_required");
-  }
+    }
 
-  try {
+    try {
     // Fetch all articles directly from database
     // Using high limit to get complete dataset for statistics
     // Status filtering and search will be done client-side

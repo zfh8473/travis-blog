@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db/prisma";
 import ArticleDetail from "@/components/article/ArticleDetail";
 import CommentList, { CommentListLoading } from "@/components/comment/CommentList";
 import CommentForm from "@/components/comment/CommentForm";
+import { enhanceHtmlWithSyntaxHighlighting } from "@/lib/utils/markdown-converter";
 
 /**
  * Article interface for detail page.
@@ -247,9 +248,12 @@ async function ArticleDetailContent({
     notFound();
   }
 
+  // Enhance HTML content with syntax highlighting for code blocks
+  const enhancedContent = await enhanceHtmlWithSyntaxHighlighting(article.content);
+
   return (
     <>
-      <ArticleDetail {...article} />
+      <ArticleDetail {...article} content={enhancedContent} />
       
       {/* Comments section - temporarily disabled for debugging */}
       {/* <div className="container mx-auto px-4 py-8 max-w-4xl border-t border-gray-200 mt-12">

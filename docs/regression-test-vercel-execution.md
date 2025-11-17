@@ -325,26 +325,141 @@
 
 ---
 
-#### TC-1.4: Markdown 内容保存 ⚠️ **部分通过**
+#### TC-1.4: Markdown 内容保存 ⚠️ **部分通过（修复中）**
 
 **测试步骤：**
 1. 在文章创建页面填写标题和内容
 2. 点击"保存为草稿"
 
-**测试结果：**
+**测试结果（修复前）：**
 - ✅ 编辑器内容输入正常
 - ✅ 标题输入正常
 - ⚠️ 点击保存后出现"请先登录"提示
 - ❌ 控制台错误：`Failed to load resource: the server responded with a status of 401 () @ https://travis-blog.vercel.app/api/articles:0`
-- **问题分析：**
-  - 文章列表页面通过 Server Component 重构已解决会话问题
-  - 但文章创建/编辑页面仍使用客户端 `fetch` 请求，仍然存在会话问题
-  - 这些页面需要类似的修复（确保 `credentials: "include"` 或考虑 Server Actions）
 
-**建议：**
-- 检查 `app/admin/articles/new/page.tsx` 和 `app/admin/articles/[id]/edit/page.tsx` 中的 `fetch` 请求
-- 确保所有 `fetch` 请求都包含 `credentials: "include"`
-- 或者考虑使用 Server Actions 替代客户端 `fetch` 请求
+**修复措施：**
+1. ✅ 创建 `getUserFromRequestOrHeaders` 辅助函数，支持从请求头或直接读取 token
+2. ✅ 更新所有文章 API 路由（GET, POST, PUT, DELETE）使用新的辅助函数
+3. ✅ 添加详细的调试日志以诊断问题
+4. ✅ 修复环境变量判断逻辑（使用 `VERCEL_ENV`）
+5. ✅ 在 API 路由中添加 `getServerSession` 作为备用认证方法
+
+**测试结果（最新）：**
+- ❌ 问题仍然存在
+- ⚠️ 点击保存后仍然出现"请先登录"提示
+- ❌ 控制台错误：`Failed to load resource: the server responded with a status of 401 () @ https://travis-blog.vercel.app/api/articles:0`
+- **分析：**
+  - 即使添加了 `getServerSession` 作为备用方法，问题仍然存在
+  - 可能 `getServerSession` 在 API 路由中无法正确获取 session
+  - 需要检查 Vercel 日志以查看调试信息
+
+**最终解决方案：**
+- ✅ 使用 Server Actions 替代客户端 `fetch` 请求
+- ✅ 创建 `lib/actions/article.ts` 包含 `createArticleAction` 和 `updateArticleAction`
+- ✅ 修改 `app/admin/articles/new/page.tsx` 使用 Server Actions
+- ✅ 修改 `app/admin/articles/[id]/edit/page.tsx` 使用 Server Actions
+- **优势：**
+  - Server Actions 在服务器端运行，可以正确访问 session
+  - 不需要处理 cookie 传递问题
+  - 符合 Next.js App Router 的最佳实践
+  - 类型安全，减少样板代码
+
+**测试结果（Server Actions 重构后）：**
+- ✅ **文章创建成功！**
+  - 成功创建文章 "Server Actions 测试文章"
+  - 文章出现在文章列表中，状态为"草稿"
+  - 没有出现"请先登录"错误
+  - 控制台没有 401 错误
+  - 页面成功跳转到文章列表页面
+
+**测试结果（编辑页面重构后）：**
+- ✅ **文章编辑页面重构完成！**
+  - 将编辑页面改为 Server Component，从数据库直接获取数据
+  - 创建了 Client Component 处理表单交互
+  - 使用 Server Actions 进行文章更新
+  - 代码已提交，等待 Vercel 部署
+
+**测试结果（编辑功能测试）：**
+- ✅ **文章编辑页面加载成功！**
+  - 页面成功加载，没有出现"请先登录"错误
+  - 文章内容正确显示在编辑器中
+  - 分类和标签数据正确加载
+  - 控制台没有 401 错误
+
+**测试结果（文章保存功能）：**
+- ✅ **文章保存成功！**
+  - 点击"保存为草稿"按钮后，页面成功跳转到文章列表
+  - 没有出现"请先登录"错误
+  - 控制台没有 401 错误
+  - Server Actions 正常工作
+
+**最终测试总结：**
+- ✅ **文章创建功能**：使用 Server Actions 成功创建文章，会话问题已解决
+- ✅ **文章编辑页面加载**：Server Component 成功从数据库获取数据，没有会话问题
+- ✅ **文章保存功能**：使用 Server Actions 成功更新文章，会话问题已解决
+
+**结论：**
+通过将文章创建和编辑页面重构为使用 Server Components 和 Server Actions，成功解决了 Vercel 环境下的会话管理问题。所有功能测试通过！
+
+---
+
+### 2025-01-XX [当前时间] - TC-3.2: Markdown 转换后的 HTML 渲染 ✅ 通过
+
+**测试步骤：**
+1. 创建了一篇包含各种 Markdown 格式的测试文章（标题、粗体、斜体、列表、代码块等）
+2. 使用 Server Actions 成功保存文章
+3. 发布文章
+4. 访问前台文章详情页
+
+**测试结果：**
+- ✅ 文章成功创建并发布
+- ✅ 文章在首页正确显示（标题、日期、阅读数）
+- ✅ 文章详情页正常加载
+- ✅ Markdown 内容正确转换为 HTML 并渲染
+- ✅ 所有格式正确显示（标题、段落、列表、代码块等）
+- ✅ 无 HTML 标签泄露
+- ✅ 无格式丢失
+
+**结论：** TC-3.2 测试通过，Markdown 转换后的 HTML 在前台正确渲染。
+
+---
+
+### 2025-01-XX [当前时间] - 图片上传功能测试说明
+
+**测试状态：** ⚠️ 需要手动测试
+
+**说明：**
+由于图片拖拽和粘贴上传功能需要真实的文件系统操作，无法通过浏览器自动化工具完全测试。以下测试需要手动执行：
+
+**TC-2.1: 图片拖拽上传**
+- 测试步骤：
+  1. 登录管理员账号
+  2. 访问 `/admin/articles/new`
+  3. 从文件管理器拖拽一张图片（JPG/PNG）到编辑器
+  4. 观察上传过程和结果
+- 预期结果：图片成功上传，Markdown 中插入图片语法
+
+**TC-2.2: 图片粘贴上传**
+- 测试步骤：
+  1. 在文章创建页面
+  2. 复制一张图片到剪贴板
+  3. 在编辑器中按 `Ctrl+V` / `Cmd+V` 粘贴
+  4. 观察上传过程和结果
+- 预期结果：图片成功上传，Markdown 中插入图片语法
+
+**TC-2.3: 图片显示验证**
+- 测试步骤：
+  1. 保存包含图片的文章
+  2. 访问文章详情页
+  3. 验证图片是否正确显示
+- 预期结果：图片在前台正确显示
+
+**代码验证：**
+- ✅ `MarkdownEditor.tsx` 已实现 `onDrop` 和 `onPaste` 处理器
+- ✅ `handleImageUpload` 函数已实现，调用 `/api/upload` API
+- ✅ 图片上传后自动插入 Markdown 图片语法
+
+**建议：** 请 Dev 或 QA 团队手动执行图片上传功能测试。
 
 ---
 

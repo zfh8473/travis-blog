@@ -64,21 +64,23 @@ postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/dbname?sslmode=require
 
 ## Vercel Blob Storage 配置
 
-如果您想使用 Vercel Blob Storage 作为文件存储后端：
+如果您想使用 Vercel Blob Storage 作为文件存储后端，请参考详细配置指南：
 
-1. **创建 Blob Store**（如果还没有）：
-   - 在 Vercel Dashboard 中，进入项目设置
-   - 导航到 **Storage** → **Blob**
-   - 创建名为 `travis-blog` 的 Blob Store
+📖 **详细配置指南**：请查看 [`docs/vercel-blob-setup-guide.md`](./vercel-blob-setup-guide.md)
 
-2. **获取 Blob Token**：
-   - 在 Blob Store 设置中，复制 **Read/Write Token**
-   - 这个 token 将作为 `BLOB_READ_WRITE_TOKEN` 环境变量
+### 快速配置步骤：
 
-3. **配置环境变量**：
+1. **获取 Blob Token**：
+   - 在 Vercel Dashboard → 项目 → **Storage** → **Blob**
+   - 选择 `travis-blog` Blob Store
+   - 复制 **Read/Write Token**
+
+2. **配置环境变量**（在 Settings → Environment Variables）：
    - `STORAGE_TYPE` = `vercel-blob`
    - `BLOB_READ_WRITE_TOKEN` = 您的 Blob Token
    - `BLOB_STORE_NAME` = `travis-blog`（可选，默认值）
+
+3. **重新部署项目**以应用新配置
 
 ## 验证配置
 

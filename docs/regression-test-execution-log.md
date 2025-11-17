@@ -218,15 +218,18 @@
     - 但客户端组件中的 fetch 请求仍然失败
   - 需要检查 Vercel 日志中的中间件调试输出
   - 可能需要考虑其他解决方案（如使用 Server Actions 或 Server Components）
-- **第三次修复尝试：** ✅ 已实施
+- **第三次修复尝试：** ✅ 已实施（但构建失败）
   - 修复时间：2025-01-XX [当前时间]
   - 修复内容：
-    1. 在 NextAuth 配置中添加 `trustHost: true`（Vercel 环境需要）
+    1. 尝试在 NextAuth 配置中添加 `trustHost: true`（但该选项在 v4.24 中不支持）
     2. 确保 `getToken` 正确配置以读取 cookie
+  - 构建错误：`trustHost` 选项在 NextAuth 4.24 中不支持（该选项在 v5 中引入）
+  - 修复：移除 `trustHost: true` 选项
   - 修改文件：
-    - `app/api/auth/[...nextauth]/route.ts`（添加 trustHost）
+    - `app/api/auth/[...nextauth]/route.ts`（移除 trustHost）
     - `middleware.ts`（确保配置正确）
-  - 等待部署和测试
+  - 说明：NextAuth 4.x 使用 `NEXTAUTH_URL` 环境变量来识别 host
+  - 等待重新部署和测试
 
 ---
 

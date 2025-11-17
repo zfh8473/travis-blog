@@ -502,3 +502,93 @@ export async function updateArticleAction(
   }
 }
 
+/**
+ * Server action to delete an article.
+ * 
+ * This action handles article deletion on the server side,
+ * including authorization checks and database operations.
+ * Only administrators can delete articles.
+ * 
+ * @param id - Article ID to delete
+ * @returns Promise resolving to success status or an error
+ * 
+ * @example
+ * ```typescript
+ * const result = await deleteArticleAction("article-123");
+ * 
+ * if (result.success) {
+ *   console.log('Article deleted successfully');
+ * } else {
+ *   console.error('Error:', result.error.message);
+ * }
+ * ```
+ */
+export async function deleteArticleAction(
+  id: string
+): Promise<ActionResult<{ message: string }>> {
+  try {
+    // Get user session
+    const session = await getServerSession(authOptions);
+    const user = session?.user;
+
+    // Check authentication and admin role
+    if (!user) {
+      return {
+        success: false,
+        error: {
+          message: "请先登录",
+          code: "UNAUTHORIZED",
+        },
+      };
+    }
+
+    if (user.role !== "ADMIN") {
+      return {
+        success: false,
+        error: {
+          message: "您没有权限执行此操作",
+          code: "FORBIDDEN",
+        },
+      };
+    }
+
+    // Check if article exists
+    const existingArticle = await prisma.article.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+
+    if (!existingArticle) {
+      return {
+        success: false,
+        error: {
+          message: "Article not found",
+          code: "ARTICLE_NOT_FOUND",
+        },
+      };
+    }
+
+    // Delete article (cascade deletes ArticleTag and Comment records)
+    // Category relation is set to null (onDelete: SetNull)
+    await prisma.article.delete({
+      where: { id },
+    });
+
+    return {
+      success: true,
+      data: {
+        message: "Article deleted successfully",
+      },
+    };
+  } catch (error) {
+    console.error("Error deleting article:", error);
+    return {
+      success: false,
+      error: {
+        message: error instanceof Error ? error.message : "Failed to delete article",
+        code: "INTERNAL_ERROR",
+      },
+    };
+  }
+}
+

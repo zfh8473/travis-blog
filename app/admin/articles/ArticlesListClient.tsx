@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { deleteArticleAction } from "@/lib/actions/article";
 
 /**
  * Article interface for list display.
@@ -165,6 +166,8 @@ export default function ArticlesListClient({
   /**
    * Handle article deletion.
    * 
+   * Uses Server Action instead of API route to avoid session issues.
+   * 
    * @param articleId - The ID of the article to delete
    * @param articleTitle - The title of the article (for confirmation message)
    */
@@ -183,35 +186,21 @@ export default function ArticlesListClient({
       setDeleteError(null);
       setSuccessMessage(null);
 
-      const response = await fetch(`/api/articles/${articleId}`, {
-        credentials: "include",
-        method: "DELETE",
-      });
+      // Use Server Action instead of API route
+      const result = await deleteArticleAction(articleId);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        
-        if (response.status === 404) {
-          setDeleteError("文章不存在");
-        } else if (response.status === 401) {
+      if (!result.success) {
+        // Handle errors
+        if (result.error.code === "UNAUTHORIZED") {
           setDeleteError("请先登录");
-        } else if (response.status === 403) {
+        } else if (result.error.code === "FORBIDDEN") {
           setDeleteError("权限不足，需要管理员权限");
+        } else if (result.error.code === "ARTICLE_NOT_FOUND") {
+          setDeleteError("文章不存在");
         } else {
-          setDeleteError(
-            errorData.error?.message || "删除文章失败，请重试"
-          );
+          setDeleteError(result.error.message || "删除文章失败，请重试");
         }
         setDeletingId(null);
-        return;
-      }
-
-      const data = await response.json();
-
-      if (!data.success) {
-        setDeleteError(data.error?.message || "删除文章失败，请重试");
-        setDeletingId(null);
-        setSuccessMessage(null);
         return;
       }
 
@@ -464,4 +453,5 @@ export default function ArticlesListClient({
     </div>
   );
 }
+
 

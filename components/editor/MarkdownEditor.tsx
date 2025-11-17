@@ -93,6 +93,7 @@ export default function MarkdownEditor({
         const response = await fetch("/api/upload", {
           method: "POST",
           body: formData,
+          credentials: "include",
         });
 
         if (!response.ok) {
@@ -172,8 +173,14 @@ export default function MarkdownEditor({
       {/* Markdown Editor */}
       <div 
         data-color-mode="light"
+        onDragOver={(event) => {
+          // Prevent default browser behavior (opening file in new tab)
+          event.preventDefault();
+          event.stopPropagation();
+        }}
         onDrop={async (event) => {
           event.preventDefault();
+          event.stopPropagation();
           const files = Array.from(event.dataTransfer?.files || []);
           const imageFiles = files.filter((file) =>
             file.type.startsWith("image/")
@@ -199,6 +206,7 @@ export default function MarkdownEditor({
 
           if (imageItem) {
             event.preventDefault();
+            event.stopPropagation();
             const file = imageItem.getAsFile();
 
             if (file) {

@@ -34,20 +34,21 @@
 ### 2. TC-3.5: 图片拖拽上传功能失效 ✅
 
 **问题描述：**
-- 图片拖拽后，图片在浏览器另外一个tab打开，并未上传图片
-- Markdown编辑器中没有插入任何内容
+- 图片拖拽后出现红色"Authentication required"提示
+- 图片未上传成功
 
 **根本原因：**
-- 缺少 `onDragOver` 事件处理来阻止浏览器默认行为（在新标签页打开文件）
-- 未添加 `event.stopPropagation()` 来阻止事件冒泡
+- `/api/upload` 路由使用 `getUserFromHeaders` 获取用户信息
+- 在 Vercel 环境中，middleware 可能无法正确设置 headers，导致认证失败
 
 **修复方案：**
-- 添加 `onDragOver` 事件处理，调用 `event.preventDefault()` 和 `event.stopPropagation()`
-- 在 `onDrop` 事件中添加 `event.stopPropagation()`
-- 在 `handleImageUpload` 的 `fetch` 请求中添加 `credentials: "include"` 以确保会话信息传递
+- 将 `/api/upload` 路由改为使用 `getUserFromRequestOrHeaders`
+- 该方法会先尝试从 headers 获取用户信息（由 middleware 设置）
+- 如果失败，则直接从 request 读取 JWT token
 
 **修改文件：**
-- `components/editor/MarkdownEditor.tsx` - 添加 `onDragOver` 处理，更新 `onDrop` 和 `onPaste` 事件
+- `app/api/upload/route.ts` - 将 `getUserFromHeaders` 改为 `getUserFromRequestOrHeaders`
+- `components/editor/MarkdownEditor.tsx` - 已添加 `onDragOver` 处理，更新 `onDrop` 事件
 
 **测试状态：** ⏳ 待测试
 
@@ -56,20 +57,21 @@
 ### 3. TC-3.6: 图片粘贴上传功能失效 ✅
 
 **问题描述：**
-- 图片粘贴后，图片未上传成功
-- Markdown编辑器中没有插入任何内容
-- 没有任何上传提示或错误消息
+- 图片粘贴后出现红色"Authentication required"提示
+- 图片未上传成功
 
 **根本原因：**
-- 未添加 `event.stopPropagation()` 来阻止事件冒泡
-- 可能缺少 `credentials: "include"` 导致会话问题
+- `/api/upload` 路由使用 `getUserFromHeaders` 获取用户信息
+- 在 Vercel 环境中，middleware 可能无法正确设置 headers，导致认证失败
 
 **修复方案：**
-- 在 `onPaste` 事件中添加 `event.stopPropagation()`
-- 在 `handleImageUpload` 的 `fetch` 请求中添加 `credentials: "include"`
+- 将 `/api/upload` 路由改为使用 `getUserFromRequestOrHeaders`
+- 该方法会先尝试从 headers 获取用户信息（由 middleware 设置）
+- 如果失败，则直接从 request 读取 JWT token
 
 **修改文件：**
-- `components/editor/MarkdownEditor.tsx` - 更新 `onPaste` 事件处理
+- `app/api/upload/route.ts` - 将 `getUserFromHeaders` 改为 `getUserFromRequestOrHeaders`
+- `components/editor/MarkdownEditor.tsx` - 已更新 `onPaste` 事件处理
 
 **测试状态：** ⏳ 待测试
 

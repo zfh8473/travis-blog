@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getUserFromHeaders } from "@/lib/auth/middleware";
+import { getUserFromRequestOrHeaders } from "@/lib/auth/middleware";
 import { requireAdmin } from "@/lib/auth/permissions";
 import { getStorage } from "@/lib/storage";
 
@@ -70,8 +70,9 @@ const ALLOWED_EXTENSIONS = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
  * ```
  */
 export async function POST(request: NextRequest) {
-  // Get user information from request headers (set by middleware)
-  const user = getUserFromHeaders(request.headers);
+  // Get user information from request, with fallback to direct token reading
+  // This ensures authentication works even if middleware doesn't set headers correctly
+  const user = await getUserFromRequestOrHeaders(request, request.headers);
 
   // Check if user is authenticated and has ADMIN role
   const adminError = requireAdmin(user);

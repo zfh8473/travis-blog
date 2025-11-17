@@ -319,6 +319,10 @@ export default function MediaLibraryPage() {
                       className="object-cover cursor-pointer"
                       onClick={() => handleImagePreview(file.url)}
                       unoptimized
+                      onError={(e) => {
+                        console.error("Image load error:", file.url);
+                        e.currentTarget.style.display = "none";
+                      }}
                     />
                   ) : (
                     <div className="flex items-center justify-center h-full">

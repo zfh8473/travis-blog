@@ -89,7 +89,14 @@ export default function ArticleDetail({
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       {/* Article header */}
       <header className="mb-10">
-        <h1 className="text-5xl font-extrabold mb-6 text-slate-900 leading-tight tracking-tight">{title}</h1>
+        <h1 className="text-5xl font-bold mb-6 leading-snug tracking-normal 
+          bg-gradient-to-r from-slate-600 via-slate-700 to-slate-800 bg-clip-text text-transparent
+          relative pb-5
+          after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-20 after:h-0.5 
+          after:bg-gradient-to-r after:from-blue-400 after:via-blue-500 after:to-slate-400 
+          after:rounded-full after:opacity-60">
+          {title}
+        </h1>
 
         {/* Article metadata */}
         <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">

@@ -52,9 +52,19 @@ async function fetchArticleBySlug(
   slug: string
 ): Promise<Article | null> {
   try {
+    // Decode URL-encoded slug if needed
+    // Next.js should handle this, but be safe for production
+    let decodedSlug = slug;
+    try {
+      decodedSlug = decodeURIComponent(slug);
+    } catch {
+      // Already decoded or invalid encoding, use original
+      decodedSlug = slug;
+    }
+
     // Query article from database by slug
     const article = await prisma.article.findUnique({
-      where: { slug },
+      where: { slug: decodedSlug },
       include: {
         author: {
           select: {
@@ -144,30 +154,39 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
-  const article = await fetchArticleBySlug(slug);
+  try {
+    const { slug } = await params;
+    const article = await fetchArticleBySlug(slug);
 
-  if (!article) {
+    if (!article) {
+      return {
+        title: "文章不存在",
+        description: "您访问的文章不存在或已被删除",
+      };
+    }
+
+    const description = article.excerpt || `${article.title} - Travis 的博客`;
+
     return {
-      title: "文章不存在",
-      description: "您访问的文章不存在或已被删除",
-    };
-  }
-
-  const description = article.excerpt || `${article.title} - Travis 的博客`;
-
-  return {
-    title: article.title,
-    description,
-    openGraph: {
       title: article.title,
       description,
-      type: "article",
-      publishedTime: article.publishedAt || undefined,
-      authors: article.author.name ? [article.author.name] : undefined,
-      tags: article.tags.map((tag) => tag.name),
-    },
-  };
+      openGraph: {
+        title: article.title,
+        description,
+        type: "article",
+        publishedTime: article.publishedAt || undefined,
+        authors: article.author.name ? [article.author.name] : undefined,
+        tags: article.tags.map((tag) => tag.name).filter(Boolean),
+      },
+    };
+  } catch (error) {
+    console.error("Error generating metadata:", error);
+    // Return default metadata on error to prevent 500
+    return {
+      title: "文章详情",
+      description: "Travis 的博客",
+    };
+  }
 }
 
 /**

@@ -225,7 +225,7 @@ export async function createArticleAction(
     }
 
     // Transform to Article interface
-    const articleData: Article = {
+    const resultArticle: Article = {
       id: article.id,
       title: article.title,
       content: article.content,
@@ -246,7 +246,7 @@ export async function createArticleAction(
 
     return {
       success: true,
-      data: articleData,
+      data: resultArticle,
     };
   } catch (error) {
     console.error("Error creating article:", error);
@@ -408,10 +408,8 @@ export async function updateArticleAction(
           },
           category: true,
           tags: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
+            include: {
+              tag: true,
             },
           },
         },
@@ -469,7 +467,7 @@ export async function updateArticleAction(
     }
 
     // Transform to Article interface
-    const articleData: Article = {
+    const resultArticle: Article = {
       id: article.id,
       title: article.title,
       content: article.content,
@@ -490,7 +488,7 @@ export async function updateArticleAction(
 
     return {
       success: true,
-      data: articleData,
+      data: resultArticle,
     };
   } catch (error) {
     console.error("Error updating article:", error);

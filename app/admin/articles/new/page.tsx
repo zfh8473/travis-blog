@@ -88,8 +88,8 @@ export default function NewArticlePage() {
 
         // Fetch categories and tags in parallel
         const [categoriesResponse, tagsResponse] = await Promise.all([
-          fetch("/api/categories"),
-          fetch("/api/tags"),
+          fetch("/api/categories", { credentials: "include" }),
+          fetch("/api/tags", { credentials: "include" }),
         ]);
 
         if (!categoriesResponse.ok) {
@@ -239,6 +239,7 @@ export default function NewArticlePage() {
       // Submit to API
       const response = await fetch("/api/articles", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -363,6 +364,7 @@ export default function NewArticlePage() {
       try {
         const response = await fetch("/api/tags", {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },

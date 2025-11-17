@@ -119,9 +119,9 @@ export default function EditArticlePage() {
 
         // Fetch article, categories, and tags in parallel
         const [articleResponse, categoriesResponse, tagsResponse] = await Promise.all([
-          fetch(`/api/articles/${articleId}`),
-          fetch("/api/categories"),
-          fetch("/api/tags"),
+          fetch(`/api/articles/${articleId}`, { credentials: "include" }),
+          fetch("/api/categories", { credentials: "include" }),
+          fetch("/api/tags", { credentials: "include" }),
         ]);
 
         // Handle article response
@@ -214,6 +214,7 @@ export default function EditArticlePage() {
 
       const response = await fetch(`/api/articles/${articleId}`, {
         method: "DELETE",
+        credentials: "include",
       });
 
       if (!response.ok) {
@@ -384,6 +385,7 @@ export default function EditArticlePage() {
       // Submit to API
       const response = await fetch(`/api/articles/${articleId}`, {
         method: "PUT",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -514,6 +516,7 @@ export default function EditArticlePage() {
       try {
         const response = await fetch("/api/tags", {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },

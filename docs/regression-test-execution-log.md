@@ -181,7 +181,15 @@
   - 内容渲染正确（标题、段落等）
   - 元数据正常显示
 - **发现的问题：** 会话管理问题（访问 `/admin/articles` 时显示"请先登录"）
-- **下一步：** 修复会话管理问题后继续执行剩余测试
+- **问题修复：** ✅ 已修复
+  - 问题原因：客户端 fetch 请求未设置 `credentials: "include"`，导致 cookie 未正确传递
+  - 修复方案：在所有客户端组件的 fetch 请求中添加 `credentials: "include"`
+  - 修复文件：
+    - `app/admin/articles/page.tsx`
+    - `app/admin/articles/new/page.tsx`
+    - `app/admin/articles/[id]/edit/page.tsx`
+    - `app/admin/media/page.tsx`
+- **下一步：** 重新测试会话管理功能，继续执行剩余测试
 
 ---
 

@@ -69,7 +69,9 @@ export default function MediaLibraryPage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/media?page=${currentPage}&limit=20`);
+      const response = await fetch(`/api/media?page=${currentPage}&limit=20`, {
+        credentials: "include",
+      });
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -128,6 +130,7 @@ export default function MediaLibraryPage() {
     try {
       const encodedPath = encodeURIComponent(filePath);
       const response = await fetch(`/api/media/${encodedPath}`, {
+        credentials: "include",
         method: "DELETE",
       });
 
@@ -177,6 +180,7 @@ export default function MediaLibraryPage() {
     try {
       const encodedPath = encodeURIComponent(filePath);
       const response = await fetch(`/api/media/${encodedPath}?force=true`, {
+        credentials: "include",
         method: "DELETE",
       });
 

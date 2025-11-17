@@ -173,7 +173,9 @@ export default function ArticlesListPage() {
       // Status filtering and search will be done client-side
       const apiUrl = "/api/articles?limit=1000";
 
-      const response = await fetch(apiUrl);
+      const response = await fetch(apiUrl, {
+        credentials: "include",
+      });
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -252,6 +254,7 @@ export default function ArticlesListPage() {
       setSuccessMessage(null);
 
       const response = await fetch(`/api/articles/${articleId}`, {
+        credentials: "include",
         method: "DELETE",
       });
 

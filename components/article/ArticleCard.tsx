@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { zhCN } from "date-fns/locale";
 
@@ -49,10 +52,21 @@ export interface ArticleCardProps {
  * 
  * Displays a single article in a card format with title, excerpt, publish date,
  * category, and tags. The entire card is clickable and navigates to the article detail page.
+ * Clicking on category or tag links will navigate to their respective pages without triggering
+ * the card click event.
  * 
  * @component
  * @param props - Component props
- * @param props.article - The article data to display
+ * @param props.id - Article ID
+ * @param props.title - Article title
+ * @param props.excerpt - Article excerpt
+ * @param props.slug - Article slug for URL
+ * @param props.publishedAt - Publication date
+ * @param props.category - Article category
+ * @param props.tags - Article tags array
+ * @param props.author - Article author
+ * @param props.isLatest - Whether this is the latest article
+ * @param props.animationDelay - Animation delay in seconds
  * 
  * @example
  * ```tsx
@@ -80,6 +94,8 @@ export default function ArticleCard({
   isLatest = false,
   animationDelay = 0,
 }: ArticleCardProps & { animationDelay?: number }) {
+  const router = useRouter();
+
   // Format publish date
   const formattedDate = publishedAt
     ? format(new Date(publishedAt), "yyyy年MM月dd日", { locale: zhCN })
@@ -88,9 +104,17 @@ export default function ArticleCard({
   // Generate excerpt from content if not provided
   const displayExcerpt = excerpt || "暂无摘要";
 
+  /**
+   * Handle card click to navigate to article detail page.
+   */
+  const handleCardClick = () => {
+    router.push(`/articles/${slug}`);
+  };
+
   return (
     <div
-      className={`block bg-white/95 backdrop-blur-sm border rounded-xl p-6 article-card-hover article-card-animate relative ${
+      onClick={handleCardClick}
+      className={`block bg-white/95 backdrop-blur-sm border rounded-xl p-6 article-card-hover article-card-animate relative cursor-pointer ${
         isLatest
           ? "border-blue-300 shadow-md"
           : "border-slate-200/80"
@@ -108,6 +132,7 @@ export default function ArticleCard({
       {category && (
         <Link
           href={`/articles/category/${category.slug}`}
+          onClick={(e) => e.stopPropagation()}
           className="inline-block px-3 py-1 bg-indigo-100 text-indigo-600 rounded-xl text-xs font-semibold mb-3 uppercase tracking-wide hover:bg-indigo-200 transition-colors"
         >
           {category.name}
@@ -115,14 +140,9 @@ export default function ArticleCard({
       )}
 
       {/* 2. 文章标题（最大，最突出） */}
-      <Link 
-        href={`/articles/${slug}`}
-        className="block"
-      >
-        <h2 className="text-[1.375rem] font-bold text-slate-900 mb-3 leading-snug hover:text-blue-600 transition-colors cursor-pointer">
+      <h2 className="text-[1.375rem] font-bold text-slate-900 mb-3 leading-snug hover:text-blue-600 transition-colors cursor-pointer">
         {title}
       </h2>
-      </Link>
 
       {/* 3. 摘要（适中，可读性强） */}
       <p className="text-slate-600 text-[0.9375rem] leading-relaxed mb-4 line-clamp-2">
@@ -181,6 +201,7 @@ export default function ArticleCard({
             <Link
               key={tag.id}
               href={`/articles/tag/${tag.slug}`}
+              onClick={(e) => e.stopPropagation()}
               className="inline-flex items-center px-3 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-xs font-medium transition-all duration-200 ease-out hover:bg-blue-600 hover:text-white hover:border-blue-600"
             >
               {tag.name}

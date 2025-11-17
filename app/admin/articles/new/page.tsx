@@ -472,7 +472,7 @@ export default function NewArticlePage() {
               )}
             </div>
 
-            {/* Content field (TiptapEditor) */}
+            {/* Content field (MarkdownEditor) */}
             <div>
               <label className="block text-sm font-semibold text-slate-600 mb-2">
                 内容 <span className="text-red-500">*</span>

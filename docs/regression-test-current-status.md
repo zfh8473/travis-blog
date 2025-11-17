@@ -119,3 +119,53 @@
 **最后更新：** 2025-01-XX  
 **状态：** 🟡 进行中（阻塞问题待解决）
 
+---
+
+## 会话管理问题调查总结
+
+### 已尝试的修复（3次）
+
+1. **第一次修复：** 添加 `credentials: "include"` 到所有 fetch 请求
+   - 结果：❌ 问题仍然存在
+
+2. **第二次修复：** 修复 cookie secure 配置 + 添加中间件调试日志
+   - 结果：❌ 问题仍然存在
+
+3. **第三次修复：** 尝试添加 `trustHost: true`（但构建失败，已移除）
+   - 结果：❌ 问题仍然存在
+
+### 问题分析
+
+**根本原因：**
+- 客户端组件中的 `fetch` 请求无法正确传递 NextAuth session cookie
+- 中间件的 `getToken` 无法从请求中读取 token
+- 可能是 NextAuth 4.x 在 Vercel 环境中的已知问题
+
+**可能的原因：**
+1. Cookie 域名或路径不匹配
+2. `NEXTAUTH_URL` 环境变量未正确设置
+3. NextAuth 4.x 在 Vercel 环境中的限制
+4. 中间件和客户端请求之间的 cookie 传递问题
+
+### 推荐解决方案
+
+**方案 1: 使用 Server Components 获取数据（强烈推荐）**
+
+**优势：**
+- ✅ 符合 Next.js App Router 最佳实践
+- ✅ 不需要处理 cookie 传递问题
+- ✅ 性能更好（减少客户端 JavaScript）
+- ✅ 可以直接访问 session
+
+**实施步骤：**
+1. 将 `app/admin/articles/page.tsx` 改为 Server Component
+2. 使用 `getServerSession` 获取 session
+3. 直接从数据库获取数据（使用 Prisma）
+4. 创建 Client Component 处理交互逻辑
+
+**详细方案：** 请参考 `docs/regression-test-session-alternative-solution.md`
+
+---
+
+**下一步行动：** 建议实施方案 1（Server Components 重构）
+

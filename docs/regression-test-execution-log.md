@@ -230,6 +230,31 @@
     - `middleware.ts`（确保配置正确）
   - 说明：NextAuth 4.x 使用 `NEXTAUTH_URL` 环境变量来识别 host
   - 等待重新部署和测试
+- **第三次修复后测试：** ⚠️ 问题仍然存在
+  - 测试时间：2025-01-XX [当前时间]
+  - 测试结果：API 请求仍然返回 401
+  - 控制台错误：`Failed to load resource: the server responded with a status of 401 () @ https://travis-blog.vercel.app/api/articles?limit=1000`
+  - 观察：
+    - 登录成功，页面布局正常显示
+    - 显示用户名"Fenghua Zhang"
+    - 但客户端组件中的 fetch 请求仍然失败
+  - **建议：** 考虑使用 Server Components 获取数据作为替代方案
+  - 详细方案请参考：`docs/regression-test-session-alternative-solution.md`
+- **重构实施：** ✅ 已完成
+  - 重构时间：2025-01-XX [当前时间]
+  - 重构内容：将 `app/admin/articles/page.tsx` 改为 Server Component
+  - 实施步骤：
+    1. 创建 `ArticlesListClient.tsx` Client Component 处理交互逻辑
+    2. 将 `page.tsx` 改为 Server Component，使用 `getServerSession` 获取 session
+    3. 直接从数据库获取数据（使用 Prisma），避免客户端 fetch 请求
+  - 修改文件：
+    - `app/admin/articles/page.tsx` - 改为 Server Component
+    - `app/admin/articles/ArticlesListClient.tsx` - 新增 Client Component
+  - 优势：
+    - ✅ 不需要处理 cookie 传递问题
+    - ✅ 性能更好（减少客户端 JavaScript）
+    - ✅ 符合 Next.js App Router 最佳实践
+  - 等待部署和测试
 
 ---
 

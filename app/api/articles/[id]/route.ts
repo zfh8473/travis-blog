@@ -4,6 +4,8 @@ import { requireAdmin } from "@/lib/auth/permissions";
 import { prisma } from "@/lib/db/prisma";
 import { updateArticleSchema } from "@/lib/validations/article";
 import { generateUniqueSlug } from "@/lib/utils/slug";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 /**
  * Get article detail by ID.

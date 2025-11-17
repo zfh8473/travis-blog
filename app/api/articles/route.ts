@@ -4,6 +4,8 @@ import { requireAdmin } from "@/lib/auth/permissions";
 import { prisma } from "@/lib/db/prisma";
 import { createArticleSchema } from "@/lib/validations/article";
 import { generateUniqueSlug } from "@/lib/utils/slug";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 /**
  * Get article list with pagination and filtering.
@@ -173,8 +175,28 @@ export async function GET(request: NextRequest) {
  * ```
  */
 export async function POST(request: NextRequest) {
-  // Get user information from request (with fallback to direct token reading)
-  const user = await getUserFromRequestOrHeaders(request, request.headers);
+  // Try multiple methods to get user information
+  // 1. First try getServerSession (most reliable in API routes)
+  // Note: getServerSession doesn't work directly with NextRequest in App Router
+  // We need to use getUserFromRequestOrHeaders which handles both methods
+  let user = await getUserFromRequestOrHeaders(request, request.headers);
+  
+  // 2. If that fails, try getServerSession as fallback
+  if (!user) {
+    try {
+      const session = await getServerSession(authOptions);
+      if (session?.user) {
+        user = {
+          id: session.user.id,
+          email: session.user.email,
+          name: session.user.name,
+          role: session.user.role,
+        };
+      }
+    } catch (error) {
+      console.error("Error getting session in POST /api/articles:", error);
+    }
+  }
 
   // Check if user is authenticated and has ADMIN role
   const adminError = requireAdmin(user);

@@ -108,10 +108,18 @@ test.describe("Sidebar Popular Articles Thumbnail Display", () => {
       },
     ];
 
-    // Create articles
+    // Create articles (use upsert to avoid duplicate slug conflicts)
     for (const articleData of articlesWithSameFirstLetter) {
-      const article = await prisma.article.create({
-        data: {
+      const article = await prisma.article.upsert({
+        where: { slug: articleData.slug },
+        update: {
+          title: articleData.title,
+          content: articleData.content,
+          excerpt: articleData.content.substring(0, 100),
+          status: "PUBLISHED",
+          publishedAt: new Date(),
+        },
+        create: {
           title: articleData.title,
           slug: articleData.slug,
           content: articleData.content,
@@ -133,9 +141,9 @@ test.describe("Sidebar Popular Articles Thumbnail Display", () => {
     const sidebar = page.locator('aside:has-text("热门文章")');
     await expect(sidebar).toBeVisible({ timeout: 10000 });
 
-    // Verify all 5 articles are displayed
+    // Verify all 5 articles are displayed (wait a bit for articles to appear)
     const articleLinks = sidebar.locator('a.popular-article');
-    await expect(articleLinks).toHaveCount(5);
+    await expect(articleLinks).toHaveCount(5, { timeout: 10000 });
 
     // Verify each article has a thumbnail
     for (let i = 0; i < 5; i++) {

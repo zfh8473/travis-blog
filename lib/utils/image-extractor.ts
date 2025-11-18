@@ -108,9 +108,11 @@ export function generatePlaceholderThumbnail(
     )}`;
   } else {
     // Use solid color (for list gradient effect)
-    // Even for solid color, we still need unique ID to avoid browser caching issues
+    // Add a unique identifier comment to ensure each data URL is unique
+    // This prevents browser caching conflicts when multiple articles have same first letter and color
     return `data:image/svg+xml,${encodeURIComponent(
       `<svg width="200" height="120" xmlns="http://www.w3.org/2000/svg">
+        <!-- Unique ID: ${svgUniqueId} -->
         <rect width="200" height="120" fill="${colorPair.top}"/>
         <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="${colorPair.text}" text-anchor="middle" dominant-baseline="middle" opacity="0.9">${firstLetter}</text>
       </svg>`

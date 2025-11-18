@@ -111,7 +111,8 @@ export default async function Sidebar() {
                 // Get first letter for thumbnail
                 const firstLetter = article.title.charAt(0).toUpperCase();
                 // Extract thumbnail from content or generate placeholder
-                const thumbnailUrl = extractFirstImage(article.content || "") || generatePlaceholderThumbnail(article.title, index, popularArticles.length);
+                // Pass article.id as uniqueId to ensure uniqueness even when titles have same first letter
+                const thumbnailUrl = extractFirstImage(article.content || "") || generatePlaceholderThumbnail(article.title, index, popularArticles.length, article.id);
                 
                 return (
                   <Link

@@ -105,21 +105,35 @@ export default function CommentForm({
         return;
       }
 
-      // Call API Route
-      const res = await fetch("/api/comments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          articleId: validationResult.data.articleId,
-          content: validationResult.data.content,
-          parentId: validationResult.data.parentId || null,
-          userId: validationResult.data.userId || null,
-          authorName: validationResult.data.authorName || undefined,
-        }),
-      });
+      // Call API Route with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
+      let res: Response;
+      try {
+        res = await fetch("/api/comments", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          signal: controller.signal,
+          body: JSON.stringify({
+            articleId: validationResult.data.articleId,
+            content: validationResult.data.content,
+            parentId: validationResult.data.parentId || null,
+            userId: validationResult.data.userId || null,
+            authorName: validationResult.data.authorName || undefined,
+          }),
+        });
+        clearTimeout(timeoutId);
+      } catch (err) {
+        clearTimeout(timeoutId);
+        if (err instanceof Error && err.name === "AbortError") {
+          throw new Error("请求超时，请稍后重试");
+        }
+        throw err;
+      }
 
       const data = await res.json();
 

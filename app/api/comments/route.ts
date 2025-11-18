@@ -266,25 +266,50 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user session (if logged in)
-    // Try getUserFromRequestOrHeaders first (more reliable in API routes)
-    let user = await getUserFromRequestOrHeaders(request, request.headers);
+    // For anonymous comments (no userId in request), skip session check entirely
+    // This avoids timeout issues in Vercel environment
     let userId: string | null = null;
     
-    if (user) {
-      userId = user.id;
-    } else {
-      // Fallback to getServerSession
+    // Only try to get session if this might be a logged-in user
+    // Check if userId is provided OR if authorName is not provided (logged-in users don't provide authorName)
+    const mightBeLoggedIn = validatedData.userId || !validatedData.authorName;
+    
+    if (mightBeLoggedIn) {
       try {
-        const session = await getServerSession(authOptions);
-        if (session?.user) {
-          userId = session.user.id;
-        }
+        // Add timeout to prevent hanging in Vercel (2 seconds)
+        const timeoutPromise = new Promise<string | null>((resolve) => {
+          setTimeout(() => {
+            console.warn("[POST /api/comments] Session check timeout, proceeding as anonymous");
+            resolve(null);
+          }, 2000);
+        });
+        
+        const sessionPromise = (async (): Promise<string | null> => {
+          try {
+            // Try getUserFromRequestOrHeaders first (faster, more reliable)
+            const user = await getUserFromRequestOrHeaders(request, request.headers);
+            if (user) {
+              return user.id;
+            }
+            
+            // Fallback to getServerSession (may hang in Vercel)
+            const session = await getServerSession(authOptions);
+            return session?.user?.id || null;
+          } catch (error) {
+            console.error("[POST /api/comments] Error getting session:", error);
+            return null;
+          }
+        })();
+        
+        userId = await Promise.race([sessionPromise, timeoutPromise]);
       } catch (error) {
-        console.error("Error getting session in POST /api/comments:", error);
+        console.error("[POST /api/comments] Unexpected error in session check:", error);
+        // Continue as anonymous user
+        userId = null;
       }
     }
     
-    // Use userId from session or from validatedData (for anonymous users)
+    // Final userId: from session, from request, or null for anonymous
     userId = userId || validatedData.userId || null;
 
     // Sanitize comment content to prevent XSS

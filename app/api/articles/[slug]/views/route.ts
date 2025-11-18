@@ -97,12 +97,23 @@ export async function POST(
       newViews: updatedArticle.views,
     });
 
-    return NextResponse.json({
+    // Create response with explicit headers to ensure proper connection handling
+    const response = NextResponse.json({
       success: true,
       data: {
         views: updatedArticle.views,
       },
+    }, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Connection': 'close',
+      },
     });
+
+    console.log("[Views API] Response created, sending to client");
+    return response;
   } catch (error) {
     console.error("[Views API] Error in POST handler:", error);
     console.error("[Views API] Error details:", {

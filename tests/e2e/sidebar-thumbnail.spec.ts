@@ -24,15 +24,25 @@ test.describe("Sidebar Popular Articles Thumbnail Display", () => {
   let testArticleIds: string[] = [];
 
   test.beforeAll(async () => {
+    // Clean up any existing test data first
+    await prisma.article.deleteMany({
+      where: {
+        slug: {
+          startsWith: "test-article-",
+        },
+      },
+    });
+    await prisma.category.deleteMany({
+      where: { slug: "e2e-thumbnail-tech" },
+    });
+    await prisma.user.deleteMany({
+      where: { email: testAdminEmail },
+    });
+
     // Create a test admin user
     const hashedPassword = await hashPassword(testAdminPassword);
-    const admin = await prisma.user.upsert({
-      where: { email: testAdminEmail },
-      update: {
-        password: hashedPassword,
-        role: Role.ADMIN,
-      },
-      create: {
+    const admin = await prisma.user.create({
+      data: {
         email: testAdminEmail,
         password: hashedPassword,
         name: "E2E Thumbnail Admin",
@@ -42,10 +52,8 @@ test.describe("Sidebar Popular Articles Thumbnail Display", () => {
     testAdminId = admin.id;
 
     // Create a test category
-    const category = await prisma.category.upsert({
-      where: { slug: "e2e-thumbnail-tech" },
-      update: {},
-      create: {
+    const category = await prisma.category.create({
+      data: {
         name: "技术",
         slug: "e2e-thumbnail-tech",
       },
@@ -120,10 +128,10 @@ test.describe("Sidebar Popular Articles Thumbnail Display", () => {
     // When: User visits the homepage
     await page.goto("/");
     await page.waitForLoadState("networkidle");
-
-    // Then: All popular articles should be displayed with thumbnails
+    
+    // Wait for sidebar to be visible (may take time to load)
     const sidebar = page.locator('aside:has-text("热门文章")');
-    await expect(sidebar).toBeVisible();
+    await expect(sidebar).toBeVisible({ timeout: 10000 });
 
     // Verify all 5 articles are displayed
     const articleLinks = sidebar.locator('a.popular-article');
@@ -168,10 +176,18 @@ test.describe("Sidebar Popular Articles Thumbnail Display", () => {
       },
     ];
 
-    // Create articles
+    // Create articles (use upsert to avoid duplicate slug conflicts)
     for (const articleData of articlesWithSameFirstLetter) {
-      const article = await prisma.article.create({
-        data: {
+      const article = await prisma.article.upsert({
+        where: { slug: articleData.slug },
+        update: {
+          title: articleData.title,
+          content: articleData.content,
+          excerpt: articleData.content.substring(0, 100),
+          status: "PUBLISHED",
+          publishedAt: new Date(),
+        },
+        create: {
           title: articleData.title,
           slug: articleData.slug,
           content: articleData.content,
@@ -188,9 +204,12 @@ test.describe("Sidebar Popular Articles Thumbnail Display", () => {
     // When: User visits the homepage
     await page.goto("/");
     await page.waitForLoadState("networkidle");
+    
+    // Wait for sidebar to be visible
+    const sidebar = page.locator('aside:has-text("热门文章")');
+    await expect(sidebar).toBeVisible({ timeout: 10000 });
 
     // Then: Extract all thumbnail data URLs and verify they are unique
-    const sidebar = page.locator('aside:has-text("热门文章")');
     const articleLinks = sidebar.locator('a.popular-article');
     
     const thumbnailDataUrls: string[] = [];
@@ -246,10 +265,18 @@ test.describe("Sidebar Popular Articles Thumbnail Display", () => {
       },
     ];
 
-    // Create articles
+    // Create articles (use upsert to avoid duplicate slug conflicts)
     for (const articleData of articlesWithDifferentFirstLetters) {
-      const article = await prisma.article.create({
-        data: {
+      const article = await prisma.article.upsert({
+        where: { slug: articleData.slug },
+        update: {
+          title: articleData.title,
+          content: articleData.content,
+          excerpt: articleData.content.substring(0, 100),
+          status: "PUBLISHED",
+          publishedAt: new Date(),
+        },
+        create: {
           title: articleData.title,
           slug: articleData.slug,
           content: articleData.content,
@@ -266,9 +293,12 @@ test.describe("Sidebar Popular Articles Thumbnail Display", () => {
     // When: User visits the homepage
     await page.goto("/");
     await page.waitForLoadState("networkidle");
+    
+    // Wait for sidebar to be visible
+    const sidebar = page.locator('aside:has-text("热门文章")');
+    await expect(sidebar).toBeVisible({ timeout: 10000 });
 
     // Then: All thumbnails should display correctly
-    const sidebar = page.locator('aside:has-text("热门文章")');
     const articleLinks = sidebar.locator('a.popular-article');
     
     // Verify at least 3 articles are displayed
@@ -287,8 +317,16 @@ test.describe("Sidebar Popular Articles Thumbnail Display", () => {
     page,
   }) => {
     // Given: Articles with images in content (should use image instead of placeholder)
-    const articleWithImage = await prisma.article.create({
-      data: {
+    const articleWithImage = await prisma.article.upsert({
+      where: { slug: "test-article-with-image" },
+      update: {
+        title: "带图片的测试文章",
+        content: '<p>测试内容</p><img src="/uploads/test-image.jpg" alt="Test" />',
+        excerpt: "测试摘要",
+        status: "PUBLISHED",
+        publishedAt: new Date(),
+      },
+      create: {
         title: "带图片的测试文章",
         slug: "test-article-with-image",
         content: '<p>测试内容</p><img src="/uploads/test-image.jpg" alt="Test" />',
@@ -304,9 +342,12 @@ test.describe("Sidebar Popular Articles Thumbnail Display", () => {
     // When: User visits the homepage
     await page.goto("/");
     await page.waitForLoadState("networkidle");
+    
+    // Wait for sidebar to be visible
+    const sidebar = page.locator('aside:has-text("热门文章")');
+    await expect(sidebar).toBeVisible({ timeout: 10000 });
 
     // Then: Thumbnail should attempt to use the image from content
-    const sidebar = page.locator('aside:has-text("热门文章")');
     const articleLinks = sidebar.locator('a.popular-article');
     
     // Find the article with image

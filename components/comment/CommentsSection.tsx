@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { getServerSession } from "next-auth";
+import { Session } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import CommentFormWrapper from "./CommentFormWrapper";
 import CommentList, { CommentListLoading } from "./CommentList";
@@ -12,10 +13,36 @@ interface CommentsSectionProps {
 }
 
 /**
+ * Get session with timeout to prevent hanging in Vercel environment.
+ * 
+ * In Vercel, getServerSession may sometimes hang, causing the page to freeze.
+ * This wrapper adds a timeout to prevent blocking the entire page load.
+ */
+async function getSessionWithTimeout(): Promise<Session | null> {
+  try {
+    // Use Promise.race to add a timeout
+    const timeoutPromise = new Promise<Session | null>((resolve) => {
+      setTimeout(() => resolve(null), 2000); // 2 second timeout
+    });
+
+    const sessionPromise = getServerSession(authOptions);
+    
+    const result = await Promise.race([sessionPromise, timeoutPromise]);
+    return result;
+  } catch (error) {
+    // Log error but return null to allow anonymous access
+    console.error("Error getting session in CommentsSection:", error);
+    return null;
+  }
+}
+
+/**
  * Comments section component.
  * 
  * Server Component that serves as the container for the comments section.
  * Fetches session information on the server and passes it to client components.
+ * 
+ * Uses timeout protection to prevent hanging in Vercel environment.
  * 
  * @component
  * @param props - Component props
@@ -29,15 +56,9 @@ interface CommentsSectionProps {
 export default async function CommentsSection({
   articleId,
 }: CommentsSectionProps) {
-  // Get session on server side
-  // Wrap in try-catch to handle potential errors gracefully
-  let session = null;
-  try {
-    session = await getServerSession(authOptions);
-  } catch (error) {
-    // Log error but continue with null session (anonymous users can still comment)
-    console.error("Error getting session in CommentsSection:", error);
-  }
+  // Get session on server side with timeout protection
+  // This prevents the page from hanging if getServerSession blocks in Vercel
+  const session = await getSessionWithTimeout();
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl border-t border-gray-200 mt-12">

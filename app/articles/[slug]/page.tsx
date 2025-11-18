@@ -262,7 +262,13 @@ async function ArticleDetailContent({
       <ArticleViewCounter slug={slug} />
       
       {/* Comments section - re-enabled with new architecture */}
-      <CommentsSection articleId={article.id} />
+      {/* Wrap in Suspense to prevent blocking page load if session fetch hangs */}
+      <Suspense fallback={<div className="container mx-auto px-4 py-8 max-w-4xl border-t border-gray-200 mt-12">
+        <h2 className="text-2xl font-bold mb-6 text-gray-900">留言</h2>
+        <div className="text-center py-4 text-gray-500">加载中...</div>
+      </div>}>
+        <CommentsSection articleId={article.id} />
+      </Suspense>
     </>
   );
 }

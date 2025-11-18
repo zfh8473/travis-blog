@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 
+// Ensure this route runs in Node.js runtime (required for Prisma)
+export const runtime = "nodejs";
+
 /**
  * Increment article view count.
  * 
@@ -23,10 +26,19 @@ export async function POST(
 ) {
   const { slug } = await params;
 
+  // Decode URL-encoded slug if needed
+  let decodedSlug = slug;
+  try {
+    decodedSlug = decodeURIComponent(slug);
+  } catch {
+    // Already decoded or invalid encoding, use original
+    decodedSlug = slug;
+  }
+
   try {
     // Find the article by slug
     const article = await prisma.article.findUnique({
-      where: { slug },
+      where: { slug: decodedSlug },
       select: {
         id: true,
         status: true,
@@ -35,6 +47,7 @@ export async function POST(
 
     // Article not found
     if (!article) {
+      console.error("Article not found for slug:", decodedSlug);
       return NextResponse.json(
         {
           success: false,
@@ -72,6 +85,12 @@ export async function POST(
       select: {
         views: true,
       },
+    });
+
+    console.log("Article views incremented:", {
+      articleId: article.id,
+      slug: decodedSlug,
+      newViews: updatedArticle.views,
     });
 
     return NextResponse.json({

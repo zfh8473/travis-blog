@@ -59,7 +59,7 @@ export default function ArticleViewCounter({ slug }: { slug: string }) {
         return;
       }
 
-      console.log("[ViewCounter] Views element found, making API call");
+      console.log("[ViewCounter] Views element found, calling Server Action");
 
       // Increment view count when component mounts and element is ready
       const incrementViews = async () => {

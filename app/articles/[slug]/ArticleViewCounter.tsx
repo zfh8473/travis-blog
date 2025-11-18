@@ -26,13 +26,21 @@ export default function ArticleViewCounter({ slug }: { slug: string }) {
     console.log("[ViewCounter] Component mounted, slug:", slug);
 
     // Wait for DOM to be ready and find the views element
+    let retryCount = 0;
+    const maxRetries = 50; // Maximum 5 seconds (50 * 100ms)
+    
     const waitForElementAndIncrement = () => {
       // Try to find the views element
       const viewsElement = document.querySelector('[data-article-views]');
       
       if (!viewsElement) {
+        retryCount++;
+        if (retryCount >= maxRetries) {
+          console.error("[ViewCounter] Views element not found after", maxRetries, "retries, giving up");
+          return;
+        }
         // Element not found yet, wait a bit and try again
-        console.log("[ViewCounter] Views element not found, retrying in 100ms");
+        console.log("[ViewCounter] Views element not found, retrying in 100ms (attempt", retryCount, "/", maxRetries, ")");
         setTimeout(waitForElementAndIncrement, 100);
         return;
       }

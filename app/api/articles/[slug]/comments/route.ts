@@ -142,12 +142,12 @@ export async function POST(
       let depth = 0;
       
       while (currentParentId && depth < MAX_COMMENT_DEPTH) {
-         const parent = await prisma.comment.findUnique({
+         const ancestor: { parentId: string | null } | null = await prisma.comment.findUnique({
              where: { id: currentParentId },
              select: { parentId: true }
          });
-         if (!parent) break;
-         currentParentId = parent.parentId;
+         if (!ancestor) break;
+         currentParentId = ancestor.parentId;
          depth++;
       }
 

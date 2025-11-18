@@ -154,9 +154,8 @@ export async function incrementArticleViewsAction(
     return {
       success: false,
       error: {
-        message: "Failed to process request",
+        message: error instanceof Error ? error.message : "Failed to process request",
         code: "INTERNAL_ERROR",
-        details: error instanceof Error ? error.message : String(error),
       },
     };
   }

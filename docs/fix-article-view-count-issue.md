@@ -170,6 +170,41 @@ console.log("[Views API] Received slug:", slug);
 console.error("[Views API] Error in POST handler:", error);
 ```
 
+### 2025-11-17: 修复执行时机和 DOM 更新问题
+
+**问题：**
+- `ArticleViewCounter` 在 `ArticleDetail` 之前渲染
+- `useEffect` 可能在 DOM 元素还没有渲染完成时就执行
+- `document.querySelector` 找不到元素
+- DOM 更新时替换了整个内容，包括 SVG 图标
+
+**修复：**
+1. 将 `ArticleViewCounter` 移到 `ArticleDetail` 之后，确保 DOM 已经渲染
+2. 添加等待机制，使用 `setTimeout` 重试直到找到元素（最多等待几秒）
+3. 改进 DOM 更新逻辑，保留 SVG 图标，只更新文本部分
+4. 添加详细的调试日志，使用 `[ViewCounter]` 前缀
+
+**代码变更：**
+```typescript
+// 等待元素出现
+const waitForElementAndIncrement = () => {
+  const viewsElement = document.querySelector('[data-article-views]');
+  if (!viewsElement) {
+    setTimeout(waitForElementAndIncrement, 100);
+    return;
+  }
+  // 找到元素后执行 API 调用
+};
+
+// 更新 DOM 时保留 SVG
+const svgElement = updatedElement.querySelector('svg');
+if (svgElement) {
+  updatedElement.innerHTML = '';
+  updatedElement.appendChild(svgElement);
+  updatedElement.appendChild(document.createTextNode(` ${views} 次阅读`));
+}
+```
+
 **最后更新：** 2025-11-17  
 **负责人：** Dev
 

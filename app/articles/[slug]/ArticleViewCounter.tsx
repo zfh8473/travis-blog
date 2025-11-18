@@ -52,17 +52,33 @@ export default function ArticleViewCounter({ slug }: { slug: string }) {
         try {
           const url = `/api/articles/${encodeURIComponent(slug)}/views`;
           console.log("[ViewCounter] Calling API:", url);
+          console.log("[ViewCounter] Fetch options:", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+          });
           
+          const fetchStartTime = Date.now();
           const response = await fetch(url, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             credentials: "include", // Ensure cookies are sent
+          }).catch((fetchError) => {
+            console.error("[ViewCounter] Fetch error (network/CORS):", {
+              error: fetchError,
+              message: fetchError.message,
+              name: fetchError.name,
+            });
+            throw fetchError;
           });
 
-          console.log("[ViewCounter] API response received, status:", response.status);
+          const fetchDuration = Date.now() - fetchStartTime;
+          console.log("[ViewCounter] API response received after", fetchDuration, "ms");
+          console.log("[ViewCounter] API response status:", response.status);
           console.log("[ViewCounter] API response ok:", response.ok);
+          console.log("[ViewCounter] API response statusText:", response.statusText);
           console.log("[ViewCounter] API response headers:", Object.fromEntries(response.headers.entries()));
 
           if (!response.ok) {

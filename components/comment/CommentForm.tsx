@@ -103,7 +103,7 @@ export default function CommentForm({
         articleId,
         userId: session?.user?.id || null,
         parentId: parentId || null,
-        authorName: isLoggedIn ? undefined : (authorName || undefined),
+        authorName: isLoggedIn ? null : (authorName || null),
       });
 
       if (!validationResult.success) {

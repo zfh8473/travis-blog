@@ -123,7 +123,7 @@ async function fetchArticleBySlug(
       categoryId: article.categoryId ? String(article.categoryId) : null,
       authorId: String(article.authorId),
       publishedAt: article.publishedAt ? article.publishedAt.toISOString() : null,
-      views: article.views || 0,
+      views: (article as any).views ?? 0, // Use type assertion and nullish coalescing for migration compatibility
       createdAt: article.createdAt.toISOString(),
       updatedAt: article.updatedAt.toISOString(),
       author: {

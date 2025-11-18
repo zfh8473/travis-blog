@@ -160,11 +160,12 @@ async function fetchArticlesByCategory(
 
     // Transform tags to simple array format
     // Type assertion is safe because we filter for PUBLISHED status in where clause
+    // Note: views field may not exist if migration hasn't run yet, use type assertion
     const transformedArticles: Article[] = articles.map((article) => ({
       ...article,
       status: "PUBLISHED" as const, // Explicitly set status since we filtered for PUBLISHED
       publishedAt: article.publishedAt?.toISOString() || null,
-      views: article.views || 0,
+      views: (article as any).views ?? 0, // Use type assertion and nullish coalescing for migration compatibility
       createdAt: article.createdAt.toISOString(),
       updatedAt: article.updatedAt.toISOString(),
       tags: article.tags.map((at) => at.tag),

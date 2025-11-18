@@ -58,13 +58,22 @@ export default function ArticleViewCounter({ slug }: { slug: string }) {
             headers: {
               "Content-Type": "application/json",
             },
+            credentials: "include", // Ensure cookies are sent
           });
 
-          console.log("[ViewCounter] API response status:", response.status);
+          console.log("[ViewCounter] API response received, status:", response.status);
+          console.log("[ViewCounter] API response ok:", response.ok);
+          console.log("[ViewCounter] API response headers:", Object.fromEntries(response.headers.entries()));
 
           if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            console.error("[ViewCounter] Failed to increment article views:", {
+            const errorText = await response.text().catch(() => "Failed to read error response");
+            let errorData;
+            try {
+              errorData = JSON.parse(errorText);
+            } catch {
+              errorData = { raw: errorText };
+            }
+            console.error("[ViewCounter] API request failed:", {
               status: response.status,
               statusText: response.statusText,
               error: errorData,
@@ -74,8 +83,21 @@ export default function ArticleViewCounter({ slug }: { slug: string }) {
             return;
           }
 
-          const data = await response.json();
-          console.log("[ViewCounter] API response data:", data);
+          const responseText = await response.text();
+          console.log("[ViewCounter] API response text:", responseText);
+          
+          let data;
+          try {
+            data = JSON.parse(responseText);
+          } catch (parseError) {
+            console.error("[ViewCounter] Failed to parse JSON response:", {
+              text: responseText,
+              error: parseError,
+            });
+            return;
+          }
+          
+          console.log("[ViewCounter] API response data (parsed):", data);
           
           if (data.success && data.data?.views !== undefined) {
             hasIncremented.current = true;

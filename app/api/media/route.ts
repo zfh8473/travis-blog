@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getUserFromHeaders } from "@/lib/auth/middleware";
+import { getUserFromRequestOrHeaders } from "@/lib/auth/middleware";
 import { requireAdmin } from "@/lib/auth/permissions";
 import { getStorage } from "@/lib/storage";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+
+// Ensure this route runs in Node.js runtime (required for Prisma and storage operations)
+export const runtime = "nodejs";
 
 /**
  * Get media file list with pagination.
@@ -24,8 +29,26 @@ import { getStorage } from "@/lib/storage";
  * ```
  */
 export async function GET(request: NextRequest) {
-  // Get user information from request headers (set by middleware)
-  const user = getUserFromHeaders(request.headers);
+  // Try multiple methods to get user information
+  // 1. First try getUserFromRequestOrHeaders (handles headers and token reading)
+  let user = await getUserFromRequestOrHeaders(request, request.headers);
+  
+  // 2. If that fails, try getServerSession as fallback
+  if (!user) {
+    try {
+      const session = await getServerSession(authOptions);
+      if (session?.user) {
+        user = {
+          id: session.user.id,
+          email: session.user.email,
+          name: session.user.name,
+          role: session.user.role,
+        };
+      }
+    } catch (error) {
+      console.error("Error getting session in GET /api/media:", error);
+    }
+  }
 
   // Check if user is authenticated and has ADMIN role
   const adminError = requireAdmin(user);

@@ -296,7 +296,7 @@
 - [x] **备注：** 状态切换功能需要手动测试（自动化测试已验证UI正常）
 
 #### TC-3.13: 媒体管理功能
-- [x] **状态：** ⚠️ 跳过（环境变量问题）
+- [x] **状态：** ⏳ 待验证（代码已修复，等待环境变量配置）
 - [x] **步骤：**
   1. 登录管理员账号
   2. 访问媒体管理页面
@@ -305,7 +305,11 @@
   5. 删除媒体文件（如需要）
 - [x] **预期结果：** 媒体管理功能正常
 - [x] **实际结果：** ⚠️ 页面显示错误："Application error: a client-side exception has occurred"，控制台显示 "DATABASE_URL environment variable is not set"
-- [x] **备注：** ⚠️ 这是 Vercel 环境变量配置问题，不是代码问题。需要检查 Vercel 环境变量配置。测试暂时跳过，等待环境变量配置完成后重新测试。
+- [x] **备注：** ✅ 代码已修复：
+  - 更新 API 路由使用 `getUserFromRequestOrHeaders` 和 `getServerSession` 作为后备
+  - 添加 `export const runtime = "nodejs"` 确保在 Node.js 运行时中运行（支持 Prisma）
+  - 参考 `docs/fix-media-page-database-url.md` 配置 Vercel 环境变量 `DATABASE_URL`
+  - 配置完成后需要重新部署并测试
 
 ---
 
@@ -398,7 +402,7 @@
 - [x] **备注：** 个人中心页面正常，管理后台入口可用
 
 #### TC-6.2: 媒体管理页面
-- [x] **状态：** ❌ 失败（环境变量问题）
+- [x] **状态：** ⏳ 待验证（代码已修复，等待环境变量配置）
 - [x] **步骤：**
   1. 登录管理员账号
   2. 访问媒体管理页面
@@ -406,7 +410,11 @@
   4. 验证媒体文件列表正常
 - [x] **预期结果：** 媒体管理页面正常
 - [x] **实际结果：** ❌ 页面显示错误："Application error: a client-side exception has occurred"，控制台显示 "DATABASE_URL environment variable is not set"
-- [x] **备注：** ⚠️ 这是 Vercel 环境变量配置问题，不是代码问题。需要检查 Vercel 环境变量配置
+- [x] **备注：** ✅ 代码已修复：
+  - 更新 API 路由使用 `getUserFromRequestOrHeaders` 和 `getServerSession` 作为后备
+  - 添加 `export const runtime = "nodejs"` 确保在 Node.js 运行时中运行（支持 Prisma）
+  - 参考 `docs/fix-media-page-database-url.md` 配置 Vercel 环境变量 `DATABASE_URL`
+  - 配置完成后需要重新部署并测试
 
 #### TC-6.3: 文章管理列表显示
 - [x] **状态：** ✅ 通过

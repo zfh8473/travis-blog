@@ -18,6 +18,7 @@ interface Article {
   categoryId: string | null;
   authorId: string;
   publishedAt: string | null;
+  views: number; // Article view count
   createdAt: string;
   updatedAt: string;
   author: {

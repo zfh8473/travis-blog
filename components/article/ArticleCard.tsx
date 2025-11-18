@@ -41,6 +41,7 @@ export interface ArticleCardProps {
   excerpt: string | null;
   slug: string;
   publishedAt: string | null;
+  views: number; // Article view count
   category: Category | null;
   tags: Tag[];
   author: Author;
@@ -88,6 +89,7 @@ export default function ArticleCard({
   excerpt,
   slug,
   publishedAt,
+  views,
   category,
   tags,
   author,
@@ -169,7 +171,7 @@ export default function ArticleCard({
             {formattedDate}
           </span>
         )}
-        {/* 阅读量占位符（未来可以添加） */}
+        {/* 阅读量 */}
         <span className="flex items-center gap-1">
           <svg
             className="w-3.5 h-3.5 opacity-60"
@@ -190,7 +192,7 @@ export default function ArticleCard({
               d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
             />
           </svg>
-          <span>0 阅读</span>
+          <span>{views.toLocaleString()} 阅读</span>
         </span>
       </div>
 

@@ -67,27 +67,47 @@ export default function ArticleViewCounter({ slug }: { slug: string }) {
           });
           
           const fetchStartTime = Date.now();
-          const response = await fetch(url, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include", // Ensure cookies are sent
-          }).catch((fetchError) => {
-            console.error("[ViewCounter] Fetch error (network/CORS):", {
+          console.log("[ViewCounter] Starting fetch request at", new Date().toISOString());
+          
+          let response;
+          try {
+            response = await Promise.race([
+              fetch(url, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                credentials: "include", // Ensure cookies are sent
+              }),
+              new Promise((_, reject) => 
+                setTimeout(() => reject(new Error("Fetch timeout after 10 seconds")), 10000)
+              ),
+            ]);
+            
+            console.log("[ViewCounter] Fetch promise resolved");
+          } catch (fetchError) {
+            console.error("[ViewCounter] Fetch error (network/CORS/timeout):", {
               error: fetchError,
-              message: fetchError.message,
-              name: fetchError.name,
+              message: fetchError instanceof Error ? fetchError.message : String(fetchError),
+              name: fetchError instanceof Error ? fetchError.name : "Unknown",
+              stack: fetchError instanceof Error ? fetchError.stack : undefined,
             });
-            throw fetchError;
-          });
+            isProcessing.current = false;
+            return;
+          }
 
           const fetchDuration = Date.now() - fetchStartTime;
           console.log("[ViewCounter] API response received after", fetchDuration, "ms");
           console.log("[ViewCounter] API response status:", response.status);
           console.log("[ViewCounter] API response ok:", response.ok);
           console.log("[ViewCounter] API response statusText:", response.statusText);
-          console.log("[ViewCounter] API response headers:", Object.fromEntries(response.headers.entries()));
+          
+          try {
+            const headersObj = Object.fromEntries(response.headers.entries());
+            console.log("[ViewCounter] API response headers:", headersObj);
+          } catch (headerError) {
+            console.warn("[ViewCounter] Failed to log headers:", headerError);
+          }
 
           if (!response.ok) {
             const errorText = await response.text().catch(() => "Failed to read error response");

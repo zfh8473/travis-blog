@@ -167,6 +167,44 @@
 
 ---
 
-**最后更新：** 2025-01-XX  
+### 5. 热门文章缩略图显示问题 ✅
+
+**问题描述：**
+- 当一篇文章中插入图片后，在热门文章的缩略图会无法正常显示
+- Next.js Image 组件无法加载外部域名图片（Vercel Blob Storage）
+- 图片加载失败时没有错误处理或回退机制
+
+**根本原因：**
+- `next.config.ts` 中未配置 `images.remotePatterns`，导致无法加载 Vercel Blob Storage 图片
+- `Sidebar` 组件是 Server Component，无法直接处理图片加载错误
+- 没有错误处理机制，图片加载失败时用户看到空白或破损图标
+
+**修复方案：**
+1. **配置 Next.js Image 组件** (`next.config.ts`)
+   - 添加 `images.remotePatterns` 配置，允许加载 `*.public.blob.vercel-storage.com` 域名图片
+
+2. **创建 ArticleThumbnail 组件** (`components/layout/ArticleThumbnail.tsx`)
+   - Client Component，处理图片加载错误
+   - 加载失败时自动回退到占位符
+   - 支持 data URI、普通 URL 和外部 URL
+
+3. **更新 Sidebar 组件**
+   - 使用新的 `ArticleThumbnail` 组件
+   - 简化缩略图显示逻辑
+
+4. **回退首字冲突验证**
+   - 移除了文章标题首字冲突验证代码（该方案无法解决根本问题）
+
+**修改文件：**
+- `next.config.ts` - 添加 images.remotePatterns 配置
+- `components/layout/ArticleThumbnail.tsx` - 新建组件（错误处理）
+- `components/layout/Sidebar.tsx` - 使用新组件
+- `lib/actions/article.ts` - 移除首字冲突验证
+
+**测试状态：** ✅ 已修复并验证
+
+---
+
+**最后更新：** 2025-11-17  
 **修复者：** Dev
 

@@ -1,6 +1,7 @@
 # Epic 1-6 回归测试执行记录
 
 **开始日期：** 2025-01-XX  
+**最后更新：** 2025-11-17  
 **负责人：** PM  
 **测试环境：** Vercel Production (`https://travis-blog.vercel.app`)  
 **管理员账号：** `zfh8473@gmail.com`  

@@ -3,8 +3,9 @@
 **问题描述：** 当一篇文章中插入图片后，在热门文章的缩略图会无法正常显示。
 
 **发现日期：** 2025-11-17  
+**修复日期：** 2025-11-17  
 **优先级：** 🔴 高  
-**状态：** 🔍 调查中
+**状态：** ✅ 已修复
 
 ---
 
@@ -150,9 +151,53 @@ const nextConfig: NextConfig = {
 
 1. ✅ 回退首字冲突验证代码
 2. ✅ 创建单元测试验证问题
-3. ⏳ 检查 `next.config.ts` 配置
-4. ⏳ 实施解决方案（配置 Image 组件或添加错误处理）
-5. ⏳ 测试验证修复效果
+3. ✅ 检查 `next.config.ts` 配置
+4. ✅ 实施解决方案（配置 Image 组件并添加错误处理）
+5. ✅ 测试验证修复效果
+
+## ✅ 修复完成
+
+### 实施的解决方案
+
+**方案 1: 配置 Next.js Image 组件允许外部域名** ✅
+- 在 `next.config.ts` 中添加了 `images.remotePatterns` 配置
+- 允许加载 `*.public.blob.vercel-storage.com` 域名的图片
+
+**方案 2: 添加错误处理和回退机制** ✅
+- 创建了 `ArticleThumbnail` Client Component (`components/layout/ArticleThumbnail.tsx`)
+- 实现了图片加载错误处理
+- 加载失败时自动回退到占位符
+- 更新 `Sidebar.tsx` 使用新的 `ArticleThumbnail` 组件
+
+### 修改的文件
+
+1. **`next.config.ts`**
+   - 添加 `images.remotePatterns` 配置，允许 Vercel Blob Storage 域名
+
+2. **`components/layout/ArticleThumbnail.tsx`** (新建)
+   - Client Component，处理图片加载错误
+   - 支持 data URI、普通 URL 和外部 URL
+   - 自动回退到占位符
+
+3. **`components/layout/Sidebar.tsx`**
+   - 使用新的 `ArticleThumbnail` 组件
+   - 简化缩略图显示逻辑
+
+4. **`lib/actions/article.ts`**
+   - 移除了首字冲突验证代码
+
+### 测试结果
+
+- ✅ 所有单元测试通过（49/49）
+- ✅ 构建成功，无错误
+- ✅ 代码已部署到 Vercel
+
+### 验证
+
+问题已修复，当文章插入图片后：
+- 缩略图能够正常显示（如果图片 URL 有效）
+- 如果图片加载失败，自动回退到占位符
+- 用户体验得到改善，不会看到空白或破损的图片
 
 ---
 

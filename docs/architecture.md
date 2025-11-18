@@ -81,7 +81,9 @@ travis-blog/
 │   └── layout/
 │       ├── Header.tsx
 │       ├── Footer.tsx
-│       └── Navigation.tsx
+│       ├── Navigation.tsx
+│       ├── Sidebar.tsx
+│       └── ArticleThumbnail.tsx
 ├── lib/                         # Utilities and shared code
 │   ├── db/                      # Database
 │   │   ├── prisma.ts
@@ -93,7 +95,8 @@ travis-blog/
 │   │   └── local.ts
 │   ├── utils/                   # Utility functions
 │   │   ├── date.ts
-│   │   └── validation.ts
+│   │   ├── validation.ts
+│   │   └── image-extractor.ts   # Image extraction and thumbnail generation
 │   └── constants/               # Constants
 │       └── categories.ts
 ├── prisma/                      # Prisma schema and migrations
@@ -108,7 +111,7 @@ travis-blog/
 │   └── comment.ts
 ├── .env.local                   # Environment variables (gitignored)
 ├── .env.example                 # Environment variables template
-├── next.config.js
+├── next.config.ts              # Next.js configuration (Image optimization, external packages)
 ├── tailwind.config.js
 ├── tsconfig.json
 └── package.json
@@ -126,7 +129,7 @@ travis-blog/
 | **Epic 4: Content Display** | `app/page.tsx`, `app/posts/`, `components/article/` | Homepage, article pages, article components |
 | **Epic 5: Reader Interaction** | `components/comment/`, `app/api/comments/` | Comment components, comment API |
 | **Epic 6: Admin Dashboard** | `app/admin/`, `components/admin/` | Admin layout, admin components |
-| **Epic 7: SEO & Performance** | `app/sitemap.xml.ts`, `next.config.js`, `components/` | Sitemap, metadata, image optimization |
+| **Epic 7: SEO & Performance** | `app/sitemap.xml.ts`, `next.config.ts`, `components/` | Sitemap, metadata, image optimization |
 
 ---
 
@@ -650,6 +653,9 @@ getCommentsAction(articleId: string): Promise<Comment[]>
 - WebP/AVIF format support
 - Lazy loading
 - Responsive images
+- Configured in `next.config.ts` with `images.remotePatterns` to allow Vercel Blob Storage
+- Used for optimized image loading in article thumbnails and content
+- `ArticleThumbnail` component handles error fallback to placeholder thumbnails
 
 ### Caching Strategy
 

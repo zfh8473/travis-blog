@@ -2,7 +2,6 @@
 
 import { useState, FormEvent } from "react";
 import { useSession } from "next-auth/react";
-import { createCommentAction } from "@/lib/actions/comment";
 import { createCommentSchema } from "@/lib/validations/comment";
 
 /**
@@ -106,10 +105,25 @@ export default function CommentForm({
         return;
       }
 
-      // Call Server Action
-      const result = await createCommentAction(validationResult.data);
+      // Call API Route
+      const res = await fetch("/api/comments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          articleId: validationResult.data.articleId,
+          content: validationResult.data.content,
+          parentId: validationResult.data.parentId || null,
+          userId: validationResult.data.userId || null,
+          authorName: validationResult.data.authorName || undefined,
+        }),
+      });
 
-      if (result.success) {
+      const data = await res.json();
+
+      if (data.success) {
         setSuccess(true);
         // Reset form
         setContent("");
@@ -124,7 +138,7 @@ export default function CommentForm({
           window.location.reload();
         }
       } else {
-        setError(result.error.message);
+        setError(data.error?.message || "提交留言时发生错误");
       }
     } catch (err) {
       console.error("Error submitting comment:", err);

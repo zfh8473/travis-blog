@@ -1,30 +1,39 @@
-import { Suspense } from "react";
-import { getCommentsAction, Comment } from "@/lib/actions/comment";
+"use client";
+
+import { Comment } from "./CommentsSection";
 import CommentItem from "./CommentItem";
+
+/**
+ * Comment list component props.
+ */
+interface CommentListProps {
+  comments: Comment[];
+  articleId: string;
+  onCommentDeleted?: () => void;
+}
 
 /**
  * Comment list component.
  * 
- * Server Component that fetches and displays all comments for an article.
- * Comments are sorted by creation time (newest first).
- * Supports nested replies display with proper indentation and visual distinction.
+ * Client Component that displays all comments for an article.
+ * Supports nested replies display with proper indentation.
  * 
  * @component
  * @param props - Component props
- * @param props.articleId - The ID of the article to fetch comments for
+ * @param props.comments - Array of top-level comments (with nested replies)
+ * @param props.articleId - The ID of the article
+ * @param props.onCommentDeleted - Callback when a comment is deleted
  * 
  * @example
  * ```tsx
- * <CommentList articleId="article-123" />
+ * <CommentList comments={comments} articleId="article-123" />
  * ```
  */
-export default async function CommentList({
+export default function CommentList({
+  comments,
   articleId,
-}: {
-  articleId: string;
-}) {
-  const comments = await getCommentsAction(articleId);
-
+  onCommentDeleted,
+}: CommentListProps) {
   if (comments.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
@@ -56,31 +65,10 @@ export default async function CommentList({
           comment={comment}
           depth={0}
           allComments={allComments}
+          articleId={articleId}
+          onCommentDeleted={onCommentDeleted}
         />
       ))}
     </div>
   );
 }
-
-/**
- * Loading component for comment list.
- */
-export function CommentListLoading() {
-  return (
-    <div className="space-y-4">
-      {[1, 2, 3].map((i) => (
-        <div key={i} className="border-b border-gray-200 py-4">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
-            <div className="flex-1 space-y-2">
-              <div className="h-4 bg-gray-200 rounded w-1/4 animate-pulse" />
-              <div className="h-4 bg-gray-200 rounded w-full animate-pulse" />
-              <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse" />
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-

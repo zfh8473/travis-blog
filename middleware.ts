@@ -24,7 +24,10 @@ const apiProtectionRules: ApiProtectionRule[] = [
   {
     prefix: "/api/articles",
     requiresAdmin: true,
-    excludePrefixes: ["/api/articles/public"],
+    excludePrefixes: [
+      "/api/articles/public",
+      "/api/articles/", // Exclude dynamic routes like /api/articles/[slug]/views
+    ],
   },
   { prefix: "/api/profile", requiresAdmin: false },
   { prefix: "/api/protected", requiresAdmin: false },

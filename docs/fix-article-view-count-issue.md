@@ -130,6 +130,29 @@ export async function POST(
 
 ---
 
+---
+
+## ✅ 修复记录
+
+### 2025-11-17: 修复中间件拦截问题
+
+**问题：**
+- `/api/articles/[slug]/views` 被中间件拦截，返回 401 错误
+- 中间件配置中 `/api/articles` 需要管理员权限，但阅读数端点是公开的
+
+**修复：**
+- 在 `getMatchingRule` 函数中添加特殊处理，排除 `/api/articles/[slug]/views` 路径
+- 使用正则表达式匹配动态路由：`/^\/api\/articles\/[^/]+\/views$/`
+
+**代码变更：**
+```typescript
+// middleware.ts
+// Special case: exclude /api/articles/[slug]/views (public endpoint for view counting)
+if (pathname.match(/^\/api\/articles\/[^/]+\/views$/)) {
+  continue;
+}
+```
+
 **最后更新：** 2025-11-17  
 **负责人：** Dev
 

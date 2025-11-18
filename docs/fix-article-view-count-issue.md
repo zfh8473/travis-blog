@@ -153,6 +153,23 @@ if (pathname.match(/^\/api\/articles\/[^/]+\/views$/)) {
 }
 ```
 
+### 2025-11-17: 添加详细错误日志
+
+**问题：**
+- API 返回 500 错误，但原因不明
+
+**修复：**
+- 添加详细的错误日志，包括 slug 解析、数据库查询等步骤
+- 修复嵌套的 try-catch 块结构
+- 统一错误处理逻辑
+
+**代码变更：**
+```typescript
+// 添加日志前缀 [Views API] 以便识别
+console.log("[Views API] Received slug:", slug);
+console.error("[Views API] Error in POST handler:", error);
+```
+
 **最后更新：** 2025-11-17  
 **负责人：** Dev
 

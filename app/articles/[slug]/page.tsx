@@ -3,9 +3,13 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { prisma } from "@/lib/db/prisma";
 import ArticleDetail from "@/components/article/ArticleDetail";
+<<<<<<< HEAD
 import CommentsSection from "@/components/comment/CommentsSection";
+=======
+>>>>>>> 50c99f08741872fadd03e98476cd6fbc9411e592
 import { enhanceHtmlWithSyntaxHighlighting } from "@/lib/utils/markdown-converter";
 import ArticleViewCounter from "./ArticleViewCounter";
+import CommentSection from "@/components/comment/CommentSection";
 
 /**
  * Article interface for detail page.
@@ -261,8 +265,13 @@ async function ArticleDetailContent({
       {/* Increment view count on client side - must be after ArticleDetail to ensure DOM is ready */}
       <ArticleViewCounter slug={slug} />
       
+<<<<<<< HEAD
       {/* Comments section - re-enabled with new architecture */}
       <CommentsSection articleId={article.id} />
+=======
+      {/* Comments section */}
+      <CommentSection articleId={article.id} slug={slug} />
+>>>>>>> 50c99f08741872fadd03e98476cd6fbc9411e592
     </>
   );
 }

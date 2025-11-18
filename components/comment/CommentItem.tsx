@@ -69,14 +69,27 @@ export default function CommentItem({
   // For anonymous users, prefix with "访客："
   const isGuest = !comment.user && comment.authorName;
   const authorName = isGuest 
-    ? `访客：${comment.authorName}`
-    : (comment.user?.name || "匿名用户");
+    ? `访客：${String(comment.authorName || "")}`
+    : (String(comment.user?.name || "") || "匿名用户");
   
   // Get author avatar: from user.image (logged-in users only)
   const authorAvatar = comment.user?.image || null;
   
-  // Format timestamp
-  const formattedDate = format(new Date(comment.createdAt), "yyyy年MM月dd日 HH:mm", { locale: zhCN });
+  // Format timestamp - ensure createdAt is a valid date
+  let formattedDate = "";
+  try {
+    const date = comment.createdAt instanceof Date 
+      ? comment.createdAt 
+      : new Date(comment.createdAt);
+    if (!isNaN(date.getTime())) {
+      formattedDate = format(date, "yyyy年MM月dd日 HH:mm", { locale: zhCN });
+    } else {
+      formattedDate = "未知时间";
+    }
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    formattedDate = "未知时间";
+  }
 
   // Check if this comment is a reply (has parentId)
   const isReply = !!comment.parentId;
@@ -94,8 +107,8 @@ export default function CommentItem({
         if (!parent) return null;
         const isParentGuest = !parent.user && parent.authorName;
         return isParentGuest 
-          ? `访客：${parent.authorName}`
-          : (parent.user?.name || "匿名用户");
+          ? `访客：${String(parent.authorName || "")}`
+          : (String(parent.user?.name || "") || "匿名用户");
       })()
     : null;
 
@@ -218,7 +231,7 @@ export default function CommentItem({
 
           {/* Comment content */}
           <div className="text-gray-700 whitespace-pre-wrap break-words mb-2">
-            {comment.content}
+            {String(comment.content || "")}
           </div>
 
           {/* Action buttons */}
@@ -254,9 +267,9 @@ export default function CommentItem({
           </div>
 
           {/* Reply count (if has replies) */}
-          {comment.replies && comment.replies.length > 0 && (
+          {comment.replies && Array.isArray(comment.replies) && comment.replies.length > 0 && (
             <span className="text-sm text-gray-500 ml-2">
-              {comment.replies.length} 条回复
+              {String(comment.replies.length)} 条回复
             </span>
           )}
 

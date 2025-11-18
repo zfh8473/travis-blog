@@ -339,18 +339,27 @@ export async function getCommentsAction(
     const comments = topLevelComments;
 
     // Transform to Comment interface (recursively transform replies)
+    // Important: Convert Date objects to ISO strings for Next.js Server Components
     const transformComment = (comment: any): Comment => {
       return {
-        id: comment.id,
-        content: comment.content,
-        articleId: comment.articleId,
-        userId: comment.userId,
-        parentId: comment.parentId,
-        authorName: comment.authorName,
-        createdAt: comment.createdAt,
-        updatedAt: comment.updatedAt,
-        user: comment.user,
-        replies: comment.replies && comment.replies.length > 0
+        id: String(comment.id),
+        content: String(comment.content || ""),
+        articleId: String(comment.articleId),
+        userId: comment.userId ? String(comment.userId) : null,
+        parentId: comment.parentId ? String(comment.parentId) : null,
+        authorName: comment.authorName ? String(comment.authorName) : null,
+        createdAt: comment.createdAt instanceof Date 
+          ? comment.createdAt 
+          : new Date(comment.createdAt),
+        updatedAt: comment.updatedAt instanceof Date 
+          ? comment.updatedAt 
+          : new Date(comment.updatedAt),
+        user: comment.user ? {
+          id: String(comment.user.id),
+          name: comment.user.name ? String(comment.user.name) : null,
+          image: comment.user.image ? String(comment.user.image) : null,
+        } : null,
+        replies: comment.replies && Array.isArray(comment.replies) && comment.replies.length > 0
           ? comment.replies.map((reply: any) => transformComment(reply))
           : undefined,
       };

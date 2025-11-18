@@ -48,7 +48,6 @@ test.describe("Sidebar Popular Articles Thumbnail Display", () => {
       create: {
         name: "技术",
         slug: "e2e-thumbnail-tech",
-        description: "技术分类",
       },
     });
     testCategoryId = category.id;

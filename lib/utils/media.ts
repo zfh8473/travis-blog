@@ -1,6 +1,13 @@
 import { prisma } from "@/lib/db/prisma";
 
 /**
+ * ⚠️ WARNING: This file contains server-side functions that use Prisma.
+ * 
+ * Do NOT import this file in Client Components. Use `lib/utils/media-client.ts`
+ * for client-safe utility functions like `formatFileSize` and `isImage`.
+ */
+
+/**
  * Check if a media file is used in any article.
  * 
  * Searches article content (HTML) for references to the file.

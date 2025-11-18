@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { formatFileSize, isImage } from "@/lib/utils/media";
+import { formatFileSize, isImage } from "@/lib/utils/media-client";
 
 /**
  * Media file interface.

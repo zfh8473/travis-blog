@@ -50,6 +50,119 @@ export interface Article {
 }
 
 /**
+ * Server action to increment article view count.
+ * 
+ * This is a public action - no authentication required.
+ * Increments the view count for a published article by slug.
+ * 
+ * @param slug - Article slug
+ * @returns Promise resolving to the updated view count or an error
+ * 
+ * @example
+ * ```typescript
+ * const result = await incrementArticleViewsAction("article-slug");
+ * 
+ * if (result.success) {
+ *   console.log('Views:', result.data.views);
+ * } else {
+ *   console.error('Error:', result.error.message);
+ * }
+ * ```
+ */
+export async function incrementArticleViewsAction(
+  slug: string
+): Promise<ActionResult<{ views: number }>> {
+  try {
+    console.log("[Views Action] Received slug:", slug);
+
+    // Decode URL-encoded slug if needed
+    let decodedSlug = slug;
+    try {
+      decodedSlug = decodeURIComponent(slug);
+      console.log("[Views Action] Decoded slug:", decodedSlug);
+    } catch {
+      // Already decoded or invalid encoding, use original
+      decodedSlug = slug;
+      console.log("[Views Action] Using original slug (decode failed)");
+    }
+
+    // Find the article by slug
+    const article = await prisma.article.findUnique({
+      where: { slug: decodedSlug },
+      select: {
+        id: true,
+        status: true,
+      },
+    });
+
+    // Article not found
+    if (!article) {
+      console.error("[Views Action] Article not found for slug:", decodedSlug);
+      return {
+        success: false,
+        error: {
+          message: "Article not found",
+          code: "ARTICLE_NOT_FOUND",
+        },
+      };
+    }
+
+    // Only increment views for published articles
+    if (article.status !== "PUBLISHED") {
+      console.log("[Views Action] Article is not published, status:", article.status);
+      return {
+        success: false,
+        error: {
+          message: "Article not found",
+          code: "ARTICLE_NOT_FOUND",
+        },
+      };
+    }
+
+    // Increment view count atomically
+    const updatedArticle = await prisma.article.update({
+      where: { id: article.id },
+      data: {
+        views: {
+          increment: 1,
+        },
+      },
+      select: {
+        views: true,
+      },
+    });
+
+    console.log("[Views Action] Article views incremented:", {
+      articleId: article.id,
+      slug: decodedSlug,
+      newViews: updatedArticle.views,
+    });
+
+    return {
+      success: true,
+      data: {
+        views: updatedArticle.views,
+      },
+    };
+  } catch (error) {
+    console.error("[Views Action] Error in incrementArticleViewsAction:", error);
+    console.error("[Views Action] Error details:", {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined,
+    });
+    return {
+      success: false,
+      error: {
+        message: "Failed to process request",
+        code: "INTERNAL_ERROR",
+        details: error instanceof Error ? error.message : String(error),
+      },
+    };
+  }
+}
+
+/**
  * Server action to create a new article.
  * 
  * This action handles article creation on the server side,
@@ -591,4 +704,3 @@ export async function deleteArticleAction(
     };
   }
 }
-

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { incrementArticleViewsAction } from "@/lib/actions/article";
 
 /**
  * Client component to increment article view count.
@@ -63,103 +64,17 @@ export default function ArticleViewCounter({ slug }: { slug: string }) {
       // Increment view count when component mounts and element is ready
       const incrementViews = async () => {
         try {
-          const url = `/api/articles/${encodeURIComponent(slug)}/views`;
-          console.log("[ViewCounter] Calling API:", url);
-          console.log("[ViewCounter] Fetch options:", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-          });
+          console.log("[ViewCounter] Calling Server Action for slug:", slug);
+          const startTime = Date.now();
           
-          const fetchStartTime = Date.now();
-          console.log("[ViewCounter] Starting fetch request at", new Date().toISOString());
+          // Use Server Action instead of API route to avoid connection issues
+          const result = await incrementArticleViewsAction(slug);
           
-          let response: Response;
-          try {
-            // Increase timeout to 30 seconds for Vercel cold starts
-            const timeoutMs = 30000;
-            const fetchPromise = fetch(url, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              credentials: "include", // Ensure cookies are sent
-            });
-            
-            const timeoutPromise = new Promise<never>((_, reject) => 
-              setTimeout(() => reject(new Error(`Fetch timeout after ${timeoutMs / 1000} seconds`)), timeoutMs)
-            );
-            
-            response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
-            
-            console.log("[ViewCounter] Fetch promise resolved, response received");
-          } catch (fetchError) {
-            const errorMessage = fetchError instanceof Error ? fetchError.message : String(fetchError);
-            console.error("[ViewCounter] Fetch error (network/CORS/timeout):", {
-              error: fetchError,
-              message: errorMessage,
-              name: fetchError instanceof Error ? fetchError.name : "Unknown",
-              stack: fetchError instanceof Error ? fetchError.stack : undefined,
-            });
-            
-            // Check if it's a timeout - the server might have processed the request
-            if (errorMessage.includes("timeout")) {
-              console.warn("[ViewCounter] Request timed out, but server may have processed it. Check server logs.");
-            }
-            
-            isProcessing.current = false;
-            globalProcessing = false;
-            return;
-          }
-
-          const fetchDuration = Date.now() - fetchStartTime;
-          console.log("[ViewCounter] API response received after", fetchDuration, "ms");
-          console.log("[ViewCounter] API response status:", response.status);
-          console.log("[ViewCounter] API response ok:", response.ok);
-          console.log("[ViewCounter] API response statusText:", response.statusText);
+          const duration = Date.now() - startTime;
+          console.log("[ViewCounter] Server Action completed after", duration, "ms");
+          console.log("[ViewCounter] Server Action result:", result);
           
-          try {
-            const headersObj = Object.fromEntries(response.headers.entries());
-            console.log("[ViewCounter] API response headers:", headersObj);
-          } catch (headerError) {
-            console.warn("[ViewCounter] Failed to log headers:", headerError);
-          }
-
-          if (!response.ok) {
-            const errorText = await response.text().catch(() => "Failed to read error response");
-            let errorData;
-            try {
-              errorData = JSON.parse(errorText);
-            } catch {
-              errorData = { raw: errorText };
-            }
-            console.error("[ViewCounter] API request failed:", {
-              status: response.status,
-              statusText: response.statusText,
-              error: errorData,
-              slug,
-              url,
-            });
-            return;
-          }
-
-          const responseText = await response.text();
-          console.log("[ViewCounter] API response text:", responseText);
-          
-          let data;
-          try {
-            data = JSON.parse(responseText);
-          } catch (parseError) {
-            console.error("[ViewCounter] Failed to parse JSON response:", {
-              text: responseText,
-              error: parseError,
-            });
-            return;
-          }
-          
-          console.log("[ViewCounter] API response data (parsed):", data);
-          
-          if (data.success && data.data?.views !== undefined) {
+          if (result.success && result.data?.views !== undefined) {
             hasIncremented.current = true;
             isProcessing.current = false;
             globalProcessing = false;
@@ -175,23 +90,25 @@ export default function ArticleViewCounter({ slug }: { slug: string }) {
                 // Preserve SVG, update text after it
                 updatedElement.innerHTML = '';
                 updatedElement.appendChild(svgElement);
-                updatedElement.appendChild(document.createTextNode(` ${data.data.views.toLocaleString()} 次阅读`));
+                updatedElement.appendChild(document.createTextNode(` ${result.data.views.toLocaleString()} 次阅读`));
               } else {
                 // Fallback: update entire content
-                updatedElement.textContent = `${data.data.views.toLocaleString()} 次阅读`;
+                updatedElement.textContent = `${result.data.views.toLocaleString()} 次阅读`;
               }
               
-              console.log("[ViewCounter] Updated DOM with views:", data.data.views);
+              console.log("[ViewCounter] Updated DOM with views:", result.data.views);
             } else {
-              console.warn("[ViewCounter] Views element not found after API call");
+              console.warn("[ViewCounter] Views element not found after Server Action");
             }
             
             console.log("[ViewCounter] Article views incremented successfully:", {
               slug,
-              newViews: data.data.views,
+              newViews: result.data.views,
             });
           } else {
-            console.error("[ViewCounter] API response missing success or views data:", data);
+            console.error("[ViewCounter] Server Action failed:", result.error);
+            isProcessing.current = false;
+            globalProcessing = false;
           }
         } catch (error) {
           // Log error for debugging
@@ -200,7 +117,8 @@ export default function ArticleViewCounter({ slug }: { slug: string }) {
           console.error("[ViewCounter] Failed to increment article views:", {
             error,
             slug,
-            url: `/api/articles/${encodeURIComponent(slug)}/views`,
+            message: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined,
           });
         }
       };

@@ -24,18 +24,22 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  const { slug } = await params;
-
-  // Decode URL-encoded slug if needed
-  let decodedSlug = slug;
   try {
-    decodedSlug = decodeURIComponent(slug);
-  } catch {
-    // Already decoded or invalid encoding, use original
-    decodedSlug = slug;
-  }
+    const { slug } = await params;
+    console.log("[Views API] Received slug:", slug);
 
-  try {
+    // Decode URL-encoded slug if needed
+    let decodedSlug = slug;
+    try {
+      decodedSlug = decodeURIComponent(slug);
+      console.log("[Views API] Decoded slug:", decodedSlug);
+    } catch {
+      // Already decoded or invalid encoding, use original
+      decodedSlug = slug;
+      console.log("[Views API] Using original slug (decode failed)");
+    }
+
+    try {
     // Find the article by slug
     const article = await prisma.article.findUnique({
       where: { slug: decodedSlug },
@@ -101,12 +105,36 @@ export async function POST(
     });
   } catch (error) {
     console.error("Error incrementing article views:", error);
+    console.error("Error details:", {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined,
+    });
     return NextResponse.json(
       {
         success: false,
         error: {
           message: "Failed to increment views",
           code: "INTERNAL_ERROR",
+          details: error instanceof Error ? error.message : String(error),
+        },
+      },
+      { status: 500 }
+    );
+  } catch (error) {
+    console.error("Error in POST handler (outer catch):", error);
+    console.error("Error details:", {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined,
+    });
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          message: "Failed to process request",
+          code: "INTERNAL_ERROR",
+          details: error instanceof Error ? error.message : String(error),
         },
       },
       { status: 500 }

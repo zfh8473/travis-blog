@@ -84,6 +84,7 @@ async function SearchResultsContent({
       excerpt: article.excerpt,
       slug: article.slug,
       publishedAt: article.publishedAt?.toISOString() || null,
+      views: (article as any).views ?? 0, // Use type assertion and nullish coalescing for migration compatibility
       category: article.category,
       tags: article.tags.map((at) => at.tag),
       author: article.author,

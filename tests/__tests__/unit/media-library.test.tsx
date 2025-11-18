@@ -17,8 +17,8 @@ jest.mock("next/image", () => ({
   ),
 }));
 
-// Mock media utilities
-jest.mock("@/lib/utils/media", () => ({
+// Mock media utilities (client-side)
+jest.mock("@/lib/utils/media-client", () => ({
   formatFileSize: jest.fn((bytes: number) => {
     if (bytes < 1024) return `${bytes} Bytes`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;

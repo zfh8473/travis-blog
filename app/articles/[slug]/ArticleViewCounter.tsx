@@ -15,6 +15,7 @@ import { useEffect, useRef } from "react";
  */
 export default function ArticleViewCounter({ slug }: { slug: string }) {
   const hasIncremented = useRef(false);
+  const isProcessing = useRef(false);
 
   useEffect(() => {
     // Only increment once per page load
@@ -23,6 +24,13 @@ export default function ArticleViewCounter({ slug }: { slug: string }) {
       return;
     }
 
+    // Prevent concurrent execution (React Strict Mode double mount)
+    if (isProcessing.current) {
+      console.log("[ViewCounter] Already processing, skipping");
+      return;
+    }
+
+    isProcessing.current = true;
     console.log("[ViewCounter] Component mounted, slug:", slug);
 
     // Wait for DOM to be ready and find the views element
@@ -117,6 +125,7 @@ export default function ArticleViewCounter({ slug }: { slug: string }) {
           
           if (data.success && data.data?.views !== undefined) {
             hasIncremented.current = true;
+            isProcessing.current = false;
             
             // Update the view count in the DOM
             const updatedElement = document.querySelector('[data-article-views]') as HTMLElement;
@@ -149,6 +158,7 @@ export default function ArticleViewCounter({ slug }: { slug: string }) {
           }
         } catch (error) {
           // Log error for debugging
+          isProcessing.current = false;
           console.error("[ViewCounter] Failed to increment article views:", {
             error,
             slug,

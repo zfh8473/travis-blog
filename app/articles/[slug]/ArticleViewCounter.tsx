@@ -106,7 +106,7 @@ export default function ArticleViewCounter({ slug }: { slug: string }) {
               newViews: result.data.views,
             });
           } else {
-            console.error("[ViewCounter] Server Action failed:", result.error);
+            console.error("[ViewCounter] Server Action failed:", result.success === false ? result.error : "Unknown error");
             isProcessing.current = false;
             globalProcessing = false;
           }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { useSession } from "next-auth/react";
+import { Session } from "next-auth";
 import { createCommentAction } from "@/lib/actions/comment";
 import { createCommentSchema } from "@/lib/validations/comment";
 
@@ -15,6 +15,7 @@ export interface CommentFormProps {
   onSuccess?: () => void;
   onCancel?: () => void; // Callback to close reply form
   isReply?: boolean; // Whether this form is for a reply
+  session?: Session | null; // Session information from server (optional for backward compatibility)
 }
 
 /**
@@ -38,10 +39,11 @@ export interface CommentFormProps {
  * 
  * @example
  * ```tsx
- * // Top-level comment form
+ * // Top-level comment form (with session from server)
  * <CommentForm 
  *   articleId="article-123"
- *   onSuccess={() => window.location.reload()}
+ *   session={session}
+ *   onSuccess={() => router.refresh()}
  * />
  * 
  * // Reply form
@@ -50,6 +52,7 @@ export interface CommentFormProps {
  *   parentId="comment-456"
  *   parentAuthorName="John Doe"
  *   isReply={true}
+ *   session={session}
  *   onSuccess={() => setShowReplyForm(false)}
  *   onCancel={() => setShowReplyForm(false)}
  * />
@@ -62,9 +65,12 @@ export default function CommentForm({
   onSuccess,
   onCancel,
   isReply,
+  session: sessionProp,
 }: CommentFormProps) {
   const isReplyMode = isReply ?? !!parentId;
-  const { data: session } = useSession();
+  // Use session from props (from server) instead of useSession hook
+  // This avoids client-side session queries and improves performance
+  const session = sessionProp ?? null;
   const [content, setContent] = useState("");
   const [authorName, setAuthorName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -120,7 +126,8 @@ export default function CommentForm({
         if (onSuccess) {
           onSuccess();
         } else {
-          // Reload page to show new comment
+          // Fallback: reload page if no callback provided
+          // This should not happen in normal usage with CommentFormWrapper
           window.location.reload();
         }
       } else {

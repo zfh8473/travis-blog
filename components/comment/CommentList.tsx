@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { Session } from "next-auth";
 import { getCommentsAction, Comment } from "@/lib/actions/comment";
 import CommentItem from "./CommentItem";
 
@@ -12,18 +13,33 @@ import CommentItem from "./CommentItem";
  * @component
  * @param props - Component props
  * @param props.articleId - The ID of the article to fetch comments for
+ * @param props.session - Session information from server (optional for backward compatibility)
  * 
  * @example
  * ```tsx
- * <CommentList articleId="article-123" />
+ * <CommentList articleId="article-123" session={session} />
  * ```
  */
 export default async function CommentList({
   articleId,
+  session,
 }: {
   articleId: string;
+  session?: Session | null;
 }) {
-  const comments = await getCommentsAction(articleId);
+  // Fetch comments with error handling
+  let comments: Comment[] = [];
+  try {
+    comments = await getCommentsAction(articleId);
+  } catch (error) {
+    // Log error and show empty state
+    console.error("Error fetching comments:", error);
+    return (
+      <div className="text-center py-8 text-red-500">
+        <p>加载留言时发生错误，请稍后重试。</p>
+      </div>
+    );
+  }
 
   if (comments.length === 0) {
     return (
@@ -56,6 +72,7 @@ export default async function CommentList({
           comment={comment}
           depth={0}
           allComments={allComments}
+          session={session}
         />
       ))}
     </div>

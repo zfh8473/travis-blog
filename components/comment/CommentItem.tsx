@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { zhCN } from "date-fns/locale";
-import { useSession } from "next-auth/react";
+import { Session } from "next-auth";
 import { Comment, deleteCommentAction } from "@/lib/actions/comment";
 import CommentForm from "./CommentForm";
 import { MAX_COMMENT_DEPTH } from "@/lib/utils/comment-depth";
@@ -15,6 +16,7 @@ export interface CommentItemProps {
   comment: Comment;
   depth?: number; // Current nesting depth (0 for top-level)
   allComments?: Comment[]; // All comments for depth calculation
+  session?: Session | null; // Session information from server (optional for backward compatibility)
 }
 
 /**
@@ -40,18 +42,24 @@ export interface CommentItemProps {
  *     createdAt: new Date(),
  *     user: null,
  *     replies: []
- *   }} 
+ *   }}
+ *   session={session}
  * />
  * ```
  */
 export default function CommentItem({ 
   comment, 
   depth = 0,
-  allComments = []
+  allComments = [],
+  session: sessionProp,
 }: CommentItemProps) {
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const { data: session } = useSession();
+  const router = useRouter();
+  
+  // Use session from props (from server) instead of useSession hook
+  // This avoids client-side session queries and improves performance
+  const session = sessionProp ?? null;
   
   // Check if current user is admin
   const isAdmin = session?.user?.role === "ADMIN";
@@ -117,8 +125,9 @@ export default function CommentItem({
   // Handle reply form success
   const handleReplySuccess = () => {
     setShowReplyForm(false);
-    // Reload page to show new reply
-    window.location.reload();
+    // Use router.refresh() to refresh server components
+    // This is more efficient than window.location.reload()
+    router.refresh();
   };
 
   // Handle delete button click
@@ -150,8 +159,9 @@ export default function CommentItem({
       if (result.success) {
         // Show success message
         alert("留言删除成功！");
-        // Reload page to reflect deletion
-        window.location.reload();
+        // Use router.refresh() to refresh server components
+        // This is more efficient than window.location.reload()
+        router.refresh();
       } else {
         // Show error message
         alert(result.error.message || "删除留言失败，请重试。");
@@ -257,6 +267,7 @@ export default function CommentItem({
                 parentId={comment.id}
                 parentAuthorName={authorName}
                 isReply={true}
+                session={session}
                 onSuccess={handleReplySuccess}
                 onCancel={() => setShowReplyForm(false)}
               />
@@ -272,6 +283,7 @@ export default function CommentItem({
                   comment={reply}
                   depth={currentDepth + 1}
                   allComments={allComments}
+                  session={session}
                 />
               ))}
             </div>

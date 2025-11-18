@@ -72,6 +72,24 @@
 **状态：** 全部跳过（功能暂时禁用）  
 **原因：** 留言板功能在调查 Vercel 问题时被暂时禁用
 
+### 4. 文章阅读数功能 ✅
+**状态：** 已实现  
+**问题：** 文章阅读数点击后未实现计数增长  
+**解决方案：** 
+- ✅ 添加 `views` 字段到 Article 模型
+- ✅ 创建 `/api/articles/[slug]/views` API 端点
+- ✅ 创建 `ArticleViewCounter` 客户端组件
+- ✅ 更新文章详情页面显示阅读数
+- 📖 参考：`docs/fix-article-views-and-archive.md`
+
+### 5. 归档月份链接404错误 ✅
+**状态：** 已修复  
+**问题：** 主页归档部分点击月份链接报 404 错误  
+**解决方案：** 
+- ✅ 创建 `app/articles/archive/[slug]/page.tsx` 归档月份页面
+- ✅ 实现月份解析和文章查询逻辑
+- 📖 参考：`docs/fix-article-views-and-archive.md`
+
 ---
 
 ## 🔧 修复的问题

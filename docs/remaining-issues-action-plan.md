@@ -1,33 +1,60 @@
 # 剩余问题解决方案
 
 **创建日期：** 2025-11-17  
-**状态：** 📋 执行中
+**最后更新：** 2025-11-17  
+**状态：** ✅ 已完成
 
 ---
 
-## 📊 剩余问题概览
+## 📊 问题解决状态
 
-### 1. 媒体管理页面环境变量问题 ⏳
+### 1. 媒体管理页面认证问题 ✅
 
-**问题：** TC-6.2 和 TC-3.13 失败，显示 "DATABASE_URL environment variable is not set"
+**问题：** TC-6.2 和 TC-3.13 失败，显示 "请先登录"
 
-**状态：** ✅ 代码已修复，⏳ 等待环境变量配置
+**状态：** ✅ 已解决
 
 **已完成的修复：**
-- ✅ 更新 `app/api/media/route.ts` 使用 `getUserFromRequestOrHeaders` 和 `getServerSession` 作为后备
-- ✅ 更新 `app/api/media/[path]/route.ts` 使用 `getUserFromRequestOrHeaders` 和 `getServerSession` 作为后备
+- ✅ 创建 `lib/utils/media-client.ts` 分离客户端安全函数
+- ✅ 从中间件保护中移除 `/api/media`，让 API 路由自行处理认证
+- ✅ 更新 API 路由使用 `getUserFromRequestOrHeaders` 和 `getServerSession` 作为后备
 - ✅ 在两个 API 路由中添加 `export const runtime = "nodejs"` 确保在 Node.js 运行时中运行（支持 Prisma）
 
-**待执行的操作：**
-1. 在 Vercel Dashboard 中配置 `DATABASE_URL` 环境变量
-2. 重新部署项目
-3. 测试媒体管理页面功能
-
-**参考文档：** `docs/fix-media-page-database-url.md`
+**参考文档：** `docs/fix-media-page-auth-issue.md`
 
 ---
 
-### 2. Epic 5: 读者互动功能 ⏸️
+### 2. 文章阅读数功能 ✅
+
+**问题：** 文章阅读数点击后未实现计数增长
+
+**状态：** ✅ 已解决
+
+**已完成的修复：**
+- ✅ 添加 `views` 字段到 Article 模型（默认值 0）
+- ✅ 创建 `/api/articles/[slug]/views` API 端点增加阅读数
+- ✅ 创建 `ArticleViewCounter` 客户端组件自动增加阅读数
+- ✅ 更新 `ArticleDetail` 组件显示阅读数
+- ✅ 更新所有 Article 接口包含 `views` 字段
+- ✅ 创建数据库迁移文件
+
+**参考文档：** `docs/fix-article-views-and-archive.md`
+
+### 3. 归档月份链接404错误 ✅
+
+**问题：** 主页归档部分点击月份链接报 404 错误
+
+**状态：** ✅ 已解决
+
+**已完成的修复：**
+- ✅ 创建 `app/articles/archive/[slug]/page.tsx` 归档月份页面
+- ✅ 实现月份解析逻辑（`yyyy-MM` 格式）
+- ✅ 实现文章查询和分页功能
+- ✅ 使用与分类页面相同的布局和组件
+
+**参考文档：** `docs/fix-article-views-and-archive.md`
+
+### 4. Epic 5: 读者互动功能 ⏸️
 
 **问题：** 留言板功能暂时禁用
 
@@ -67,47 +94,81 @@
 
 ---
 
-## 🎯 执行优先级
+## 🎯 执行状态
 
-### 高优先级
-1. **配置 Vercel 环境变量 `DATABASE_URL`**
+### 已完成 ✅
+1. **媒体管理页面认证问题** ✅
    - 影响：TC-6.2 和 TC-3.13 测试用例
-   - 操作：在 Vercel Dashboard 中配置环境变量
-   - 参考：`docs/fix-media-page-database-url.md`
+   - 状态：已解决
+   - 参考：`docs/fix-media-page-auth-issue.md`
 
-### 中优先级
-2. **恢复留言板功能**
+2. **文章阅读数功能** ✅
+   - 影响：用户体验
+   - 状态：已实现
+   - 参考：`docs/fix-article-views-and-archive.md`
+
+3. **归档月份链接404错误** ✅
+   - 影响：用户体验
+   - 状态：已修复
+   - 参考：`docs/fix-article-views-and-archive.md`
+
+### 待处理
+4. **恢复留言板功能**
    - 影响：Epic 5 功能完整性
    - 操作：取消注释代码，测试功能
-   - 前提：媒体管理页面问题解决后
+   - 前提：所有核心功能已稳定
 
 ---
 
-## 📝 详细操作步骤
+## 📝 已完成的操作
 
-### 步骤 1: 配置 DATABASE_URL 环境变量
+### ✅ 步骤 1: 修复媒体管理页面认证问题
 
-1. **登录 Vercel Dashboard**
-   - 访问 https://vercel.com/dashboard
-   - 选择 `travis-blog` 项目
+1. **创建客户端安全工具文件**
+   - 创建 `lib/utils/media-client.ts`
+   - 分离 `formatFileSize` 和 `isImage` 函数
 
-2. **进入环境变量设置**
-   - Settings > Environment Variables
+2. **更新客户端组件**
+   - 更新 `app/admin/media/page.tsx` 使用新的导入路径
 
-3. **添加 DATABASE_URL**
-   - Key: `DATABASE_URL`
-   - Value: PostgreSQL 连接字符串（格式：`postgresql://user:password@host:port/database?sslmode=require`）
-   - Environment: Production（以及 Preview 如果需要）
+3. **修复中间件配置**
+   - 从中间件保护中移除 `/api/media`
+   - 让 API 路由自行处理认证
 
-4. **重新部署**
-   - 环境变量配置后，Vercel 会自动触发重新部署
-   - 或手动触发：Deployments > 最新部署 > Redeploy
+4. **验证修复**
+   - ✅ 媒体管理页面正常显示
+   - ✅ 功能正常工作
 
-5. **验证修复**
-   - 访问 `https://travis-blog.vercel.app/admin/media`
-   - 验证页面正常显示，不再出现错误
+### ✅ 步骤 2: 实现文章阅读数功能
 
-### 步骤 2: 恢复留言板功能（可选）
+1. **数据库迁移**
+   - 添加 `views` 字段到 Article 模型
+   - 创建迁移文件
+
+2. **创建 API 端点**
+   - 创建 `/api/articles/[slug]/views` POST 端点
+
+3. **创建客户端组件**
+   - 创建 `ArticleViewCounter` 组件
+
+4. **更新文章详情页面**
+   - 添加阅读数显示
+   - 集成阅读数计数器
+
+### ✅ 步骤 3: 实现归档月份页面
+
+1. **创建归档路由**
+   - 创建 `app/articles/archive/[slug]/page.tsx`
+
+2. **实现月份解析**
+   - 解析 `yyyy-MM` 格式的月份 slug
+   - 查询该月份的文章
+
+3. **实现页面布局**
+   - 使用与分类页面相同的布局
+   - 支持分页功能
+
+### 步骤 4: 恢复留言板功能（可选）
 
 1. **验证代码完整性**
    ```bash
@@ -136,15 +197,30 @@
 
 ## 📋 检查清单
 
-### 媒体管理页面修复
-- [ ] 在 Vercel Dashboard 中配置 `DATABASE_URL` 环境变量
-- [ ] 验证环境变量已应用到 Production 环境
-- [ ] 触发重新部署
-- [ ] 验证媒体管理页面正常显示
-- [ ] 测试媒体文件列表功能
-- [ ] 测试图片预览功能
-- [ ] 测试删除功能
-- [ ] 更新测试记录（TC-6.2, TC-3.13）
+### 媒体管理页面修复 ✅
+- [x] 创建 `lib/utils/media-client.ts` 分离客户端安全函数
+- [x] 更新 `app/admin/media/page.tsx` 使用新的导入路径
+- [x] 从中间件保护中移除 `/api/media`
+- [x] 验证媒体管理页面正常显示
+- [x] 测试媒体文件列表功能
+- [x] 测试图片预览功能
+- [x] 测试删除功能
+- [x] 更新测试记录（TC-6.2, TC-3.13）
+
+### 文章阅读数功能 ✅
+- [x] 添加 `views` 字段到 Article 模型
+- [x] 创建数据库迁移文件
+- [x] 创建 `/api/articles/[slug]/views` API 端点
+- [x] 创建 `ArticleViewCounter` 客户端组件
+- [x] 更新文章详情页面显示阅读数
+- [x] 更新所有 Article 接口包含 `views` 字段
+- [x] 测试阅读数计数功能
+
+### 归档月份页面 ✅
+- [x] 创建 `app/articles/archive/[slug]/page.tsx`
+- [x] 实现月份解析逻辑
+- [x] 实现文章查询和分页
+- [x] 测试归档月份链接功能
 
 ### 留言板功能恢复（可选）
 - [ ] 评估恢复条件是否满足

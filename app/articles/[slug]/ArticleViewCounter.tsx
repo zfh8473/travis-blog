@@ -76,6 +76,8 @@ export default function ArticleViewCounter({ slug }: { slug: string }) {
           
           let response: Response;
           try {
+            // Increase timeout to 30 seconds for Vercel cold starts
+            const timeoutMs = 30000;
             const fetchPromise = fetch(url, {
               method: "POST",
               headers: {
@@ -85,19 +87,26 @@ export default function ArticleViewCounter({ slug }: { slug: string }) {
             });
             
             const timeoutPromise = new Promise<never>((_, reject) => 
-              setTimeout(() => reject(new Error("Fetch timeout after 10 seconds")), 10000)
+              setTimeout(() => reject(new Error(`Fetch timeout after ${timeoutMs / 1000} seconds`)), timeoutMs)
             );
             
             response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
             
-            console.log("[ViewCounter] Fetch promise resolved");
+            console.log("[ViewCounter] Fetch promise resolved, response received");
           } catch (fetchError) {
+            const errorMessage = fetchError instanceof Error ? fetchError.message : String(fetchError);
             console.error("[ViewCounter] Fetch error (network/CORS/timeout):", {
               error: fetchError,
-              message: fetchError instanceof Error ? fetchError.message : String(fetchError),
+              message: errorMessage,
               name: fetchError instanceof Error ? fetchError.name : "Unknown",
               stack: fetchError instanceof Error ? fetchError.stack : undefined,
             });
+            
+            // Check if it's a timeout - the server might have processed the request
+            if (errorMessage.includes("timeout")) {
+              console.warn("[ViewCounter] Request timed out, but server may have processed it. Check server logs.");
+            }
+            
             isProcessing.current = false;
             globalProcessing = false;
             return;

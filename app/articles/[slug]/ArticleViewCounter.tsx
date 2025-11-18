@@ -73,18 +73,19 @@ export default function ArticleViewCounter({ slug }: { slug: string }) {
             hasIncremented.current = true;
             
             // Update the view count in the DOM
-            const updatedElement = document.querySelector('[data-article-views]');
+            const updatedElement = document.querySelector('[data-article-views]') as HTMLElement;
             if (updatedElement) {
-              // Find the text node and update it
-              const textNode = Array.from(updatedElement.childNodes).find(
-                (node) => node.nodeType === Node.TEXT_NODE
-              );
+              // The structure is: <span><svg>...</svg> {views} 次阅读</span>
+              // We need to preserve the SVG and only update the text
+              const svgElement = updatedElement.querySelector('svg');
               
-              if (textNode) {
-                // Replace the text content
-                updatedElement.textContent = `${data.data.views.toLocaleString()} 次阅读`;
+              if (svgElement) {
+                // Preserve SVG, update text after it
+                updatedElement.innerHTML = '';
+                updatedElement.appendChild(svgElement);
+                updatedElement.appendChild(document.createTextNode(` ${data.data.views.toLocaleString()} 次阅读`));
               } else {
-                // If no text node, update the entire content
+                // Fallback: update entire content
                 updatedElement.textContent = `${data.data.views.toLocaleString()} 次阅读`;
               }
               

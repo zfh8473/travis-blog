@@ -39,7 +39,6 @@ export async function POST(
       console.log("[Views API] Using original slug (decode failed)");
     }
 
-    try {
     // Find the article by slug
     const article = await prisma.article.findUnique({
       where: { slug: decodedSlug },
@@ -51,7 +50,7 @@ export async function POST(
 
     // Article not found
     if (!article) {
-      console.error("Article not found for slug:", decodedSlug);
+      console.error("[Views API] Article not found for slug:", decodedSlug);
       return NextResponse.json(
         {
           success: false,
@@ -66,6 +65,7 @@ export async function POST(
 
     // Only increment views for published articles
     if (article.status !== "PUBLISHED") {
+      console.log("[Views API] Article is not published, status:", article.status);
       return NextResponse.json(
         {
           success: false,
@@ -91,7 +91,7 @@ export async function POST(
       },
     });
 
-    console.log("Article views incremented:", {
+    console.log("[Views API] Article views incremented:", {
       articleId: article.id,
       slug: decodedSlug,
       newViews: updatedArticle.views,
@@ -104,26 +104,8 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error("Error incrementing article views:", error);
-    console.error("Error details:", {
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      name: error instanceof Error ? error.name : undefined,
-    });
-    return NextResponse.json(
-      {
-        success: false,
-        error: {
-          message: "Failed to increment views",
-          code: "INTERNAL_ERROR",
-          details: error instanceof Error ? error.message : String(error),
-        },
-      },
-      { status: 500 }
-    );
-  } catch (error) {
-    console.error("Error in POST handler (outer catch):", error);
-    console.error("Error details:", {
+    console.error("[Views API] Error in POST handler:", error);
+    console.error("[Views API] Error details:", {
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
       name: error instanceof Error ? error.name : undefined,

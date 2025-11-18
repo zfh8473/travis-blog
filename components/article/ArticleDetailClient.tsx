@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { zhCN } from "date-fns/locale";
@@ -46,10 +49,10 @@ export interface ArticleDetailProps {
 }
 
 /**
- * Article detail component.
+ * Article detail component (Client Component).
  *
  * Displays a single article with full content, category, tags, and metadata.
- * The component renders article title, content, publish date, category, tags, author, and excerpt.
+ * Supports real-time view count updates.
  *
  * @component
  * @param props - Component props
@@ -57,35 +60,43 @@ export interface ArticleDetailProps {
  *
  * @example
  * ```tsx
- * <ArticleDetail
+ * <ArticleDetailClient
  *   id="article-1"
  *   title="My First Article"
  *   content="<p>Article content...</p>"
  *   excerpt="This is a summary..."
  *   slug="my-first-article"
  *   publishedAt="2025-11-14T10:00:00Z"
+ *   views={100}
  *   category={{ id: "cat-1", name: "技术", slug: "tech" }}
  *   tags={[{ id: "tag-1", name: "React", slug: "react" }]}
  *   author={{ id: "user-1", name: "Travis", image: null }}
  * />
  * ```
  */
-export default function ArticleDetail({
+export default function ArticleDetailClient({
   id,
   title,
   content,
   excerpt,
   slug,
   publishedAt,
-  views,
+  views: initialViews,
   category,
   tags,
   author,
 }: ArticleDetailProps) {
+  const [views, setViews] = useState(initialViews);
+
   // Format publish date
   const formattedDate = publishedAt
     ? format(new Date(publishedAt), "yyyy年MM月dd日", { locale: zhCN })
     : null;
+
+  // Update views when initialViews changes (from server)
+  useEffect(() => {
+    setViews(initialViews);
+  }, [initialViews]);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -138,7 +149,7 @@ export default function ArticleDetail({
               {author.name}
             </span>
           )}
-          <span className="flex items-center" data-article-views>
+          <span className="flex items-center">
             <svg
               className="w-4 h-4 mr-1"
               fill="none"

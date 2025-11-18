@@ -3,10 +3,9 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { prisma } from "@/lib/db/prisma";
 import ArticleDetail from "@/components/article/ArticleDetail";
-import CommentList, { CommentListLoading } from "@/components/comment/CommentList";
-import CommentForm from "@/components/comment/CommentForm";
 import { enhanceHtmlWithSyntaxHighlighting } from "@/lib/utils/markdown-converter";
 import ArticleViewCounter from "./ArticleViewCounter";
+import CommentSection from "@/components/comment/CommentSection";
 
 /**
  * Article interface for detail page.
@@ -262,21 +261,8 @@ async function ArticleDetailContent({
       {/* Increment view count on client side - must be after ArticleDetail to ensure DOM is ready */}
       <ArticleViewCounter slug={slug} />
       
-      {/* Comments section - temporarily disabled for debugging */}
-      {/* <div className="container mx-auto px-4 py-8 max-w-4xl border-t border-gray-200 mt-12">
-        <h2 className="text-2xl font-bold mb-6 text-gray-900">留言</h2>
-        
-        <div className="mb-8">
-          <CommentForm articleId={article.id} />
-        </div>
-        
-        <div>
-          <h3 className="text-xl font-semibold mb-4 text-gray-900">所有留言</h3>
-          <Suspense fallback={<CommentListLoading />}>
-            <CommentList articleId={article.id} />
-          </Suspense>
-        </div>
-      </div> */}
+      {/* Comments section */}
+      <CommentSection articleId={article.id} slug={slug} />
     </>
   );
 }

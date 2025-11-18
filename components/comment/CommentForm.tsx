@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { Session } from "next-auth";
-import { createCommentAction } from "@/lib/actions/comment";
+import { useSession } from "next-auth/react";
 import { createCommentSchema } from "@/lib/validations/comment";
 
 /**
@@ -15,7 +14,6 @@ export interface CommentFormProps {
   onSuccess?: () => void;
   onCancel?: () => void; // Callback to close reply form
   isReply?: boolean; // Whether this form is for a reply
-  session?: Session | null; // Session information from server (optional for backward compatibility)
 }
 
 /**
@@ -39,11 +37,10 @@ export interface CommentFormProps {
  * 
  * @example
  * ```tsx
- * // Top-level comment form (with session from server)
+ * // Top-level comment form
  * <CommentForm 
  *   articleId="article-123"
- *   session={session}
- *   onSuccess={() => router.refresh()}
+ *   onSuccess={() => window.location.reload()}
  * />
  * 
  * // Reply form
@@ -52,7 +49,6 @@ export interface CommentFormProps {
  *   parentId="comment-456"
  *   parentAuthorName="John Doe"
  *   isReply={true}
- *   session={session}
  *   onSuccess={() => setShowReplyForm(false)}
  *   onCancel={() => setShowReplyForm(false)}
  * />
@@ -65,12 +61,9 @@ export default function CommentForm({
   onSuccess,
   onCancel,
   isReply,
-  session: sessionProp,
 }: CommentFormProps) {
   const isReplyMode = isReply ?? !!parentId;
-  // Use session from props (from server) instead of useSession hook
-  // This avoids client-side session queries and improves performance
-  const session = sessionProp ?? null;
+  const { data: session } = useSession();
   const [content, setContent] = useState("");
   const [authorName, setAuthorName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -112,10 +105,25 @@ export default function CommentForm({
         return;
       }
 
-      // Call Server Action
-      const result = await createCommentAction(validationResult.data);
+      // Call API Route
+      const res = await fetch("/api/comments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          articleId: validationResult.data.articleId,
+          content: validationResult.data.content,
+          parentId: validationResult.data.parentId || null,
+          userId: validationResult.data.userId || null,
+          authorName: validationResult.data.authorName || undefined,
+        }),
+      });
 
-      if (result.success) {
+      const data = await res.json();
+
+      if (data.success) {
         setSuccess(true);
         // Reset form
         setContent("");
@@ -126,12 +134,11 @@ export default function CommentForm({
         if (onSuccess) {
           onSuccess();
         } else {
-          // Fallback: reload page if no callback provided
-          // This should not happen in normal usage with CommentFormWrapper
+          // Reload page to show new comment
           window.location.reload();
         }
       } else {
-        setError(result.error.message);
+        setError(data.error?.message || "提交留言时发生错误");
       }
     } catch (err) {
       console.error("Error submitting comment:", err);
@@ -226,3 +233,4 @@ export default function CommentForm({
     </form>
   );
 }
+

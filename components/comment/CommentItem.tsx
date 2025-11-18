@@ -1,22 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { zhCN } from "date-fns/locale";
-import { Session } from "next-auth";
-import { Comment, deleteCommentAction } from "@/lib/actions/comment";
+import { useSession } from "next-auth/react";
+import { Comment } from "./CommentsSection";
 import CommentForm from "./CommentForm";
 import { MAX_COMMENT_DEPTH } from "@/lib/utils/comment-depth";
 
 /**
- * Comment data interface.
+ * Comment item component props.
  */
 export interface CommentItemProps {
   comment: Comment;
   depth?: number; // Current nesting depth (0 for top-level)
   allComments?: Comment[]; // All comments for depth calculation
-  session?: Session | null; // Session information from server (optional for backward compatibility)
+  articleId: string; // Article ID for API calls
+  onCommentDeleted?: () => void; // Callback when comment is deleted
 }
 
 /**
@@ -31,7 +31,6 @@ export interface CommentItemProps {
  * @param props.comment - The comment data to display (includes nested replies)
  * @param props.depth - Current nesting depth (0 for top-level, defaults to 0)
  * @param props.allComments - All comments for depth calculation (optional)
- * @param props.session - Session information from server (optional for backward compatibility)
  * 
  * @example
  * ```tsx
@@ -43,8 +42,7 @@ export interface CommentItemProps {
  *     createdAt: new Date(),
  *     user: null,
  *     replies: []
- *   }}
- *   session={session}
+ *   }} 
  * />
  * ```
  */
@@ -52,15 +50,12 @@ export default function CommentItem({
   comment, 
   depth = 0,
   allComments = [],
-  session: sessionProp,
+  articleId,
+  onCommentDeleted,
 }: CommentItemProps) {
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const router = useRouter();
-  
-  // Use session from props (from server) instead of useSession hook
-  // This avoids client-side session queries and improves performance
-  const session = sessionProp ?? null;
+  const { data: session } = useSession();
   
   // Check if current user is admin
   const isAdmin = session?.user?.role === "ADMIN";
@@ -69,27 +64,16 @@ export default function CommentItem({
   // For anonymous users, prefix with "访客："
   const isGuest = !comment.user && comment.authorName;
   const authorName = isGuest 
-    ? `访客：${String(comment.authorName || "")}`
-    : (String(comment.user?.name || "") || "匿名用户");
+    ? `访客：${comment.authorName}`
+    : (comment.user?.name || "匿名用户");
   
   // Get author avatar: from user.image (logged-in users only)
   const authorAvatar = comment.user?.image || null;
   
-  // Format timestamp - ensure createdAt is a valid date
-  let formattedDate = "";
-  try {
-    const date = comment.createdAt instanceof Date 
-      ? comment.createdAt 
-      : new Date(comment.createdAt);
-    if (!isNaN(date.getTime())) {
-      formattedDate = format(date, "yyyy年MM月dd日 HH:mm", { locale: zhCN });
-    } else {
-      formattedDate = "未知时间";
-    }
-  } catch (error) {
-    console.error("Error formatting date:", error);
-    formattedDate = "未知时间";
-  }
+  // Format timestamp - handle ISO strings (from API)
+  // createdAt is always a string from API response
+  const createdAtDate = new Date(comment.createdAt);
+  const formattedDate = format(createdAtDate, "yyyy年MM月dd日 HH:mm", { locale: zhCN });
 
   // Check if this comment is a reply (has parentId)
   const isReply = !!comment.parentId;
@@ -107,8 +91,8 @@ export default function CommentItem({
         if (!parent) return null;
         const isParentGuest = !parent.user && parent.authorName;
         return isParentGuest 
-          ? `访客：${String(parent.authorName || "")}`
-          : (String(parent.user?.name || "") || "匿名用户");
+          ? `访客：${parent.authorName}`
+          : (parent.user?.name || "匿名用户");
       })()
     : null;
 
@@ -139,9 +123,13 @@ export default function CommentItem({
   // Handle reply form success
   const handleReplySuccess = () => {
     setShowReplyForm(false);
-    // Use router.refresh() to refresh server components
-    // This is more efficient than window.location.reload()
-    router.refresh();
+    // Call parent callback to refresh comments
+    if (onCommentDeleted) {
+      onCommentDeleted();
+    } else {
+      // Fallback: reload page
+      window.location.reload();
+    }
   };
 
   // Handle delete button click
@@ -168,17 +156,26 @@ export default function CommentItem({
 
     setIsDeleting(true);
     try {
-      const result = await deleteCommentAction(comment.id);
-      
-      if (result.success) {
+      const res = await fetch(`/api/comments/${comment.id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
         // Show success message
         alert("留言删除成功！");
-        // Use router.refresh() to refresh server components
-        // This is more efficient than window.location.reload()
-        router.refresh();
+        // Call parent callback to refresh comments
+        if (onCommentDeleted) {
+          onCommentDeleted();
+        } else {
+          // Fallback: reload page
+          window.location.reload();
+        }
       } else {
         // Show error message
-        alert(result.error.message || "删除留言失败，请重试。");
+        alert(data.error?.message || "删除留言失败，请重试。");
       }
     } catch (error) {
       console.error("Error deleting comment:", error);
@@ -231,7 +228,7 @@ export default function CommentItem({
 
           {/* Comment content */}
           <div className="text-gray-700 whitespace-pre-wrap break-words mb-2">
-            {String(comment.content || "")}
+            {comment.content}
           </div>
 
           {/* Action buttons */}
@@ -267,9 +264,9 @@ export default function CommentItem({
           </div>
 
           {/* Reply count (if has replies) */}
-          {comment.replies && Array.isArray(comment.replies) && comment.replies.length > 0 && (
+          {comment.replies && comment.replies.length > 0 && (
             <span className="text-sm text-gray-500 ml-2">
-              {String(comment.replies.length)} 条回复
+              {comment.replies.length} 条回复
             </span>
           )}
 
@@ -277,11 +274,10 @@ export default function CommentItem({
           {showReplyForm && (
             <div className="mt-4">
               <CommentForm
-                articleId={comment.articleId}
+                articleId={articleId}
                 parentId={comment.id}
                 parentAuthorName={authorName}
                 isReply={true}
-                session={session}
                 onSuccess={handleReplySuccess}
                 onCancel={() => setShowReplyForm(false)}
               />
@@ -297,7 +293,8 @@ export default function CommentItem({
                   comment={reply}
                   depth={currentDepth + 1}
                   allComments={allComments}
-                  session={session}
+                  articleId={articleId}
+                  onCommentDeleted={onCommentDeleted}
                 />
               ))}
             </div>
@@ -307,3 +304,4 @@ export default function CommentItem({
     </div>
   );
 }
+

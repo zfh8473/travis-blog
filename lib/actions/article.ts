@@ -119,16 +119,18 @@ export async function createArticleAction(
 
     // Check if first letter conflicts with published articles (only for PUBLISHED status)
     if (validatedData.status === "PUBLISHED") {
-      const firstLetter = validatedData.title.charAt(0).toUpperCase();
-      const conflictingArticle = await prisma.article.findFirst({
+      const firstLetter = validatedData.title.trim().charAt(0).toUpperCase();
+      // Get all published articles and check first letter
+      const publishedArticles = await prisma.article.findMany({
         where: {
           status: "PUBLISHED",
-          title: {
-            startsWith: firstLetter,
-          },
         },
         select: { id: true, title: true },
       });
+
+      const conflictingArticle = publishedArticles.find(
+        (article) => article.title.trim().charAt(0).toUpperCase() === firstLetter
+      );
 
       if (conflictingArticle) {
         return {
@@ -372,21 +374,23 @@ export async function updateArticleAction(
     // Check if first letter conflicts with published articles
     // Only check if title changed and article is/will be PUBLISHED
     if (validatedData.title !== undefined && (validatedData.status === "PUBLISHED" || existingArticle.status === "PUBLISHED")) {
-      const newFirstLetter = validatedData.title.charAt(0).toUpperCase();
-      const currentFirstLetter = existingArticle.title.charAt(0).toUpperCase();
+      const newFirstLetter = validatedData.title.trim().charAt(0).toUpperCase();
+      const currentFirstLetter = existingArticle.title.trim().charAt(0).toUpperCase();
       
       // Only check if first letter actually changed
       if (newFirstLetter !== currentFirstLetter) {
-        const conflictingArticle = await prisma.article.findFirst({
+        // Get all published articles and check first letter
+        const publishedArticles = await prisma.article.findMany({
           where: {
             status: "PUBLISHED",
             id: { not: id }, // Exclude current article
-            title: {
-              startsWith: newFirstLetter,
-            },
           },
           select: { id: true, title: true },
         });
+
+        const conflictingArticle = publishedArticles.find(
+          (article) => article.title.trim().charAt(0).toUpperCase() === newFirstLetter
+        );
 
         if (conflictingArticle) {
           return {

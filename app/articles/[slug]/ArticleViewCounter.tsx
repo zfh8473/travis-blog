@@ -74,20 +74,21 @@ export default function ArticleViewCounter({ slug }: { slug: string }) {
           const fetchStartTime = Date.now();
           console.log("[ViewCounter] Starting fetch request at", new Date().toISOString());
           
-          let response;
+          let response: Response;
           try {
-            response = await Promise.race([
-              fetch(url, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                credentials: "include", // Ensure cookies are sent
-              }),
-              new Promise((_, reject) => 
-                setTimeout(() => reject(new Error("Fetch timeout after 10 seconds")), 10000)
-              ),
-            ]);
+            const fetchPromise = fetch(url, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              credentials: "include", // Ensure cookies are sent
+            });
+            
+            const timeoutPromise = new Promise<never>((_, reject) => 
+              setTimeout(() => reject(new Error("Fetch timeout after 10 seconds")), 10000)
+            );
+            
+            response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
             
             console.log("[ViewCounter] Fetch promise resolved");
           } catch (fetchError) {
@@ -98,6 +99,7 @@ export default function ArticleViewCounter({ slug }: { slug: string }) {
               stack: fetchError instanceof Error ? fetchError.stack : undefined,
             });
             isProcessing.current = false;
+            globalProcessing = false;
             return;
           }
 

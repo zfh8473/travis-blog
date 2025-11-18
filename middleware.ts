@@ -28,10 +28,10 @@ const apiProtectionRules: ApiProtectionRule[] = [
   },
   { prefix: "/api/profile", requiresAdmin: false },
   { prefix: "/api/protected", requiresAdmin: false },
-  // Note: /api/upload is handled in the API route itself, not in middleware
+  // Note: /api/upload and /api/media are handled in the API routes themselves, not in middleware
   // This avoids Edge Runtime limitations with getToken
   // { prefix: "/api/upload", requiresAdmin: true },
-  { prefix: "/api/media", requiresAdmin: true },
+  // { prefix: "/api/media", requiresAdmin: true },
   {
     prefix: "/api/tags",
     requiresAdmin: true,

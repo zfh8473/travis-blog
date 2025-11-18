@@ -1,9 +1,9 @@
 import { prisma } from "@/lib/db/prisma";
 import Link from "next/link";
-import Image from "next/image";
 import { format } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import { extractFirstImage, generatePlaceholderThumbnail } from "@/lib/utils/image-extractor";
+import ArticleThumbnail from "./ArticleThumbnail";
 
 /**
  * Sidebar component for desktop view.
@@ -121,27 +121,13 @@ export default async function Sidebar() {
                   >
                     {/* Thumbnail */}
                     <div className="popular-article-thumb flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-slate-100 flex items-center justify-center text-2xl font-bold text-slate-600">
-                      {thumbnailUrl.startsWith("data:") ? (
-                        <img
-                          src={thumbnailUrl}
-                          alt={article.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <>
-                          {thumbnailUrl ? (
-                            <Image
-                              src={thumbnailUrl}
-                              alt={article.title}
-                              fill
-                              className="object-cover"
-                              sizes="64px"
-                            />
-                          ) : (
-                            <span>{firstLetter}</span>
-                          )}
-                        </>
-                      )}
+                      <ArticleThumbnail
+                        thumbnailUrl={thumbnailUrl}
+                        articleTitle={article.title}
+                        index={index}
+                        total={popularArticles.length}
+                        alt={article.title}
+                      />
                     </div>
                     
                     {/* Content */}

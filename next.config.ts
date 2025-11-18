@@ -20,6 +20,21 @@ const nextConfig: NextConfig = {
     "jsdom",
     "isomorphic-dompurify",
   ],
+
+  /**
+   * Image optimization configuration.
+   * 
+   * Configures Next.js Image component to allow loading images from
+   * Vercel Blob Storage and other external domains.
+   */
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "*.public.blob.vercel-storage.com",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

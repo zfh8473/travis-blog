@@ -257,10 +257,10 @@ async function ArticleDetailContent({
 
   return (
     <>
-      {/* Increment view count on client side */}
-      <ArticleViewCounter slug={slug} />
-      
       <ArticleDetail {...article} content={enhancedContent} />
+      
+      {/* Increment view count on client side - must be after ArticleDetail to ensure DOM is ready */}
+      <ArticleViewCounter slug={slug} />
       
       {/* Comments section - temporarily disabled for debugging */}
       {/* <div className="container mx-auto px-4 py-8 max-w-4xl border-t border-gray-200 mt-12">

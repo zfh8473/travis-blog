@@ -31,14 +31,12 @@ export function extractFirstImage(htmlContent: string): string | null {
  * @param title - Article title
  * @param index - Optional index in a list (for creating gradient effect across multiple thumbnails)
  * @param total - Optional total count (for creating gradient effect across multiple thumbnails)
- * @param uniqueId - Optional unique identifier (e.g., article ID) to ensure uniqueness when titles have same first letter
  * @returns Placeholder image URL or data URI
  */
 export function generatePlaceholderThumbnail(
   title: string,
   index?: number,
-  total?: number,
-  uniqueId?: string
+  total?: number
 ): string {
   const firstLetter = title.charAt(0).toUpperCase();
   
@@ -82,14 +80,9 @@ export function generatePlaceholderThumbnail(
     colorPair = colorPairs[colorIndex];
   }
   
-  // Generate a unique ID for SVG gradient/defs to avoid conflicts
-  // Use provided uniqueId (e.g., article ID), or fallback to index or first letter
-  const svgUniqueId = uniqueId 
-    ? `grad-${uniqueId.replace(/[^a-zA-Z0-9]/g, "-")}` 
-    : index !== undefined 
-    ? `grad-${index}` 
-    : `grad-${firstLetter.charCodeAt(0)}-${Date.now()}`;
-  
+  // Return a data URI
+  // If top and bottom colors are the same, use solid color; otherwise use gradient
+  const uniqueId = index !== undefined ? `grad-${index}` : `grad-${firstLetter.charCodeAt(0)}`;
   const useGradient = colorPair.top !== colorPair.bottom;
   
   if (useGradient) {
@@ -97,22 +90,19 @@ export function generatePlaceholderThumbnail(
     return `data:image/svg+xml,${encodeURIComponent(
       `<svg width="200" height="120" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <linearGradient id="${svgUniqueId}" x1="0%" y1="0%" x2="0%" y2="100%">
+          <linearGradient id="${uniqueId}" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" style="stop-color:${colorPair.top};stop-opacity:1" />
             <stop offset="100%" style="stop-color:${colorPair.bottom};stop-opacity:1" />
           </linearGradient>
         </defs>
-        <rect width="200" height="120" fill="url(#${svgUniqueId})"/>
+        <rect width="200" height="120" fill="url(#${uniqueId})"/>
         <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="${colorPair.text}" text-anchor="middle" dominant-baseline="middle" opacity="0.9">${firstLetter}</text>
       </svg>`
     )}`;
   } else {
     // Use solid color (for list gradient effect)
-    // Add a unique identifier comment to ensure each data URL is unique
-    // This prevents browser caching conflicts when multiple articles have same first letter and color
     return `data:image/svg+xml,${encodeURIComponent(
       `<svg width="200" height="120" xmlns="http://www.w3.org/2000/svg">
-        <!-- Unique ID: ${svgUniqueId} -->
         <rect width="200" height="120" fill="${colorPair.top}"/>
         <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="${colorPair.text}" text-anchor="middle" dominant-baseline="middle" opacity="0.9">${firstLetter}</text>
       </svg>`

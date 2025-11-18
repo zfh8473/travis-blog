@@ -111,8 +111,7 @@ export default async function Sidebar() {
                 // Get first letter for thumbnail
                 const firstLetter = article.title.charAt(0).toUpperCase();
                 // Extract thumbnail from content or generate placeholder
-                // Pass article.id as uniqueId to ensure uniqueness even when titles have same first letter
-                const thumbnailUrl = extractFirstImage(article.content || "") || generatePlaceholderThumbnail(article.title, index, popularArticles.length, article.id);
+                const thumbnailUrl = extractFirstImage(article.content || "") || generatePlaceholderThumbnail(article.title, index, popularArticles.length);
                 
                 return (
                   <Link
@@ -124,7 +123,6 @@ export default async function Sidebar() {
                     <div className="popular-article-thumb flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-slate-100 flex items-center justify-center text-2xl font-bold text-slate-600">
                       {thumbnailUrl.startsWith("data:") ? (
                         <img
-                          key={`thumbnail-${article.id}`}
                           src={thumbnailUrl}
                           alt={article.title}
                           className="w-full h-full object-cover"

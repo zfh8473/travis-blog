@@ -117,6 +117,30 @@ export async function createArticleAction(
 
     const validatedData = validationResult.data;
 
+    // Check if first letter conflicts with published articles (only for PUBLISHED status)
+    if (validatedData.status === "PUBLISHED") {
+      const firstLetter = validatedData.title.charAt(0).toUpperCase();
+      const conflictingArticle = await prisma.article.findFirst({
+        where: {
+          status: "PUBLISHED",
+          title: {
+            startsWith: firstLetter,
+          },
+        },
+        select: { id: true, title: true },
+      });
+
+      if (conflictingArticle) {
+        return {
+          success: false,
+          error: {
+            message: `文章标题首字"${firstLetter}"与已发布文章《${conflictingArticle.title}》冲突。请修改标题首字以避免缩略图显示问题。`,
+            code: "FIRST_LETTER_CONFLICT",
+          },
+        };
+      }
+    }
+
     // Generate unique slug from title
     const slug = await generateUniqueSlug(validatedData.title);
 
@@ -318,7 +342,7 @@ export async function updateArticleAction(
     // Check if article exists
     const existingArticle = await prisma.article.findUnique({
       where: { id },
-      select: { id: true },
+      select: { id: true, status: true, title: true },
     });
 
     if (!existingArticle) {
@@ -344,6 +368,37 @@ export async function updateArticleAction(
     }
 
     const validatedData = validationResult.data;
+
+    // Check if first letter conflicts with published articles
+    // Only check if title changed and article is/will be PUBLISHED
+    if (validatedData.title !== undefined && (validatedData.status === "PUBLISHED" || existingArticle.status === "PUBLISHED")) {
+      const newFirstLetter = validatedData.title.charAt(0).toUpperCase();
+      const currentFirstLetter = existingArticle.title.charAt(0).toUpperCase();
+      
+      // Only check if first letter actually changed
+      if (newFirstLetter !== currentFirstLetter) {
+        const conflictingArticle = await prisma.article.findFirst({
+          where: {
+            status: "PUBLISHED",
+            id: { not: id }, // Exclude current article
+            title: {
+              startsWith: newFirstLetter,
+            },
+          },
+          select: { id: true, title: true },
+        });
+
+        if (conflictingArticle) {
+          return {
+            success: false,
+            error: {
+              message: `文章标题首字"${newFirstLetter}"与已发布文章《${conflictingArticle.title}》冲突。请修改标题首字以避免缩略图显示问题。`,
+              code: "FIRST_LETTER_CONFLICT",
+            },
+          };
+        }
+      }
+    }
 
     // Prepare update data
     const updateData: {

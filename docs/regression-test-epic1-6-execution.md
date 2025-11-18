@@ -296,7 +296,7 @@
 - [x] **备注：** 状态切换功能需要手动测试（自动化测试已验证UI正常）
 
 #### TC-3.13: 媒体管理功能
-- [x] **状态：** ⏳ 待验证（代码已修复，等待环境变量配置）
+- [x] **状态：** ✅ 通过
 - [x] **步骤：**
   1. 登录管理员账号
   2. 访问媒体管理页面
@@ -304,12 +304,11 @@
   4. 预览图片
   5. 删除媒体文件（如需要）
 - [x] **预期结果：** 媒体管理功能正常
-- [x] **实际结果：** ⚠️ 页面显示错误："Application error: a client-side exception has occurred"，控制台显示 "DATABASE_URL environment variable is not set"
-- [x] **备注：** ✅ 代码已修复：
-  - 更新 API 路由使用 `getUserFromRequestOrHeaders` 和 `getServerSession` 作为后备
-  - 添加 `export const runtime = "nodejs"` 确保在 Node.js 运行时中运行（支持 Prisma）
-  - 参考 `docs/fix-media-page-database-url.md` 配置 Vercel 环境变量 `DATABASE_URL`
-  - 配置完成后需要重新部署并测试
+- [x] **实际结果：** ✅ 媒体管理页面正常显示，功能正常
+- [x] **备注：** ✅ 问题已解决：
+  - 修复客户端组件导入 Prisma 问题（创建 media-client.ts）
+  - 修复中间件认证问题（从中间件保护中移除 /api/media）
+  - 参考：`docs/fix-media-page-auth-issue.md`
 
 ---
 
@@ -402,19 +401,18 @@
 - [x] **备注：** 个人中心页面正常，管理后台入口可用
 
 #### TC-6.2: 媒体管理页面
-- [x] **状态：** ⏳ 待验证（代码已修复，等待环境变量配置）
+- [x] **状态：** ✅ 通过
 - [x] **步骤：**
   1. 登录管理员账号
   2. 访问媒体管理页面
   3. 验证页面正常显示
   4. 验证媒体文件列表正常
 - [x] **预期结果：** 媒体管理页面正常
-- [x] **实际结果：** ❌ 页面显示错误："Application error: a client-side exception has occurred"，控制台显示 "DATABASE_URL environment variable is not set"
-- [x] **备注：** ✅ 代码已修复：
-  - 更新 API 路由使用 `getUserFromRequestOrHeaders` 和 `getServerSession` 作为后备
-  - 添加 `export const runtime = "nodejs"` 确保在 Node.js 运行时中运行（支持 Prisma）
-  - 参考 `docs/fix-media-page-database-url.md` 配置 Vercel 环境变量 `DATABASE_URL`
-  - 配置完成后需要重新部署并测试
+- [x] **实际结果：** ✅ 媒体管理页面正常显示，功能正常
+- [x] **备注：** ✅ 问题已解决：
+  - 修复客户端组件导入 Prisma 问题（创建 media-client.ts）
+  - 修复中间件认证问题（从中间件保护中移除 /api/media）
+  - 参考：`docs/fix-media-page-auth-issue.md`
 
 #### TC-6.3: 文章管理列表显示
 - [x] **状态：** ✅ 通过

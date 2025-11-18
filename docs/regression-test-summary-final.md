@@ -51,23 +51,22 @@
 
 ## ⚠️ 已知问题
 
-### 1. TC-6.2: 媒体管理页面 ⏳
-**状态：** 待验证（代码已修复，等待环境变量配置）  
+### 1. TC-6.2: 媒体管理页面 ✅
+**状态：** 已解决  
 **问题：** "Application error: a client-side exception has occurred"  
-**原因：** Vercel 环境变量 `DATABASE_URL` 未配置  
-**影响：** 媒体管理功能暂时无法使用  
+**原因：** 客户端组件导入 Prisma + 中间件认证问题  
 **解决方案：** 
-- ✅ 代码已修复（更新认证方式，确保 Node.js 运行时）
-- ⏳ 需要在 Vercel Dashboard 中配置 `DATABASE_URL` 环境变量
-- 📖 参考：`docs/fix-media-page-database-url.md`
+- ✅ 创建 `lib/utils/media-client.ts` 分离客户端安全函数
+- ✅ 从中间件保护中移除 `/api/media`，让 API 路由自行处理认证
+- 📖 参考：`docs/fix-media-page-auth-issue.md`
 
-### 2. TC-3.13: 媒体管理功能 ⏳
-**状态：** 待验证（代码已修复，等待环境变量配置）  
-**原因：** 与 TC-6.2 相同，等待环境变量配置  
+### 2. TC-3.13: 媒体管理功能 ✅
+**状态：** 已解决  
+**原因：** 与 TC-6.2 相同  
 **解决方案：** 
-- ✅ 代码已修复（更新认证方式，确保 Node.js 运行时）
-- ⏳ 需要在 Vercel Dashboard 中配置 `DATABASE_URL` 环境变量
-- 📖 参考：`docs/fix-media-page-database-url.md`
+- ✅ 创建 `lib/utils/media-client.ts` 分离客户端安全函数
+- ✅ 从中间件保护中移除 `/api/media`，让 API 路由自行处理认证
+- 📖 参考：`docs/fix-media-page-auth-issue.md`
 
 ### 3. Epic 5: 读者互动 ⏸️
 **状态：** 全部跳过（功能暂时禁用）  

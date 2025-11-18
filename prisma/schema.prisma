@@ -125,6 +125,7 @@ model Article {
   categoryId  String?
   authorId    String
   publishedAt DateTime?
+  views       Int           @default(0) // Article view count
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 

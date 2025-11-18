@@ -6,6 +6,7 @@ import ArticleDetail from "@/components/article/ArticleDetail";
 import CommentList, { CommentListLoading } from "@/components/comment/CommentList";
 import CommentForm from "@/components/comment/CommentForm";
 import { enhanceHtmlWithSyntaxHighlighting } from "@/lib/utils/markdown-converter";
+import ArticleViewCounter from "./ArticleViewCounter";
 
 /**
  * Article interface for detail page.
@@ -20,6 +21,7 @@ interface Article {
   categoryId: string | null;
   authorId: string;
   publishedAt: string | null;
+  views: number;
   createdAt: string;
   updatedAt: string;
   author: {
@@ -108,6 +110,7 @@ async function fetchArticleBySlug(
 
     // Transform tags to simple array format
     // Explicitly construct the object to avoid Date serialization issues
+    // Include views count
     // This is critical for Next.js Server Components in production (Vercel)
     // Type assertion is safe because we check for PUBLISHED status
     const transformedArticle: Article = {
@@ -120,6 +123,7 @@ async function fetchArticleBySlug(
       categoryId: article.categoryId ? String(article.categoryId) : null,
       authorId: String(article.authorId),
       publishedAt: article.publishedAt ? article.publishedAt.toISOString() : null,
+      views: article.views || 0,
       createdAt: article.createdAt.toISOString(),
       updatedAt: article.updatedAt.toISOString(),
       author: {
@@ -253,6 +257,9 @@ async function ArticleDetailContent({
 
   return (
     <>
+      {/* Increment view count on client side */}
+      <ArticleViewCounter slug={slug} />
+      
       <ArticleDetail {...article} content={enhancedContent} />
       
       {/* Comments section - temporarily disabled for debugging */}

@@ -19,6 +19,7 @@ interface Article {
   categoryId: string | null;
   authorId: string;
   publishedAt: string | null;
+  views: number;
   createdAt: string;
   updatedAt: string;
   author: {
@@ -167,6 +168,7 @@ async function fetchArticlesByTag(
       ...article,
       status: "PUBLISHED" as const, // Explicitly set status since we filtered for PUBLISHED
       publishedAt: article.publishedAt?.toISOString() || null,
+      views: article.views || 0,
       createdAt: article.createdAt.toISOString(),
       updatedAt: article.updatedAt.toISOString(),
       tags: article.tags.map((at) => at.tag),

@@ -232,19 +232,23 @@ export default function CommentItem({
   return (
     <div 
       id={`comment-${comment.id}`}
-      className={`${isReply ? "ml-8 border-l-2 border-gray-200 pl-4" : ""} border-b border-gray-200 py-4`}
+      className={`${
+        isReply 
+          ? "sm:ml-8 ml-0 sm:pl-4 bg-gray-50 sm:bg-transparent p-3 sm:p-0 rounded-lg sm:rounded-none border-l-4 border-blue-200 sm:border-l-2 sm:border-gray-200" 
+          : ""
+      } border-b border-gray-200 py-3 sm:py-4`}
     >
-      <div className="flex items-start gap-3">
-        {/* Author avatar */}
+      <div className="flex items-start gap-2 sm:gap-3">
+        {/* Author avatar - 移动端稍小 */}
         {authorAvatar ? (
           <img
             src={authorAvatar}
             alt={safeAuthorName}
-            className="w-10 h-10 rounded-full object-cover"
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover shrink-0"
           />
         ) : (
-          <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
-            <span className="text-gray-600 text-sm font-medium">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-300 flex items-center justify-center flex-shrink-0">
+            <span className="text-gray-600 text-xs sm:text-sm font-medium">
               {safeAuthorName && safeAuthorName.length > 0 ? safeAuthorName.charAt(0).toUpperCase() : "?"}
             </span>
           </div>
@@ -252,27 +256,28 @@ export default function CommentItem({
 
         {/* Comment content */}
         <div className="flex-1 min-w-0">
-          {/* Author name and timestamp */}
-          <div className="flex items-center gap-2 mb-2">
+          {/* Author name and timestamp - 移动端优化布局 */}
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
             {isReply && parentAuthorName && (
-              <span className="text-sm text-gray-500">
+              <span className="text-xs sm:text-sm text-gray-500">
                 回复{" "}
                 <button
                   type="button"
                   onClick={handleScrollToParent}
-                  className="text-blue-600 hover:text-blue-800 font-medium underline"
+                  className="text-blue-600 hover:text-blue-800 font-medium underline min-h-[44px] min-w-[44px] px-1"
+                  aria-label={`跳转到 @${parentAuthorName} 的留言`}
                 >
                   @{String(parentAuthorName || "")}
                 </button>
               </span>
             )}
-            <span className="font-medium text-gray-900">{safeAuthorName}</span>
-            <span className="text-sm text-gray-500">{safeFormattedDate}</span>
+            <span className="font-medium text-gray-900 text-sm sm:text-base">{safeAuthorName}</span>
+            <span className="text-xs sm:text-sm text-gray-500">{safeFormattedDate}</span>
           </div>
 
           {/* Comment content */}
           {/* Ensure content is always a string to prevent React error #418 */}
-          <div className="text-gray-700 whitespace-pre-wrap break-words mb-2">
+          <div className="text-gray-700 whitespace-pre-wrap mb-2 text-sm sm:text-base leading-relaxed">
             {(() => {
               const content = String(comment.content || "");
               // Additional safety check
@@ -280,20 +285,21 @@ export default function CommentItem({
             })()}
           </div>
 
-          {/* Action buttons */}
-          <div className="flex items-center gap-3">
+          {/* Action buttons - 优化触摸目标 */}
+          <div className="flex items-center gap-3 sm:gap-4 mt-2">
             {/* Reply button */}
             {canReply && (
               <button
                 type="button"
-                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                className="text-sm sm:text-base text-blue-600 hover:text-blue-800 font-medium min-h-[44px] min-w-[60px] px-2 active:scale-95 transition-transform"
                 onClick={handleReplyClick}
+                aria-label="回复留言"
               >
                 回复
               </button>
             )}
             {!canReply && (
-              <span className="text-sm text-gray-400">
+              <span className="text-xs sm:text-sm text-gray-400">
                 已达到最大回复深度
               </span>
             )}
@@ -302,7 +308,7 @@ export default function CommentItem({
             {isAdmin && (
               <button
                 type="button"
-                className="text-sm text-red-600 hover:text-red-800 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="text-sm sm:text-base text-red-600 hover:text-red-800 font-medium disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] min-w-[60px] px-2 active:scale-95 transition-transform"
                 onClick={handleDeleteClick}
                 disabled={isDeleting}
                 aria-label="删除留言"

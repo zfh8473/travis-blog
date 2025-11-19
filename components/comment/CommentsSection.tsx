@@ -175,24 +175,38 @@ export default function CommentsSection({
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl border-t border-gray-200 mt-12">
-      <h2 className="text-2xl font-bold mb-6 text-gray-900">留言</h2>
+    <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 max-w-4xl border-t-2 border-gray-300 mt-8 sm:mt-12">
+      {/* 优化标题区域 - 添加视觉分隔和留言数量 */}
+      <div className="flex items-center gap-3 mb-6 sm:mb-8">
+        <div className="w-1 h-6 sm:h-8 bg-blue-600 rounded-full"></div>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">留言讨论</h2>
+        {!loading && (
+          <span className="text-xs sm:text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+            {comments.length} 条
+          </span>
+        )}
+      </div>
 
       {/* Comment form */}
-      <div className="mb-8">
+      <div className="mb-6 sm:mb-8">
         <CommentForm articleId={articleId} onSuccess={handleCommentCreated} />
       </div>
 
-      {/* Error message */}
+      {/* Error message - 优化移动端显示 */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
-          {error}
+        <div className="bg-red-50 border-l-4 border-red-400 text-red-700 px-4 py-3 rounded-r mb-4 sm:mb-6">
+          <div className="flex items-start gap-2">
+            <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+            <p className="text-sm sm:text-base">{error}</p>
+          </div>
         </div>
       )}
 
       {/* Comments list */}
       <div>
-        <h3 className="text-xl font-semibold mb-4 text-gray-900">所有留言</h3>
+        <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900">所有留言</h3>
         {loading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (

@@ -166,7 +166,11 @@ export default function CommentForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className={`space-y-4 ${isReplyMode ? "ml-8 mt-2 border-l-2 border-gray-200 pl-4" : ""}`}>
+    <form 
+      onSubmit={handleSubmit} 
+      className={`space-y-4 ${isReplyMode ? "sm:ml-8 ml-0 sm:border-l-2 sm:pl-4 bg-gray-50 sm:bg-transparent p-3 sm:p-0 rounded-lg sm:rounded-none border-l-4 border-blue-200 sm:border-l-2 sm:border-gray-200" : ""}`}
+      aria-label={isReplyMode ? "回复留言表单" : "留言表单"}
+    >
       {/* Reply mode indication */}
       {isReplyMode && parentAuthorName && (
         <div className="text-sm text-gray-600 mb-2">
@@ -185,10 +189,12 @@ export default function CommentForm({
             id="authorName"
             value={authorName}
             onChange={(e) => setAuthorName(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2.5 min-h-[44px] border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
             placeholder="请输入您的姓名"
             required
             maxLength={100}
+            aria-label="姓名"
+            aria-required="true"
           />
         </div>
       )}
@@ -203,38 +209,51 @@ export default function CommentForm({
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={4}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base resize-y"
           placeholder="请输入您的留言..."
           required
           maxLength={5000}
+          aria-label="留言内容"
+          aria-describedby="content-help"
+          aria-required="true"
         />
-        <div className="mt-1 text-sm text-gray-500 text-right">
+        <div id="content-help" className="mt-1 text-sm text-gray-500 text-right">
           {content.length} / 5000
         </div>
       </div>
 
-      {/* Error message */}
+      {/* Error message - 优化样式和位置 */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          {error}
+        <div className="bg-red-50 border-l-4 border-red-400 text-red-700 px-4 py-3 rounded-r" role="alert">
+          <div className="flex items-start gap-2">
+            <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+            <p className="text-sm flex-1">{error}</p>
+          </div>
         </div>
       )}
 
-      {/* Success message */}
+      {/* Success message - 优化样式 */}
       {success && (
-        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
-          留言提交成功！
+        <div className="bg-green-50 border-l-4 border-green-400 text-green-700 px-4 py-3 rounded-r" role="status">
+          <div className="flex items-center gap-2">
+            <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <p className="text-sm">留言提交成功！</p>
+          </div>
         </div>
       )}
 
-      {/* Submit and Cancel buttons */}
-      <div className="flex justify-end gap-2">
+      {/* Submit and Cancel buttons - 优化触摸目标和加载状态 */}
+      <div className="flex justify-end gap-2 sm:gap-3">
         {isReplyMode && onCancel && (
           <button
             type="button"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 sm:px-5 py-2.5 min-h-[44px] min-w-[80px] border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all duration-200 text-sm sm:text-base"
           >
             取消
           </button>
@@ -242,9 +261,19 @@ export default function CommentForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-5 sm:px-6 py-2.5 min-h-[44px] min-w-[100px] bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base font-medium"
         >
-          {isSubmitting ? "提交中..." : isReplyMode ? "提交回复" : "提交留言"}
+          {isSubmitting ? (
+            <>
+              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              <span>提交中...</span>
+            </>
+          ) : (
+            isReplyMode ? "提交回复" : "提交留言"
+          )}
         </button>
       </div>
     </form>

@@ -53,13 +53,10 @@ export default function ArticleFilters({
     // Build new URL
     const newUrl = params.toString() ? `/?${params.toString()}` : "/";
     
-    // Use startTransition to wrap the navigation update
-    // This ensures the Server Component re-renders with new searchParams
+    // Use router.push to navigate and trigger Server Component re-render
+    // router.push automatically triggers a refresh for Server Components
     startTransition(() => {
-      // Use replace instead of push to avoid adding to history
-      router.replace(newUrl);
-      // Refresh immediately after replace to ensure Server Component re-renders
-      router.refresh();
+      router.push(newUrl);
     });
   };
 

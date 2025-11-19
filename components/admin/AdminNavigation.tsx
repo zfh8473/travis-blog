@@ -47,8 +47,10 @@ export default function AdminNavigation() {
   const navItems = [
     { href: "/admin", label: "仪表板" },
     { href: "/admin/articles", label: "文章管理" },
-    { href: "/admin/comments", label: "评论管理" },
     { href: "/admin/media", label: "媒体管理" },
+    // Note: Comment management is available on the dashboard
+    // The /admin/comments page is kept for future expansion (viewing all comments, search, filters, etc.)
+    // { href: "/admin/comments", label: "评论管理" },
   ];
 
   return (

@@ -62,9 +62,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Count unread comments
+    // Exclude comments made by the admin user themselves
     const unreadCount = await prisma.comment.count({
       where: {
         isRead: false,
+        userId: {
+          not: user.id, // Exclude admin's own comments
+        },
       },
     });
 

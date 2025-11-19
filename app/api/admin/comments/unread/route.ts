@@ -94,9 +94,13 @@ export async function GET(request: NextRequest) {
       : 20;
 
     // Fetch unread comments with article information
+    // Exclude comments made by the admin user themselves
     const comments = await prisma.comment.findMany({
       where: {
         isRead: false,
+        userId: {
+          not: user.id, // Exclude admin's own comments
+        },
       },
       include: {
         article: {

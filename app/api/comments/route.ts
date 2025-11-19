@@ -34,6 +34,11 @@ export interface Comment {
  * Fetches all comments for an article, including nested replies.
  * Returns comments in nested structure, sorted by creation time.
  */
+
+// Ensure Node.js runtime for Prisma
+export const runtime = "nodejs";
+export const maxDuration = 30; // 30 seconds max duration
+
 export async function GET(request: NextRequest) {
   const startTime = Date.now();
   console.log("[GET /api/comments] Request received at", new Date().toISOString());
@@ -61,8 +66,18 @@ export async function GET(request: NextRequest) {
     // Query all comments for the article
     console.log("[GET /api/comments] Querying database. Time so far:", Date.now() - startTime, "ms");
     
+    // Test Prisma connection first
+    try {
+      await prisma.$connect();
+      console.log("[GET /api/comments] Prisma connected. Time so far:", Date.now() - startTime, "ms");
+    } catch (connError) {
+      console.error("[GET /api/comments] Prisma connection error:", connError);
+      throw new Error("Database connection failed");
+    }
+    
     let allCommentsRaw;
     try {
+      console.log("[GET /api/comments] Executing findMany query. Time so far:", Date.now() - startTime, "ms");
       allCommentsRaw = await prisma.comment.findMany({
         where: {
           articleId: validationResult.data.articleId,
@@ -190,6 +205,8 @@ export async function GET(request: NextRequest) {
  * Creates a new comment or reply.
  * Supports both logged-in and anonymous users.
  */
+
+// Runtime configuration is already set above for GET
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
   console.log("[POST /api/comments] Request received at", new Date().toISOString());
@@ -365,9 +382,19 @@ export async function POST(request: NextRequest) {
     });
     console.log("[POST /api/comments] Content sanitized, creating comment in database. Time so far:", Date.now() - startTime, "ms");
 
+    // Test Prisma connection first
+    try {
+      await prisma.$connect();
+      console.log("[POST /api/comments] Prisma connected. Time so far:", Date.now() - startTime, "ms");
+    } catch (connError) {
+      console.error("[POST /api/comments] Prisma connection error:", connError);
+      throw new Error("Database connection failed");
+    }
+
     // Create comment in database
     let comment;
     try {
+      console.log("[POST /api/comments] Executing create query. Time so far:", Date.now() - startTime, "ms");
       comment = await prisma.comment.create({
       data: {
         content: sanitizedContent,

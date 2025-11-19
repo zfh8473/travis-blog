@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import CommentForm from "./CommentForm";
 import CommentList from "./CommentList";
 
@@ -147,7 +147,14 @@ export default function CommentsSection({
   }, [articleId]);
 
   // Fetch comments on mount and when articleId changes
+  // Use ref to prevent duplicate requests in React Strict Mode
+  const hasFetched = useRef(false);
   useEffect(() => {
+    // Prevent duplicate requests in React Strict Mode (development)
+    if (hasFetched.current) {
+      return;
+    }
+    hasFetched.current = true;
     fetchComments();
   }, [fetchComments]);
 

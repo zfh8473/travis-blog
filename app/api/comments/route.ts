@@ -60,23 +60,31 @@ export async function GET(request: NextRequest) {
 
     // Query all comments for the article
     console.log("[GET /api/comments] Querying database. Time so far:", Date.now() - startTime, "ms");
-    const allCommentsRaw = await prisma.comment.findMany({
-      where: {
-        articleId: validationResult.data.articleId,
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            image: true,
+    
+    let allCommentsRaw;
+    try {
+      allCommentsRaw = await prisma.comment.findMany({
+        where: {
+          articleId: validationResult.data.articleId,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+            },
           },
         },
-      },
-      orderBy: {
-        createdAt: "asc",
-      },
-    });
+        orderBy: {
+          createdAt: "asc",
+        },
+      });
+      console.log("[GET /api/comments] Database query completed, found", allCommentsRaw.length, "comments. Time so far:", Date.now() - startTime, "ms");
+    } catch (dbError) {
+      console.error("[GET /api/comments] Database query error:", dbError);
+      throw dbError;
+    }
 
     // Build nested structure in memory
     const commentMap = new Map<string, any>();
@@ -147,10 +155,20 @@ export async function GET(request: NextRequest) {
     const totalTime = Date.now() - startTime;
     console.log("[GET /api/comments] Response ready, total time:", totalTime, "ms", "comments count:", topLevelComments.length);
 
-    return NextResponse.json({
+    // Ensure response is properly serialized and sent
+    const response = NextResponse.json({
       success: true,
       data: topLevelComments,
+    }, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+      },
     });
+    
+    console.log("[GET /api/comments] Response created, sending...");
+    return response;
   } catch (error) {
     console.error("Error fetching comments:", error);
     return NextResponse.json(
@@ -348,7 +366,9 @@ export async function POST(request: NextRequest) {
     console.log("[POST /api/comments] Content sanitized, creating comment in database. Time so far:", Date.now() - startTime, "ms");
 
     // Create comment in database
-    const comment = await prisma.comment.create({
+    let comment;
+    try {
+      comment = await prisma.comment.create({
       data: {
         content: sanitizedContent,
         articleId: validatedData.articleId,
@@ -366,6 +386,11 @@ export async function POST(request: NextRequest) {
         },
       },
     });
+      console.log("[POST /api/comments] Comment created in database, ID:", comment.id, "Time so far:", Date.now() - startTime, "ms");
+    } catch (dbError) {
+      console.error("[POST /api/comments] Database create error:", dbError);
+      throw dbError;
+    }
 
     console.log("[POST /api/comments] Comment created, transforming response. Time so far:", Date.now() - startTime, "ms");
     
@@ -392,10 +417,20 @@ export async function POST(request: NextRequest) {
     const totalTime = Date.now() - startTime;
     console.log("[POST /api/comments] Response ready, total time:", totalTime, "ms");
     
-    return NextResponse.json({
+    // Ensure response is properly serialized and sent
+    const response = NextResponse.json({
       success: true,
       data: responseData,
+    }, {
+      status: 201,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+      },
     });
+    
+    console.log("[POST /api/comments] Response created, sending...");
+    return response;
   } catch (error) {
     console.error("Error creating comment:", error);
     return NextResponse.json(

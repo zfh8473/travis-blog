@@ -81,6 +81,9 @@ async function fetchArticles(
   sort?: string
 ): Promise<{ articles: Article[]; pagination: PaginationData }> {
   try {
+    // Debug: Log the sort parameter
+    console.log("[fetchArticles] sort parameter:", sort, "type:", typeof sort);
+    
     const skip = (page - 1) * limit;
     const take = Math.min(100, Math.max(1, limit));
 
@@ -105,21 +108,29 @@ async function fetchArticles(
     let needInMemorySort = false;
     let sortType: "comments" | "views" | null = null;
 
-    if (sort === "最早") {
+    // Normalize sort parameter (handle URL encoding)
+    const normalizedSort = sort?.trim();
+    console.log("[fetchArticles] normalizedSort:", normalizedSort);
+
+    if (normalizedSort === "最早") {
       // Sort by publishedAt ascending (oldest first)
       orderBy = { publishedAt: "asc" };
-    } else if (sort === "最热") {
+      console.log("[fetchArticles] Using sort: 最早 (publishedAt asc)");
+    } else if (normalizedSort === "最热") {
       // Sort by views descending (most viewed first)
       orderBy = { views: "desc" };
-    } else if (sort === "最多评论") {
+      console.log("[fetchArticles] Using sort: 最热 (views desc)");
+    } else if (normalizedSort === "最多评论") {
       // Need to sort by comment count - fetch all and sort in memory
       needInMemorySort = true;
       sortType = "comments";
       // Use publishedAt as initial sort, will re-sort after fetching
       orderBy = { publishedAt: "desc" };
+      console.log("[fetchArticles] Using sort: 最多评论 (comments desc, in-memory)");
     } else {
       // "最新" or default - sort by publishedAt descending (newest first)
       orderBy = { publishedAt: "desc" };
+      console.log("[fetchArticles] Using sort: 最新 or default (publishedAt desc)");
     }
 
     // Get total count for pagination
@@ -162,13 +173,17 @@ async function fetchArticles(
     // Sort in memory if needed (for comment count)
     let sortedArticles = articles;
     if (needInMemorySort && sortType === "comments") {
+      console.log("[fetchArticles] Sorting by comment count in memory. Articles before sort:", articles.length);
       sortedArticles = articles.sort((a, b) => {
-        const aCount = a._count.comments || 0;
-        const bCount = b._count.comments || 0;
+        const aCount = a._count?.comments || 0;
+        const bCount = b._count?.comments || 0;
+        console.log(`[fetchArticles] Comparing: ${a.title} (${aCount} comments) vs ${b.title} (${bCount} comments)`);
         return bCount - aCount; // Descending order (most comments first)
       });
+      console.log("[fetchArticles] Articles after sort:", sortedArticles.map(a => ({ title: a.title, comments: a._count?.comments || 0 })));
       // Apply pagination after sorting
       sortedArticles = sortedArticles.slice(skip, skip + take);
+      console.log("[fetchArticles] Articles after pagination:", sortedArticles.length);
     }
 
     // Transform tags to simple array format
@@ -219,6 +234,10 @@ async function HomePageContent({
   const limit = Math.min(100, Math.max(1, parseInt(searchParams.limit || "20", 10)));
   const category = searchParams.category || "全部";
   const sort = searchParams.sort || "最新";
+
+  // Debug: Log searchParams
+  console.log("[HomePageContent] searchParams:", searchParams);
+  console.log("[HomePageContent] sort value:", sort, "type:", typeof sort);
 
   try {
     const { articles, pagination } = await fetchArticles(page, limit, category, sort);

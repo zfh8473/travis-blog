@@ -123,6 +123,23 @@ export default async function LogoDemoPage({
     });
   }
 
+  // Transform articles to match ArticleCardProps format
+  const transformedArticles = articles.map((article) => ({
+    id: article.id,
+    title: article.title,
+    excerpt: article.excerpt,
+    slug: article.slug,
+    publishedAt: article.publishedAt?.toISOString() || null,
+    views: (article as any).views ?? 0,
+    category: article.category,
+    tags: article.tags.map((at) => at.tag),
+    author: {
+      id: article.author.id,
+      name: article.author.name,
+      image: null, // ArticleCardProps doesn't require image
+    },
+  }));
+
   return (
     <>
       <NavigationBarWithCustomLogo logoId={logoId} />
@@ -156,7 +173,7 @@ export default async function LogoDemoPage({
         </div>
 
         {/* Article List */}
-        <ArticleList articles={articles} />
+        <ArticleList articles={transformedArticles} />
       </div>
       
       <MobileBottomNav />

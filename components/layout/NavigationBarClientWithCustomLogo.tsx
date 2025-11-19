@@ -75,11 +75,12 @@ export default function NavigationBarClientWithCustomLogo({
    */
   const renderLogo = () => {
     const logoSize = "w-10 h-10"; // Same size as original T logo
+    const logoSize1 = "w-12 h-12"; // Slightly larger for option 1 (风 · 书韵)
     
     switch (logoId) {
       case 1: // 风 · 书韵
         return (
-          <svg width="40" height="40" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" className={logoSize}>
+          <svg width="48" height="48" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" className={logoSize1}>
             <defs>
               <linearGradient id="trad1" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" style={{stopColor:"#92400e",stopOpacity:1}} />

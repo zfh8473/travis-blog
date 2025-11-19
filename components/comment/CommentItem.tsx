@@ -62,18 +62,27 @@ export default function CommentItem({
 
   // Get author name: from user.name (logged-in) or authorName (anonymous)
   // For anonymous users, prefix with "访客："
+  // Ensure all values are strings to prevent React error #418
   const isGuest = !comment.user && comment.authorName;
   const authorName = isGuest 
-    ? `访客：${comment.authorName}`
-    : (comment.user?.name || "匿名用户");
+    ? `访客：${String(comment.authorName || "")}`
+    : String(comment.user?.name || "匿名用户");
   
   // Get author avatar: from user.image (logged-in users only)
   const authorAvatar = comment.user?.image || null;
   
   // Format timestamp - handle ISO strings (from API)
   // createdAt is always a string from API response
-  const createdAtDate = new Date(comment.createdAt);
-  const formattedDate = format(createdAtDate, "yyyy年MM月dd日 HH:mm", { locale: zhCN });
+  // Ensure valid date to prevent React error #418
+  let formattedDate = "未知时间";
+  try {
+    const createdAtDate = new Date(String(comment.createdAt || ""));
+    if (!isNaN(createdAtDate.getTime())) {
+      formattedDate = format(createdAtDate, "yyyy年MM月dd日 HH:mm", { locale: zhCN });
+    }
+  } catch (error) {
+    console.error("Error formatting date:", error);
+  }
 
   // Check if this comment is a reply (has parentId)
   const isReply = !!comment.parentId;
@@ -85,14 +94,15 @@ export default function CommentItem({
   const canReply = currentDepth < MAX_COMMENT_DEPTH - 1;
 
   // Get parent author name for reply indication
+  // Ensure all values are strings to prevent React error #418
   const parentAuthorName = isReply && allComments.length > 0
     ? (() => {
         const parent = allComments.find(c => c.id === comment.parentId);
         if (!parent) return null;
         const isParentGuest = !parent.user && parent.authorName;
         return isParentGuest 
-          ? `访客：${parent.authorName}`
-          : (parent.user?.name || "匿名用户");
+          ? `访客：${String(parent.authorName || "")}`
+          : String(parent.user?.name || "匿名用户");
       })()
     : null;
 
@@ -201,7 +211,7 @@ export default function CommentItem({
         ) : (
           <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
             <span className="text-gray-600 text-sm font-medium">
-              {authorName.charAt(0).toUpperCase()}
+              {authorName && authorName.length > 0 ? authorName.charAt(0).toUpperCase() : "?"}
             </span>
           </div>
         )}
@@ -227,8 +237,9 @@ export default function CommentItem({
           </div>
 
           {/* Comment content */}
+          {/* Ensure content is always a string to prevent React error #418 */}
           <div className="text-gray-700 whitespace-pre-wrap break-words mb-2">
-            {comment.content}
+            {String(comment.content || "")}
           </div>
 
           {/* Action buttons */}

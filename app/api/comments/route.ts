@@ -78,10 +78,11 @@ export async function GET(request: NextRequest) {
     const topLevelComments: any[] = [];
 
     // First pass: create comment objects
+    // Ensure all string fields are explicitly converted to prevent React error #418
     allCommentsRaw.forEach((comment) => {
       commentMap.set(comment.id, {
         id: String(comment.id),
-        content: String(comment.content),
+        content: String(comment.content || ""), // Ensure content is never null/undefined
         articleId: String(comment.articleId),
         userId: comment.userId ? String(comment.userId) : null,
         parentId: comment.parentId ? String(comment.parentId) : null,

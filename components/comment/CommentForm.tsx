@@ -106,8 +106,9 @@ export default function CommentForm({
       }
 
       // Call API Route with timeout
+      // Increase timeout to 15 seconds for Vercel environment
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
       
       let res: Response;
       try {
@@ -130,7 +131,9 @@ export default function CommentForm({
       } catch (err) {
         clearTimeout(timeoutId);
         if (err instanceof Error && err.name === "AbortError") {
-          throw new Error("请求超时，请稍后重试");
+          setError("请求超时，请检查网络连接后重试");
+          setIsSubmitting(false);
+          return;
         }
         throw err;
       }

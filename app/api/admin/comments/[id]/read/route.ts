@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { Role } from "@/lib/auth/permissions";
 import { prisma } from "@/lib/db/prisma";
+import { getUserFromRequestOrHeaders } from "@/lib/auth/middleware";
 
 /**
  * PUT /api/admin/comments/[id]/read
@@ -22,9 +23,23 @@ export async function PUT(
 ) {
   try {
     // Check authentication and admin role
-    const session = await getServerSession(authOptions);
+    // First try getUserFromRequestOrHeaders (more robust in Vercel)
+    let user = await getUserFromRequestOrHeaders(request, request.headers);
     
-    if (!session || !session.user) {
+    // Fallback to getServerSession if getUserFromRequestOrHeaders fails
+    if (!user) {
+      const session = await getServerSession(authOptions);
+      if (session && session.user) {
+        user = {
+          id: session.user.id,
+          email: session.user.email || "",
+          name: session.user.name,
+          role: session.user.role || Role.USER,
+        };
+      }
+    }
+    
+    if (!user) {
       return NextResponse.json(
         {
           success: false,
@@ -37,7 +52,7 @@ export async function PUT(
       );
     }
 
-    if (session.user.role !== Role.ADMIN) {
+    if (user.role !== Role.ADMIN) {
       return NextResponse.json(
         {
           success: false,
@@ -104,7 +119,7 @@ export async function PUT(
       data: {
         isRead: true,
         readAt: new Date(),
-        readBy: session.user.id,
+        readBy: user.id,
       },
       select: {
         id: true,

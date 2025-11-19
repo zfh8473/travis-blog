@@ -38,6 +38,9 @@ const apiProtectionRules: ApiProtectionRule[] = [
   // Note: /api/tags POST/PUT/PATCH/DELETE authentication is handled in the API route itself
   // This avoids middleware token retrieval issues in Vercel serverless environment
   // { prefix: "/api/tags", requiresAdmin: true, methods: ["POST", "PUT", "PATCH", "DELETE"] },
+  // Note: /api/admin/comments authentication is handled in the API routes themselves
+  // This avoids middleware token retrieval issues in Vercel serverless environment
+  // { prefix: "/api/admin/comments", requiresAdmin: true },
 ];
 
 /**

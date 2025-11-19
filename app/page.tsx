@@ -109,7 +109,8 @@ async function fetchArticles(
     let sortType: "comments" | "views" | null = null;
 
     // Normalize sort parameter (handle URL encoding)
-    const normalizedSort = sort?.trim();
+    const normalizedSort = sort?.trim() || "";
+    console.log("[fetchArticles] sort parameter:", sort, "type:", typeof sort);
     console.log("[fetchArticles] normalizedSort:", normalizedSort);
 
     if (normalizedSort === "最早") {

@@ -170,7 +170,7 @@ export default function CommentForm({
       {/* Reply mode indication */}
       {isReplyMode && parentAuthorName && (
         <div className="text-sm text-gray-600 mb-2">
-          回复 <span className="font-medium text-blue-600">@{parentAuthorName}</span>
+          回复 <span className="font-medium text-blue-600">@{String(parentAuthorName || "")}</span>
         </div>
       )}
 

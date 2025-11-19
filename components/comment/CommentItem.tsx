@@ -53,6 +53,12 @@ export default function CommentItem({
   articleId,
   onCommentDeleted,
 }: CommentItemProps) {
+  // Validate comment data at component entry to prevent React errors
+  if (!comment || !comment.id) {
+    console.warn("Invalid comment data:", comment);
+    return null;
+  }
+  
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const { data: session } = useSession();
@@ -64,9 +70,12 @@ export default function CommentItem({
   // For anonymous users, prefix with "访客："
   // Ensure all values are strings to prevent React error #418
   const isGuest = !comment.user && comment.authorName;
-  const authorName = isGuest 
+  const authorName: string = isGuest 
     ? `访客：${String(comment.authorName || "")}`
     : String(comment.user?.name || "匿名用户");
+  
+  // Final safety check - ensure authorName is never null/undefined
+  const safeAuthorName = authorName && typeof authorName === "string" ? authorName : "匿名用户";
   
   // Get author avatar: from user.image (logged-in users only)
   const authorAvatar = comment.user?.image || null;
@@ -74,15 +83,23 @@ export default function CommentItem({
   // Format timestamp - handle ISO strings (from API)
   // createdAt is always a string from API response
   // Ensure valid date to prevent React error #418
-  let formattedDate = "未知时间";
+  let formattedDate: string = "未知时间";
   try {
-    const createdAtDate = new Date(String(comment.createdAt || ""));
-    if (!isNaN(createdAtDate.getTime())) {
-      formattedDate = format(createdAtDate, "yyyy年MM月dd日 HH:mm", { locale: zhCN });
+    const createdAtStr = String(comment.createdAt || "");
+    if (createdAtStr && createdAtStr !== "undefined" && createdAtStr !== "null") {
+      const createdAtDate = new Date(createdAtStr);
+      if (!isNaN(createdAtDate.getTime())) {
+        const formatted = format(createdAtDate, "yyyy年MM月dd日 HH:mm", { locale: zhCN });
+        formattedDate = formatted && typeof formatted === "string" ? formatted : "未知时间";
+      }
     }
   } catch (error) {
-    console.error("Error formatting date:", error);
+    console.error("Error formatting date:", error, "createdAt:", comment.createdAt);
+    formattedDate = "未知时间";
   }
+  
+  // Final safety check
+  const safeFormattedDate = formattedDate && typeof formattedDate === "string" ? formattedDate : "未知时间";
 
   // Check if this comment is a reply (has parentId)
   const isReply = !!comment.parentId;
@@ -95,14 +112,16 @@ export default function CommentItem({
 
   // Get parent author name for reply indication
   // Ensure all values are strings to prevent React error #418
-  const parentAuthorName = isReply && allComments.length > 0
+  const parentAuthorName: string | null = isReply && allComments.length > 0 && comment.parentId
     ? (() => {
-        const parent = allComments.find(c => c.id === comment.parentId);
+        const parent = allComments.find(c => c && c.id === comment.parentId);
         if (!parent) return null;
         const isParentGuest = !parent.user && parent.authorName;
-        return isParentGuest 
+        const name = isParentGuest 
           ? `访客：${String(parent.authorName || "")}`
           : String(parent.user?.name || "匿名用户");
+        // Ensure we return a valid string, not null or undefined
+        return name && name.length > 0 ? name : null;
       })()
     : null;
 
@@ -205,13 +224,13 @@ export default function CommentItem({
         {authorAvatar ? (
           <img
             src={authorAvatar}
-            alt={authorName}
+            alt={safeAuthorName}
             className="w-10 h-10 rounded-full object-cover"
           />
         ) : (
           <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
             <span className="text-gray-600 text-sm font-medium">
-              {authorName && authorName.length > 0 ? authorName.charAt(0).toUpperCase() : "?"}
+              {safeAuthorName && safeAuthorName.length > 0 ? safeAuthorName.charAt(0).toUpperCase() : "?"}
             </span>
           </div>
         )}
@@ -228,18 +247,22 @@ export default function CommentItem({
                   onClick={handleScrollToParent}
                   className="text-blue-600 hover:text-blue-800 font-medium underline"
                 >
-                  @{parentAuthorName}
+                  @{String(parentAuthorName || "")}
                 </button>
               </span>
             )}
-            <span className="font-medium text-gray-900">{authorName}</span>
-            <span className="text-sm text-gray-500">{formattedDate}</span>
+            <span className="font-medium text-gray-900">{safeAuthorName}</span>
+            <span className="text-sm text-gray-500">{safeFormattedDate}</span>
           </div>
 
           {/* Comment content */}
           {/* Ensure content is always a string to prevent React error #418 */}
           <div className="text-gray-700 whitespace-pre-wrap break-words mb-2">
-            {String(comment.content || "")}
+            {(() => {
+              const content = String(comment.content || "");
+              // Additional safety check
+              return content !== "undefined" && content !== "null" ? content : "";
+            })()}
           </div>
 
           {/* Action buttons */}
@@ -287,7 +310,7 @@ export default function CommentItem({
               <CommentForm
                 articleId={articleId}
                 parentId={comment.id}
-                parentAuthorName={authorName}
+                parentAuthorName={safeAuthorName}
                 isReply={true}
                 onSuccess={handleReplySuccess}
                 onCancel={() => setShowReplyForm(false)}

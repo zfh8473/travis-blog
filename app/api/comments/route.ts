@@ -66,15 +66,8 @@ export async function GET(request: NextRequest) {
     // Query all comments for the article
     console.log("[GET /api/comments] Querying database. Time so far:", Date.now() - startTime, "ms");
     
-    // Test Prisma connection first
-    try {
-      await prisma.$connect();
-      console.log("[GET /api/comments] Prisma connected. Time so far:", Date.now() - startTime, "ms");
-    } catch (connError) {
-      console.error("[GET /api/comments] Prisma connection error:", connError);
-      throw new Error("Database connection failed");
-    }
-    
+    // Query all comments for the article
+    // Note: Prisma automatically manages connections, so we don't need explicit $connect()
     let allCommentsRaw;
     try {
       console.log("[GET /api/comments] Executing findMany query. Time so far:", Date.now() - startTime, "ms");
@@ -185,12 +178,17 @@ export async function GET(request: NextRequest) {
     console.log("[GET /api/comments] Response created, sending...");
     return response;
   } catch (error) {
-    console.error("Error fetching comments:", error);
+    console.error("[GET /api/comments] Error fetching comments:", error);
+    console.error("[GET /api/comments] Error details:", {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined,
+    });
     return NextResponse.json(
       {
         success: false,
         error: {
-          message: "Failed to fetch comments",
+          message: error instanceof Error ? error.message : "Failed to fetch comments",
           code: "INTERNAL_ERROR",
         },
       },
@@ -382,16 +380,8 @@ export async function POST(request: NextRequest) {
     });
     console.log("[POST /api/comments] Content sanitized, creating comment in database. Time so far:", Date.now() - startTime, "ms");
 
-    // Test Prisma connection first
-    try {
-      await prisma.$connect();
-      console.log("[POST /api/comments] Prisma connected. Time so far:", Date.now() - startTime, "ms");
-    } catch (connError) {
-      console.error("[POST /api/comments] Prisma connection error:", connError);
-      throw new Error("Database connection failed");
-    }
-
     // Create comment in database
+    // Note: Prisma automatically manages connections, so we don't need explicit $connect()
     let comment;
     try {
       console.log("[POST /api/comments] Executing create query. Time so far:", Date.now() - startTime, "ms");
@@ -459,12 +449,17 @@ export async function POST(request: NextRequest) {
     console.log("[POST /api/comments] Response created, sending...");
     return response;
   } catch (error) {
-    console.error("Error creating comment:", error);
+    console.error("[POST /api/comments] Error creating comment:", error);
+    console.error("[POST /api/comments] Error details:", {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined,
+    });
     return NextResponse.json(
       {
         success: false,
         error: {
-          message: "Failed to create comment",
+          message: error instanceof Error ? error.message : "Failed to create comment",
           code: "INTERNAL_ERROR",
         },
       },

@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { prisma } from "@/lib/db/prisma";
 import ArticleList from "@/components/article/ArticleList";
 import type { ArticleCardProps } from "@/components/article/ArticleCard";
+import SearchInput from "@/components/search/SearchInput";
 
 /**
  * Search results page content component.
@@ -20,13 +21,25 @@ async function SearchResultsContent({
   const query = resolvedSearchParams.q || "";
   const searchTerm = query.trim();
 
-  // If no search query, show empty state
+  // If no search query, show search input form
   if (!searchTerm) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="bg-slate-50 dark:bg-gray-800/50 border border-slate-200 dark:border-gray-700 rounded-lg p-8 sm:p-12 text-center">
+        {/* Page header */}
+        <header className="mb-8 text-center">
+          <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-slate-900 dark:text-gray-100">搜索文章</h1>
+          <p className="text-slate-600 dark:text-gray-400">
+            输入关键词搜索您感兴趣的文章
+          </p>
+        </header>
+
+        {/* Search input form */}
+        <SearchInput />
+
+        {/* Empty state illustration */}
+        <div className="bg-slate-50 dark:bg-gray-800/50 border border-slate-200 dark:border-gray-700 rounded-lg p-8 sm:p-12 text-center mt-8">
           <svg
-            className="mx-auto h-12 w-12 text-slate-400 mb-4"
+            className="mx-auto h-12 w-12 text-slate-400 dark:text-gray-500 mb-4"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -38,14 +51,14 @@ async function SearchResultsContent({
               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
             />
           </svg>
-          <h3 className="text-lg font-medium text-slate-900 dark:text-gray-100 mb-2">请输入搜索关键词</h3>
+          <h3 className="text-lg font-medium text-slate-900 dark:text-gray-100 mb-2">开始搜索</h3>
           <p className="text-sm text-slate-500 dark:text-gray-400 mb-4">
-            在上方搜索框中输入关键词，或点击右上角的搜索图标
+            在上方输入框中输入关键词，然后点击"搜索"按钮
           </p>
-          {/* 移动端友好提示 */}
+          {/* 搜索提示 */}
           <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-left max-w-md mx-auto">
             <p className="text-xs text-blue-700 dark:text-blue-300">
-              <span className="font-semibold">💡 提示：</span> 在移动端，点击右上角的菜单图标（☰），然后在上方的搜索框中输入关键词
+              <span className="font-semibold">💡 搜索技巧：</span> 可以搜索文章标题、摘要或内容中的关键词
             </p>
           </div>
         </div>
@@ -104,12 +117,15 @@ async function SearchResultsContent({
         {/* Page header */}
         <header className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-slate-900 dark:text-gray-100">搜索结果</h1>
-          <p className="text-slate-600 dark:text-gray-400">
+          <p className="text-slate-600 dark:text-gray-400 mb-4">
             {transformedArticles.length > 0
               ? `找到 ${transformedArticles.length} 篇与"${searchTerm}"相关的文章`
               : `未找到与"${searchTerm}"相关的文章`}
           </p>
         </header>
+
+        {/* Search input form - 允许用户修改搜索关键词 */}
+        <SearchInput />
 
         {/* Article list */}
         {transformedArticles.length > 0 ? (

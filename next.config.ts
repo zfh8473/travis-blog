@@ -18,7 +18,8 @@ const nextConfig: NextConfig = {
    */
   serverExternalPackages: [
     "jsdom",
-    "isomorphic-dompurify",
+    // Removed "isomorphic-dompurify" - not compatible with Vercel serverless
+    // Using sanitizeText from lib/utils/sanitize.ts instead
   ],
 
   /**

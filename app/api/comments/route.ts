@@ -4,7 +4,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getUserFromRequestOrHeaders } from "@/lib/auth/middleware";
 import { prisma } from "@/lib/db/prisma";
 import { createCommentSchema, getCommentsSchema } from "@/lib/validations/comment";
-import DOMPurify from "isomorphic-dompurify";
+import { sanitizeText } from "@/lib/utils/sanitize";
 import { MAX_COMMENT_DEPTH } from "@/lib/utils/comment-depth";
 
 /**
@@ -373,11 +373,9 @@ export async function POST(request: NextRequest) {
     console.log("[POST /api/comments] Final userId:", userId ? "logged-in" : "anonymous", "Time so far:", Date.now() - startTime, "ms");
 
     // Sanitize comment content to prevent XSS
+    // Use sanitizeText instead of DOMPurify to avoid ES Module issues in Vercel serverless
     console.log("[POST /api/comments] Sanitizing content, length:", validatedData.content.length);
-    const sanitizedContent = DOMPurify.sanitize(validatedData.content, {
-      ALLOWED_TAGS: [],
-      ALLOWED_ATTR: [],
-    });
+    const sanitizedContent = sanitizeText(validatedData.content);
     console.log("[POST /api/comments] Content sanitized, creating comment in database. Time so far:", Date.now() - startTime, "ms");
 
     // Create comment in database

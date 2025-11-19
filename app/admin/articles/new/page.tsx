@@ -166,7 +166,8 @@ export default function NewArticlePage() {
     }
 
     // Validate categoryId UUID format if provided
-    if (categoryId && !isValidUUID(categoryId)) {
+    // Only validate if categoryId is not empty and not the default "选择分类" option
+    if (categoryId && categoryId.trim() !== "" && !isValidUUID(categoryId)) {
       newErrors.categoryId = "分类 ID 格式无效";
     }
 
@@ -229,7 +230,8 @@ export default function NewArticlePage() {
         requestBody.excerpt = excerpt.trim();
       }
 
-      if (categoryId) {
+      // Only include categoryId if it's not empty and is a valid UUID
+      if (categoryId && categoryId.trim() !== "" && isValidUUID(categoryId)) {
         requestBody.categoryId = categoryId;
       }
 

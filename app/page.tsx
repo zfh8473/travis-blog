@@ -280,7 +280,7 @@ function HomePageLoading() {
 export default function Home({
   searchParams,
 }: {
-  searchParams: { page?: string; limit?: string };
+  searchParams: { page?: string; limit?: string; category?: string; sort?: string };
 }) {
   return (
     <Suspense fallback={<HomePageLoading />}>

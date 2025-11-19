@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
-import { getUserFromHeaders } from "@/lib/auth/middleware";
+import { getUserFromRequestOrHeaders } from "@/lib/auth/middleware";
 import { requireAdmin } from "@/lib/auth/permissions";
 import { generateSlug } from "@/lib/utils/slug";
+
+// Ensure Node.js runtime for Prisma
+export const runtime = "nodejs";
+export const maxDuration = 30; // 30 seconds max duration
 
 /**
  * Get all tags.
@@ -100,7 +104,8 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   // Check authentication and admin role
-  const user = getUserFromHeaders(request.headers);
+  // Use getUserFromRequestOrHeaders for more reliable session retrieval
+  const user = await getUserFromRequestOrHeaders(request, request.headers);
   const adminError = requireAdmin(user);
 
   if (adminError) {

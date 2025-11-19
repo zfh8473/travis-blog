@@ -49,7 +49,7 @@ export default function ArticleFilters({
       params.set("category", value);
     }
     params.delete("page"); // Reset to first page when filtering
-    router.push(`/?${params.toString()}`);
+    router.push(`/?${params.toString()}`, { scroll: false });
   };
 
   /**
@@ -64,7 +64,7 @@ export default function ArticleFilters({
       params.set("sort", value);
     }
     params.delete("page"); // Reset to first page when sorting
-    router.push(`/?${params.toString()}`);
+    router.push(`/?${params.toString()}`, { scroll: false });
   };
 
   return (

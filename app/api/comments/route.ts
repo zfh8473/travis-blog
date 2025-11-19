@@ -55,6 +55,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Query all comments for the article
+    console.log("[GET /api/comments] Querying database. Time so far:", Date.now() - startTime, "ms");
     const allCommentsRaw = await prisma.comment.findMany({
       where: {
         articleId: validationResult.data.articleId,
@@ -139,6 +140,9 @@ export async function GET(request: NextRequest) {
     };
     topLevelComments.forEach(sortReplies);
 
+    const totalTime = Date.now() - startTime;
+    console.log("[GET /api/comments] Response ready, total time:", totalTime, "ms", "comments count:", topLevelComments.length);
+
     return NextResponse.json({
       success: true,
       data: topLevelComments,
@@ -165,8 +169,12 @@ export async function GET(request: NextRequest) {
  * Supports both logged-in and anonymous users.
  */
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  console.log("[POST /api/comments] Request received at", new Date().toISOString());
+  
   try {
     const body = await request.json();
+    console.log("[POST /api/comments] Body parsed, articleId:", body.articleId, "has authorName:", !!body.authorName, "has userId:", !!body.userId);
 
     // Validate input
     const validationResult = createCommentSchema.safeParse(body);
@@ -276,15 +284,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user session (if logged in)
-    // For anonymous comments (no userId in request), skip session check entirely
-    // This avoids timeout issues in Vercel environment
+    // For anonymous comments, skip session check entirely to avoid timeout issues
+    // Anonymous users provide authorName, logged-in users provide userId
     let userId: string | null = null;
     
-    // Only try to get session if this might be a logged-in user
-    // Check if userId is provided OR if authorName is not provided (logged-in users don't provide authorName)
-    const mightBeLoggedIn = validatedData.userId || !validatedData.authorName;
+    // Only try to get session if userId is explicitly provided in request
+    // This means it's a logged-in user (client sends userId from session)
+    // Anonymous users don't send userId, so we skip session check completely
+    console.log("[POST /api/comments] Checking session - userId provided:", !!validatedData.userId, "authorName provided:", !!validatedData.authorName);
     
-    if (mightBeLoggedIn) {
+    if (validatedData.userId) {
+      console.log("[POST /api/comments] Attempting to get session for logged-in user");
       try {
         // Add timeout to prevent hanging in Vercel (2 seconds)
         const timeoutPromise = new Promise<string | null>((resolve) => {
@@ -319,14 +329,19 @@ export async function POST(request: NextRequest) {
       }
     }
     
-    // Final userId: from session, from request, or null for anonymous
+    // Final userId: from session (if we tried to get it), or from request, or null for anonymous
+    // For anonymous users, validatedData.userId is null, so userId will be null
+    // For logged-in users, userId comes from session or validatedData.userId
     userId = userId || validatedData.userId || null;
+    console.log("[POST /api/comments] Final userId:", userId ? "logged-in" : "anonymous", "Time so far:", Date.now() - startTime, "ms");
 
     // Sanitize comment content to prevent XSS
+    console.log("[POST /api/comments] Sanitizing content, length:", validatedData.content.length);
     const sanitizedContent = DOMPurify.sanitize(validatedData.content, {
       ALLOWED_TAGS: [],
       ALLOWED_ATTR: [],
     });
+    console.log("[POST /api/comments] Content sanitized, creating comment in database. Time so far:", Date.now() - startTime, "ms");
 
     // Create comment in database
     const comment = await prisma.comment.create({
@@ -348,6 +363,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    console.log("[POST /api/comments] Comment created, transforming response. Time so far:", Date.now() - startTime, "ms");
+    
     // Transform to response format
     // Ensure Date objects are converted to ISO strings for JSON serialization
     const responseData: Comment = {
@@ -368,6 +385,9 @@ export async function POST(request: NextRequest) {
         : null,
     };
 
+    const totalTime = Date.now() - startTime;
+    console.log("[POST /api/comments] Response ready, total time:", totalTime, "ms");
+    
     return NextResponse.json({
       success: true,
       data: responseData,

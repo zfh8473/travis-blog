@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import { useSession } from "next-auth/react";
 import { Comment } from "./CommentsSection";
@@ -76,6 +76,8 @@ export default function CommentItem({
   
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { data: session } = useSession();
   
   // Check if current user is admin
@@ -99,22 +101,35 @@ export default function CommentItem({
   // createdAt is always a string from API response
   // Ensure valid date to prevent React error #418
   let formattedDate: string = "未知时间";
+  let relativeTime: string = "未知时间";
+  let createdAtDate: Date | null = null;
+  
   try {
     const createdAtStr = String(comment.createdAt || "");
     if (createdAtStr && createdAtStr !== "undefined" && createdAtStr !== "null") {
-      const createdAtDate = new Date(createdAtStr);
+      createdAtDate = new Date(createdAtStr);
       if (!isNaN(createdAtDate.getTime())) {
+        // Absolute time for tooltip
         const formatted = format(createdAtDate, "yyyy年MM月dd日 HH:mm", { locale: zhCN });
         formattedDate = formatted && typeof formatted === "string" ? formatted : "未知时间";
+        
+        // Relative time for display
+        const relative = formatDistanceToNow(createdAtDate, {
+          addSuffix: true,
+          locale: zhCN,
+        });
+        relativeTime = relative && typeof relative === "string" ? relative : "未知时间";
       }
     }
   } catch (error) {
     console.error("Error formatting date:", error, "createdAt:", comment.createdAt);
     formattedDate = "未知时间";
+    relativeTime = "未知时间";
   }
   
   // Final safety check
   const safeFormattedDate = formattedDate && typeof formattedDate === "string" ? formattedDate : "未知时间";
+  const safeRelativeTime = relativeTime && typeof relativeTime === "string" ? relativeTime : "未知时间";
 
   // Check if this comment is a reply (has parentId)
   const isReply = !!comment.parentId;
@@ -176,29 +191,16 @@ export default function CommentItem({
     }
   };
 
-  // Handle delete button click
-  const handleDeleteClick = async () => {
-    // Count replies (including nested ones)
-    const countReplies = (comment: Comment): number => {
-      let count = comment.replies?.length || 0;
-      if (comment.replies) {
-        comment.replies.forEach(reply => {
-          count += countReplies(reply);
-        });
-      }
-      return count;
-    };
+  // Handle delete button click - show confirmation dialog
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  };
 
-    const replyCount = countReplies(comment);
-    const confirmMessage = replyCount > 0
-      ? `确定要删除这条留言吗？此留言有 ${replyCount} 条回复，删除后所有回复也将被删除。删除后无法恢复。`
-      : "确定要删除这条留言吗？删除后无法恢复。";
-
-    if (!window.confirm(confirmMessage)) {
-      return;
-    }
-
+  // Handle confirmed delete
+  const handleDeleteConfirm = async () => {
+    setShowDeleteConfirm(false);
     setIsDeleting(true);
+    
     try {
       const res = await fetch(`/api/comments/${comment.id}`, {
         method: "DELETE",
@@ -208,8 +210,6 @@ export default function CommentItem({
       const data = await res.json();
 
       if (data.success) {
-        // Show success message
-        alert("留言删除成功！");
         // Call parent callback to refresh comments
         if (onCommentDeleted) {
           onCommentDeleted();
@@ -228,6 +228,19 @@ export default function CommentItem({
       setIsDeleting(false);
     }
   };
+
+  // Count replies (including nested ones)
+  const countReplies = (comment: Comment): number => {
+    let count = comment.replies?.length || 0;
+    if (comment.replies) {
+      comment.replies.forEach(reply => {
+        count += countReplies(reply);
+      });
+    }
+    return count;
+  };
+
+  const replyCount = countReplies(comment);
 
   return (
     <div 
@@ -272,18 +285,40 @@ export default function CommentItem({
               </span>
             )}
             <span className="font-medium text-gray-900 text-sm sm:text-base">{safeAuthorName}</span>
-            <span className="text-xs sm:text-sm text-gray-500">{safeFormattedDate}</span>
+            <span 
+              className="text-xs sm:text-sm text-gray-500 cursor-help"
+              title={safeFormattedDate}
+            >
+              {safeRelativeTime}
+            </span>
           </div>
 
-          {/* Comment content */}
+          {/* Comment content with expand/collapse */}
           {/* Ensure content is always a string to prevent React error #418 */}
-          <div className="text-gray-700 whitespace-pre-wrap mb-2 text-sm sm:text-base leading-relaxed">
-            {(() => {
-              const content = String(comment.content || "");
-              // Additional safety check
-              return content !== "undefined" && content !== "null" ? content : "";
-            })()}
-          </div>
+          {(() => {
+            const content = String(comment.content || "");
+            const safeContent = content !== "undefined" && content !== "null" ? content : "";
+            const shouldTruncate = safeContent.length > 200;
+            const displayContent = shouldTruncate && !isExpanded 
+              ? safeContent.substring(0, 200) + "..."
+              : safeContent;
+            
+            return (
+              <div className="text-gray-700 whitespace-pre-wrap mb-2 text-sm sm:text-base leading-relaxed">
+                {displayContent}
+                {shouldTruncate && (
+                  <button
+                    type="button"
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="text-blue-600 hover:text-blue-800 text-sm ml-2 font-medium min-h-[44px] min-w-[60px] px-2 active:scale-95 transition-transform"
+                    aria-label={isExpanded ? "收起内容" : "展开内容"}
+                  >
+                    {isExpanded ? "收起" : "展开"}
+                  </button>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Action buttons - 优化触摸目标 */}
           <div className="flex items-center gap-3 sm:gap-4 mt-2">
@@ -318,6 +353,47 @@ export default function CommentItem({
             )}
           </div>
 
+          {/* Delete confirmation modal */}
+          {showDeleteConfirm && (
+            <div 
+              className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+              onClick={() => setShowDeleteConfirm(false)}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="delete-confirm-title"
+            >
+              <div 
+                className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h3 id="delete-confirm-title" className="text-lg font-semibold mb-2 text-gray-900">
+                  确认删除
+                </h3>
+                <p className="text-gray-600 mb-4 text-sm sm:text-base">
+                  {replyCount > 0 
+                    ? `确定要删除这条留言吗？此留言有 ${replyCount} 条回复，删除后所有回复也将被删除。删除后无法恢复。`
+                    : "确定要删除这条留言吗？删除后无法恢复。"}
+                </p>
+                <div className="flex gap-3 justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="px-4 py-2.5 min-h-[44px] border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 active:scale-95 transition-all duration-200 text-sm sm:text-base"
+                  >
+                    取消
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDeleteConfirm}
+                    className="px-4 py-2.5 min-h-[44px] bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 active:scale-95 transition-all duration-200 text-sm sm:text-base font-medium"
+                  >
+                    删除
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Reply count (if has replies) */}
           {comment.replies && Array.isArray(comment.replies) && comment.replies.length > 0 && (
             <span className="text-sm text-gray-500 ml-2">
@@ -325,9 +401,13 @@ export default function CommentItem({
             </span>
           )}
 
-          {/* Reply form */}
-          {showReplyForm && (
-            <div className="mt-4">
+          {/* Reply form with smooth animation */}
+          <div className={`mt-4 transition-all duration-300 ease-in-out ${
+            showReplyForm 
+              ? "opacity-100 max-h-[2000px] overflow-visible" 
+              : "opacity-0 max-h-0 overflow-hidden"
+          }`}>
+            {showReplyForm && (
               <CommentForm
                 articleId={articleId}
                 parentId={comment.id}
@@ -336,8 +416,8 @@ export default function CommentItem({
                 onSuccess={handleReplySuccess}
                 onCancel={() => setShowReplyForm(false)}
               />
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Nested replies */}
           {comment.replies && Array.isArray(comment.replies) && comment.replies.length > 0 && (

@@ -39,9 +39,9 @@ export default function AdminNavigation() {
   const getLinkClasses = (href: string) => {
     const baseClasses = "block px-4 py-2 rounded-lg transition-colors";
     if (isActive(href)) {
-      return `${baseClasses} bg-blue-100 text-blue-900 font-medium`;
+      return `${baseClasses} bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-300 font-medium`;
     }
-    return `${baseClasses} text-gray-700 hover:bg-gray-100`;
+    return `${baseClasses} text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700`;
   };
 
   const navItems = [
@@ -65,16 +65,17 @@ export default function AdminNavigation() {
         </ul>
       </nav>
 
-      {/* Mobile Navigation */}
+      {/* Mobile Navigation - 优化移动端显示 */}
       <div className="md:hidden">
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-4 w-full text-left flex items-center justify-between hover:bg-gray-100 transition-colors"
-          aria-label="Toggle menu"
+          className="w-full text-left flex items-center justify-between p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors min-h-[44px]"
+          aria-label="切换菜单"
+          aria-expanded={isMobileMenuOpen}
         >
-          <span className="font-medium text-gray-900">菜单</span>
+          <span className="font-medium text-gray-900 dark:text-gray-100">菜单</span>
           <svg
-            className={`w-5 h-5 transition-transform ${isMobileMenuOpen ? "rotate-180" : ""}`}
+            className={`w-5 h-5 text-gray-600 dark:text-gray-400 transition-transform ${isMobileMenuOpen ? "rotate-180" : ""}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -88,13 +89,13 @@ export default function AdminNavigation() {
           </svg>
         </button>
         {isMobileMenuOpen && (
-          <nav className="p-2 border-t border-gray-200">
+          <nav className="p-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
             <ul className="space-y-1">
               {navItems.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className={getLinkClasses(item.href)}
+                    className={`${getLinkClasses(item.href)} min-h-[44px] flex items-center dark:text-gray-300 dark:hover:bg-gray-700`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {item.label}

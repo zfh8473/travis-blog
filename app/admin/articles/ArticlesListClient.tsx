@@ -256,12 +256,13 @@ export default function ArticlesListClient({
   const statistics = calculateStatistics();
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">文章管理</h1>
+    <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
+      {/* Page Header - 移动端优化 */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">文章管理</h1>
         <Link
           href="/admin/articles/new"
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full sm:w-auto px-4 py-2.5 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all min-h-[44px] flex items-center justify-center text-sm sm:text-base"
         >
           新建文章
         </Link>
@@ -281,35 +282,35 @@ export default function ArticlesListClient({
         </div>
       )}
 
-      {/* Article Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-sm text-gray-600 mb-1">总文章数</div>
-          <div className="text-2xl font-bold text-gray-900">{statistics.total}</div>
+      {/* Article Statistics - 移动端优化 */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border border-gray-200 dark:border-gray-700">
+          <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">总文章数</div>
+          <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{statistics.total}</div>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-sm text-gray-600 mb-1">已发布</div>
-          <div className="text-2xl font-bold text-green-600">{statistics.published}</div>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border border-gray-200 dark:border-gray-700">
+          <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">已发布</div>
+          <div className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400">{statistics.published}</div>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-sm text-gray-600 mb-1">草稿</div>
-          <div className="text-2xl font-bold text-gray-600">{statistics.drafts}</div>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border border-gray-200 dark:border-gray-700">
+          <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">草稿</div>
+          <div className="text-xl sm:text-2xl font-bold text-gray-600 dark:text-gray-400">{statistics.drafts}</div>
         </div>
       </div>
 
-      {/* Filter and Search Controls */}
-      <div className="bg-white rounded-lg shadow p-4 mb-6">
-        <div className="flex flex-col md:flex-row gap-4">
+      {/* Filter and Search Controls - 移动端优化 */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 sm:p-4 mb-4 sm:mb-6 border border-gray-200 dark:border-gray-700">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           {/* Status Filter */}
           <div className="flex-1">
-            <label htmlFor="status-filter" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="status-filter" className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">
               状态筛选
             </label>
             <select
               id="status-filter"
               value={statusFilter}
               onChange={(e) => handleStatusFilterChange(e.target.value as StatusFilter)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
             >
               <option value="all">全部</option>
               <option value="published">已发布</option>
@@ -319,7 +320,7 @@ export default function ArticlesListClient({
 
           {/* Search Input */}
           <div className="flex-1">
-            <label htmlFor="search-input" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="search-input" className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">
               搜索文章
             </label>
             <input
@@ -328,127 +329,213 @@ export default function ArticlesListClient({
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="输入文章标题搜索..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
             />
           </div>
         </div>
       </div>
 
-      {/* Articles table */}
+      {/* Articles table - 移动端使用卡片布局，桌面端使用表格 */}
       {filteredArticles.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-6 text-center">
-          <p className="text-gray-600">暂无文章</p>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center border border-gray-200 dark:border-gray-700">
+          <p className="text-gray-600 dark:text-gray-400">暂无文章</p>
           <Link
             href="/admin/articles/new"
-            className="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="mt-4 inline-block px-4 py-2.5 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors min-h-[44px] flex items-center justify-center"
           >
             创建第一篇文章
           </Link>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  标题
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  状态
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  作者
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  发布日期
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  操作
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredArticles.map((article) => (
-                <tr key={article.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <div className="text-sm font-medium text-gray-900">
-                      {article.title}
-                    </div>
-                    <div className="mt-1 flex flex-wrap gap-1">
-                      {article.category && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                          {article.category.name}
-                        </span>
-                      )}
-                      {article.tags && article.tags.length > 0 && (
-                        <>
-                          {article.tags.map((tag) => (
-                            <span
-                              key={tag.id}
-                              className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800"
-                            >
-                              {tag.name}
-                            </span>
-                          ))}
-                        </>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        article.status === "PUBLISHED"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {article.status === "PUBLISHED" ? "已发布" : "草稿"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {article.author.name || article.author.id}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatDate(article.publishedAt)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <Link
-                        href={`/admin/articles/${article.id}/edit`}
-                        className="text-blue-600 hover:text-blue-900"
-                      >
-                        编辑
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(article.id, article.title)}
-                        disabled={deletingId === article.id}
-                        className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
-                        aria-label={`删除文章《${article.title}》`}
-                      >
-                        {deletingId === article.id ? "删除中..." : "删除"}
-                      </button>
-                    </div>
-                  </td>
+        <>
+          {/* Desktop Table View - 桌面端表格视图 */}
+          <div className="hidden md:block bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden border border-gray-200 dark:border-gray-700">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    标题
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    状态
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    作者
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    发布日期
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    操作
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                {filteredArticles.map((article) => (
+                  <tr key={article.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <td className="px-6 py-4">
+                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {article.title}
+                      </div>
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        {article.category && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
+                            {article.category.name}
+                          </span>
+                        )}
+                        {article.tags && article.tags.length > 0 && (
+                          <>
+                            {article.tags.map((tag) => (
+                              <span
+                                key={tag.id}
+                                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300"
+                              >
+                                {tag.name}
+                              </span>
+                            ))}
+                          </>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          article.status === "PUBLISHED"
+                            ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
+                            : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300"
+                        }`}
+                      >
+                        {article.status === "PUBLISHED" ? "已发布" : "草稿"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                      {article.author.name || article.author.id}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                      {formatDate(article.publishedAt)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex space-x-2">
+                        <Link
+                          href={`/admin/articles/${article.id}/edit`}
+                          className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
+                        >
+                          编辑
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(article.id, article.title)}
+                          disabled={deletingId === article.id}
+                          className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                          aria-label={`删除文章《${article.title}》`}
+                        >
+                          {deletingId === article.id ? "删除中..." : "删除"}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
 
-          {/* Results info */}
-          <div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
-            <div className="text-sm text-gray-700">
-              {filteredArticles.length === 0 ? (
-                <span>没有找到匹配的文章</span>
-              ) : (
-                <span>
-                  显示 {filteredArticles.length} 篇文章
-                  {searchQuery && `（搜索: "${searchQuery}"）`}
-                  {statusFilter !== "all" && `（筛选: ${statusFilter === "published" ? "已发布" : "草稿"}）`}
-                </span>
-              )}
+            {/* Results info */}
+            <div className="bg-gray-50 dark:bg-gray-700 px-6 py-3 border-t border-gray-200 dark:border-gray-600">
+              <div className="text-sm text-gray-700 dark:text-gray-300">
+                {filteredArticles.length === 0 ? (
+                  <span>没有找到匹配的文章</span>
+                ) : (
+                  <span>
+                    显示 {filteredArticles.length} 篇文章
+                    {searchQuery && `（搜索: "${searchQuery}"）`}
+                    {statusFilter !== "all" && `（筛选: ${statusFilter === "published" ? "已发布" : "草稿"}）`}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+
+          {/* Mobile Card View - 移动端卡片视图 */}
+          <div className="md:hidden space-y-3">
+            {filteredArticles.map((article) => (
+              <div
+                key={article.id}
+                className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border border-gray-200 dark:border-gray-700"
+              >
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 flex-1">
+                    {article.title}
+                  </h3>
+                  <span
+                    className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full flex-shrink-0 ${
+                      article.status === "PUBLISHED"
+                        ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
+                        : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300"
+                    }`}
+                  >
+                    {article.status === "PUBLISHED" ? "已发布" : "草稿"}
+                  </span>
+                </div>
+                
+                <div className="flex flex-wrap gap-1 mb-3">
+                  {article.category && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
+                      {article.category.name}
+                    </span>
+                  )}
+                  {article.tags && article.tags.length > 0 && (
+                    <>
+                      {article.tags.map((tag) => (
+                        <span
+                          key={tag.id}
+                          className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300"
+                        >
+                          {tag.name}
+                        </span>
+                      ))}
+                    </>
+                  )}
+                </div>
+
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-3 border-t border-gray-200 dark:border-gray-700">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+                    <div>作者: {article.author.name || article.author.id}</div>
+                    <div>发布日期: {formatDate(article.publishedAt)}</div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Link
+                      href={`/admin/articles/${article.id}/edit`}
+                      className="px-3 py-1.5 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors min-h-[44px] flex items-center justify-center"
+                    >
+                      编辑
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(article.id, article.title)}
+                      disabled={deletingId === article.id}
+                      className="px-3 py-1.5 text-sm text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] flex items-center justify-center"
+                      aria-label={`删除文章《${article.title}》`}
+                    >
+                      {deletingId === article.id ? "删除中..." : "删除"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {/* Results info - Mobile */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border border-gray-200 dark:border-gray-700">
+              <div className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+                {filteredArticles.length === 0 ? (
+                  <span>没有找到匹配的文章</span>
+                ) : (
+                  <span>
+                    显示 {filteredArticles.length} 篇文章
+                    {searchQuery && `（搜索: "${searchQuery}"）`}
+                    {statusFilter !== "all" && `（筛选: ${statusFilter === "published" ? "已发布" : "草稿"}）`}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

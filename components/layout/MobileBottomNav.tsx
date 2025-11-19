@@ -92,7 +92,7 @@ export default function MobileBottomNav() {
     },
     {
       href: isAuthenticated ? "/profile" : "/login",
-      label: isAuthenticated ? (userName || "我的") : "登录",
+      label: isAuthenticated ? "个人" : "登录",
       icon: isAuthenticated ? (
         // 已登录：显示用户头像图标
         session?.user?.image ? (

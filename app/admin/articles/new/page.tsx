@@ -382,14 +382,14 @@ export default function NewArticlePage() {
   }
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl relative z-10">
-      {/* Page Header Card */}
-      <div className="bg-white/95 backdrop-blur-sm border border-slate-200/80 rounded-xl p-6 shadow-sm mb-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-slate-900">创建文章</h1>
+    <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8 relative z-10">
+      {/* Page Header Card - 移动端优化 */}
+      <div className="bg-white dark:bg-gray-800/95 backdrop-blur-sm border border-slate-200/80 dark:border-gray-700/80 rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-gray-100">创建文章</h1>
           <Link
             href="/admin/articles"
-            className="px-4 py-2 text-sm font-medium text-slate-700 bg-white/80 backdrop-blur-sm border border-slate-300 rounded-lg hover:bg-slate-50 hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
+            className="w-full sm:w-auto px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-gray-300 bg-white dark:bg-gray-700/80 backdrop-blur-sm border border-slate-300 dark:border-gray-600 rounded-lg hover:bg-slate-50 dark:hover:bg-gray-700 hover:border-slate-400 dark:hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all min-h-[44px] flex items-center justify-center"
           >
             ← 返回文章列表
           </Link>
@@ -411,19 +411,19 @@ export default function NewArticlePage() {
       )}
 
       {/* Main Form Layout: Desktop - Grid, Mobile - Stack */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
-        {/* Main Form Card */}
-        <div className="bg-white/95 backdrop-blur-sm border border-slate-200/80 rounded-xl p-6 shadow-sm">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 sm:gap-6">
+        {/* Main Form Card - 移动端优化 */}
+        <div className="bg-white dark:bg-gray-800/95 backdrop-blur-sm border border-slate-200/80 dark:border-gray-700/80 rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm">
           <form
             onSubmit={(e) => handleSubmit(e, status)}
             className="space-y-6"
           >
             {/* Title field */}
             <div>
-              <label
-                htmlFor="title"
-                className="block text-sm font-semibold text-slate-600 mb-2"
-              >
+            <label
+              htmlFor="title"
+              className="block text-sm font-semibold text-slate-600 dark:text-gray-300 mb-2"
+            >
                 标题 <span className="text-red-500">*</span>
               </label>
               <input
@@ -431,8 +431,8 @@ export default function NewArticlePage() {
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className={`w-full px-4 py-2 border rounded-lg bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
-                  errors.title ? "border-red-500" : "border-slate-300"
+                className={`w-full px-4 py-2.5 border rounded-lg bg-white dark:bg-gray-800/80 backdrop-blur-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all min-h-[44px] ${
+                  errors.title ? "border-red-500 dark:border-red-500" : "border-slate-300 dark:border-gray-600"
                 }`}
                 placeholder="输入文章标题"
                 maxLength={200}
@@ -445,7 +445,7 @@ export default function NewArticlePage() {
 
             {/* Content field (MarkdownEditor) */}
             <div>
-              <label className="block text-sm font-semibold text-slate-600 mb-2">
+              <label className="block text-sm font-semibold text-slate-600 dark:text-gray-300 mb-2">
                 内容 <span className="text-red-500">*</span>
               </label>
               <MarkdownEditor
@@ -459,8 +459,8 @@ export default function NewArticlePage() {
               )}
             </div>
 
-            {/* Submit buttons */}
-            <div className="flex space-x-4 pt-4 border-t border-slate-200">
+            {/* Submit buttons - 移动端优化 */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:space-x-4 pt-4 border-t border-slate-200 dark:border-gray-700">
               <button
                 type="submit"
                 onClick={(e) => {
@@ -469,7 +469,7 @@ export default function NewArticlePage() {
                   handleSubmit(e as any, "DRAFT");
                 }}
                 disabled={submitting}
-                className="px-6 py-2 text-sm font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-full sm:w-auto px-6 py-2.5 text-sm font-medium text-white bg-slate-600 dark:bg-slate-700 rounded-lg hover:bg-slate-700 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all min-h-[44px] flex items-center justify-center"
               >
                 {submitting ? "保存中..." : "保存为草稿"}
               </button>
@@ -481,7 +481,7 @@ export default function NewArticlePage() {
                   handleSubmit(e as any, "PUBLISHED");
                 }}
                 disabled={submitting}
-                className="px-6 py-2 text-sm font-semibold text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-full sm:w-auto px-6 py-2.5 text-sm font-semibold text-white bg-blue-700 dark:bg-blue-600 rounded-lg hover:bg-blue-800 dark:hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all min-h-[44px] flex items-center justify-center"
               >
                 {submitting ? "发布中..." : "发布"}
               </button>
@@ -489,13 +489,13 @@ export default function NewArticlePage() {
           </form>
         </div>
 
-        {/* Sidebar Card - Metadata */}
-        <div className="space-y-6">
+        {/* Sidebar Card - Metadata - 移动端优化 */}
+        <div className="space-y-4 sm:space-y-6">
           {/* Excerpt field */}
-          <div className="bg-white/95 backdrop-blur-sm border border-slate-200/80 rounded-xl p-6 shadow-sm">
+          <div className="bg-white dark:bg-gray-800/95 backdrop-blur-sm border border-slate-200/80 dark:border-gray-700/80 rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm">
             <label
               htmlFor="excerpt"
-              className="block text-sm font-semibold text-slate-600 mb-2"
+              className="block text-sm font-semibold text-slate-600 dark:text-gray-300 mb-2"
             >
               摘要（可选）
             </label>
@@ -503,8 +503,8 @@ export default function NewArticlePage() {
               id="excerpt"
               value={excerpt}
               onChange={(e) => setExcerpt(e.target.value)}
-              className={`w-full px-4 py-2 border rounded-lg bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
-                errors.excerpt ? "border-red-500" : "border-slate-300"
+              className={`w-full px-4 py-2.5 border rounded-lg bg-white dark:bg-gray-800/80 backdrop-blur-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all min-h-[44px] ${
+                errors.excerpt ? "border-red-500 dark:border-red-500" : "border-slate-300 dark:border-gray-600"
               }`}
               placeholder="输入文章摘要（最多 500 个字符）"
               rows={3}
@@ -517,10 +517,10 @@ export default function NewArticlePage() {
           </div>
 
           {/* Category field */}
-          <div className="bg-white/95 backdrop-blur-sm border border-slate-200/80 rounded-xl p-6 shadow-sm">
+          <div className="bg-white dark:bg-gray-800/95 backdrop-blur-sm border border-slate-200/80 dark:border-gray-700/80 rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm">
             <label
               htmlFor="category"
-              className="block text-sm font-semibold text-slate-600 mb-2"
+              className="block text-sm font-semibold text-slate-600 dark:text-gray-300 mb-2"
             >
               分类（可选）
             </label>
@@ -529,8 +529,8 @@ export default function NewArticlePage() {
                 id="category"
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
-                className={`w-full pl-4 pr-10 py-2 border rounded-lg bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none ${
-                  errors.categoryId ? "border-red-500 focus:border-red-500" : "border-slate-300"
+                className={`w-full pl-4 pr-10 py-2.5 border rounded-lg bg-white dark:bg-gray-800/80 backdrop-blur-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none min-h-[44px] ${
+                  errors.categoryId ? "border-red-500 dark:border-red-500 focus:border-red-500" : "border-slate-300 dark:border-gray-600"
                 }`}
                 disabled={submitting}
               >
@@ -563,8 +563,8 @@ export default function NewArticlePage() {
           </div>
 
           {/* Tags field */}
-          <div className="bg-white/95 backdrop-blur-sm border border-slate-200/80 rounded-xl p-6 shadow-sm">
-            <label className="block text-sm font-semibold text-slate-600 mb-2">
+          <div className="bg-white dark:bg-gray-800/95 backdrop-blur-sm border border-slate-200/80 dark:border-gray-700/80 rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm">
+            <label className="block text-sm font-semibold text-slate-600 dark:text-gray-300 mb-2">
               标签（可选）
             </label>
           
@@ -623,7 +623,7 @@ export default function NewArticlePage() {
                   setTimeout(() => setShowTagSuggestions(false), 200);
                 }}
                 placeholder="输入标签并按 Enter 创建"
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-2.5 border border-slate-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800/80 backdrop-blur-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all min-h-[44px]"
                 disabled={submitting}
               />
 
@@ -693,8 +693,8 @@ export default function NewArticlePage() {
           </div>
 
           {/* Status field */}
-          <div className="bg-white/95 backdrop-blur-sm border border-slate-200/80 rounded-xl p-6 shadow-sm">
-            <label className="block text-sm font-semibold text-slate-600 mb-2">
+          <div className="bg-white dark:bg-gray-800/95 backdrop-blur-sm border border-slate-200/80 dark:border-gray-700/80 rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm">
+            <label className="block text-sm font-semibold text-slate-600 dark:text-gray-300 mb-2">
               状态 <span className="text-red-500">*</span>
             </label>
             <div className="flex space-x-4">

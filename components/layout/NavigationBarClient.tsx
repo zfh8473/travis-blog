@@ -212,26 +212,53 @@ export default function NavigationBarClient({
             )}
           </div>
 
-          {/* Mobile Search Icon - 手机端显示搜索图标 */}
-          <Link
-            href="/search"
-            className="md:hidden p-2 text-slate-700 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-            aria-label="搜索文章"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          {/* Mobile Action Buttons - 手机端显示搜索图标和发布文章按钮（管理员） */}
+          <div className="md:hidden flex items-center gap-2">
+            {/* 搜索图标 */}
+            <Link
+              href="/search"
+              className="p-2 text-slate-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+              aria-label="搜索文章"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          </Link>
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </Link>
+            
+            {/* 发布文章按钮 - 仅管理员可见 */}
+            {isAuthenticated && isAdmin && (
+              <Link
+                href="/admin/articles/new"
+                className="p-2 text-white bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                aria-label="发布文章"
+                title="发布文章"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Mobile Menu - 手机端菜单（平板端和桌面端不显示） */}

@@ -31,13 +31,22 @@ body {
   /* 使用 Inter 字体，更圆润友好 */
   font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
   /* 方案2: 渐变背景 + 装饰性几何图形 - 更柔和的色调 */
+  /* 在移动端使用更浅的渐变，减少对阅读的干扰 */
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 30%, #e8f2ff 60%, #f0f9ff 100%);
   position: relative;
   overflow-x: hidden;
   min-height: 100vh;
 }
 
+/* 移动端：使用更浅的背景渐变，减少视觉干扰 */
+@media (max-width: 768px) {
+  body {
+    background: linear-gradient(135deg, #fafbfc 0%, #f8f9fa 30%, #f5f7fa 60%, #f8fafc 100%);
+  }
+}
+
 /* 方案2: 装饰性几何图形 - 右上角（更圆的椭圆） */
+/* 在移动端降低透明度，减少对阅读的干扰 */
 body::before {
   content: '';
   position: fixed;
@@ -53,6 +62,14 @@ body::before {
     0 0 40px rgba(148, 163, 184, 0.025);
   z-index: 0;
   pointer-events: none;
+  /* 移动端降低透明度 */
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  body::before {
+    opacity: 0.4; /* 移动端降低背景干扰 */
+  }
 }
 
 /* 方案2: 装饰性几何图形 - 左下角（更圆的椭圆） */
@@ -71,6 +88,13 @@ body::after {
     0 0 40px rgba(148, 163, 184, 0.02);
   z-index: 0;
   pointer-events: none;
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  body::after {
+    opacity: 0.4; /* 移动端降低背景干扰 */
+  }
 }
 
 /* 方案2: 额外的装饰性图形 - 中间偏右（更圆的椭圆） */
@@ -88,6 +112,13 @@ body::after {
     0 0 30px rgba(148, 163, 184, 0.02);
   z-index: 0;
   pointer-events: none;
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .decorative-circle-1 {
+    opacity: 0.3; /* 移动端进一步降低背景干扰 */
+  }
 }
 
 /* 方案2: 额外的装饰性图形 - 中间偏左（更圆的椭圆） */
@@ -105,6 +136,13 @@ body::after {
     0 0 25px rgba(148, 163, 184, 0.02);
   z-index: 0;
   pointer-events: none;
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .decorative-circle-2 {
+    opacity: 0.3; /* 移动端进一步降低背景干扰 */
+  }
 }
 
 /* 确保主要内容在装饰元素之上 */

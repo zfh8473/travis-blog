@@ -88,9 +88,9 @@ export default function ArticleDetail({
     : null;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 max-w-4xl relative z-10">
       {/* Article header */}
-      <header className="mb-10">
+      <header className="mb-8 sm:mb-10">
         <h1 className="text-5xl font-bold mb-6 leading-snug tracking-normal 
           bg-gradient-to-r from-slate-600 via-slate-700 to-slate-800 bg-clip-text text-transparent
           relative pb-5
@@ -197,13 +197,14 @@ export default function ArticleDetail({
 
       {/* Article excerpt */}
       {excerpt && (
-        <div className="mb-6 p-4 bg-gray-50 border-l-4 border-blue-500 rounded">
-          <p className="text-gray-700 italic">{excerpt}</p>
+        <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-800/50 border-l-4 border-blue-500 dark:border-blue-400 rounded backdrop-blur-sm">
+          <p className="text-gray-700 dark:text-gray-300 italic">{excerpt}</p>
         </div>
       )}
 
-      {/* Article content */}
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm px-6 py-8 md:px-10 md:py-12">
+      {/* Article content - 增强视觉分离，减少背景干扰 */}
+      {/* 使用更强的背景和阴影，在移动端提供更好的阅读体验 */}
+      <div className="bg-white dark:bg-gray-900/95 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl px-4 sm:px-6 py-6 sm:py-8 md:px-10 md:py-12 relative z-10">
         <article
           className="prose prose-lg prose-slate max-w-none
             prose-headings:font-bold prose-headings:text-slate-900

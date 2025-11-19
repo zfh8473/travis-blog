@@ -2,17 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useUserRole } from "@/lib/hooks/useUserRole";
 
 /**
  * Mobile bottom navigation bar component.
  * 
  * Displays fixed bottom navigation on mobile devices (max-width: 768px).
- * Contains: 首页, 分类, 标签, 搜索, 我的
+ * Contains: 首页, 分类, 标签, 搜索, 登录/我的
  * 
  * @component
  */
 export default function MobileBottomNav() {
   const pathname = usePathname();
+  const { isAuthenticated, userName, session } = useUserRole();
 
   /**
    * Checks if a navigation link is active.
@@ -28,6 +30,7 @@ export default function MobileBottomNav() {
     return pathname.startsWith(href);
   };
 
+  // 动态生成导航项，根据登录状态调整"我的"项
   const navItems = [
     {
       href: "/",
@@ -106,9 +109,33 @@ export default function MobileBottomNav() {
       ),
     },
     {
-      href: "/profile",
-      label: "我的",
-      icon: (
+      href: isAuthenticated ? "/profile" : "/login",
+      label: isAuthenticated ? (userName || "我的") : "登录",
+      icon: isAuthenticated ? (
+        // 已登录：显示用户头像图标
+        session?.user?.image ? (
+          <img
+            src={session.user.image}
+            alt={userName || "用户"}
+            className="w-5 h-5 rounded-full object-cover"
+          />
+        ) : (
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            />
+          </svg>
+        )
+      ) : (
+        // 未登录：显示登录图标
         <svg
           className="w-5 h-5"
           fill="none"
@@ -119,7 +146,7 @@ export default function MobileBottomNav() {
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth={2}
-            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
           />
         </svg>
       ),
@@ -132,7 +159,7 @@ export default function MobileBottomNav() {
       <div className="lg:hidden h-16" />
       
       {/* Mobile bottom navigation */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200/80 shadow-lg">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-slate-200/80 dark:border-gray-700/80 shadow-lg">
         <div className="flex items-center justify-around h-16">
           {navItems.map((item) => {
             const active = isActive(item.href);
@@ -140,22 +167,22 @@ export default function MobileBottomNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center justify-center gap-1 flex-1 h-full min-h-[44px] transition-colors ${
+                className={`relative flex flex-col items-center justify-center gap-1 flex-1 h-full min-h-[44px] transition-colors ${
                   active
-                    ? "text-blue-600"
-                    : "text-slate-600 hover:text-blue-600"
+                    ? "text-blue-600 dark:text-blue-400"
+                    : "text-slate-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
                 }`}
               >
                 <div
-                  className={`transition-transform ${
+                  className={`transition-transform flex items-center justify-center ${
                     active ? "scale-110" : "scale-100"
                   }`}
                 >
                   {item.icon}
                 </div>
-                <span className="text-xs font-medium">{item.label}</span>
+                <span className="text-xs font-medium truncate max-w-[60px] text-center">{item.label}</span>
                 {active && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-t-full" />
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-400 rounded-t-full" />
                 )}
               </Link>
             );

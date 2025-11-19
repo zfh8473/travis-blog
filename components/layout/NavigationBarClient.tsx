@@ -251,39 +251,9 @@ export default function NavigationBarClient({
           </button>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu - 简化：移除搜索（底部导航栏已有），只保留导航链接和操作按钮 */}
         {isMobileMenuOpen && (
           <div className="lg:hidden border-t border-slate-200 bg-white/98 backdrop-blur-md">
-            {/* Mobile Search */}
-            <form onSubmit={handleSearch} className="p-4 border-b border-slate-200">
-              <div className="relative">
-                <div className="absolute left-3 top-0 bottom-0 flex items-center pointer-events-none">
-                  <svg
-                    className="w-4 h-4 text-slate-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                </div>
-                        <input
-                          type="text"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          placeholder="搜索文章..."
-                          className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all min-h-[44px] search-input-focus"
-                          aria-label="搜索文章"
-                        />
-              </div>
-            </form>
-
             {/* Mobile Navigation Links */}
             <div className="p-4 space-y-1">
               <Link

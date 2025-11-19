@@ -58,13 +58,9 @@ export default function ArticleFilters({
     startTransition(() => {
       // Use replace instead of push to avoid adding to history
       router.replace(newUrl);
-    });
-    
-    // Explicitly refresh to ensure Server Component re-renders
-    // This is necessary because router.replace may not trigger a re-render immediately
-    setTimeout(() => {
+      // Refresh immediately after replace to ensure Server Component re-renders
       router.refresh();
-    }, 0);
+    });
   };
 
   return (

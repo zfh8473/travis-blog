@@ -97,21 +97,28 @@ async function fetchArticles(
     }
 
     // Determine sort order
+    // For "最多评论" and "最热", we need to fetch all articles first, then sort in memory
+    // because Prisma doesn't support ordering by relation count directly in a single query
     let orderBy: any = {
       publishedAt: "desc", // Default: newest first
     };
+    let needInMemorySort = false;
+    let sortType: "comments" | "views" | null = null;
 
     if (sort === "最早") {
       // Sort by publishedAt ascending (oldest first)
       orderBy = { publishedAt: "asc" };
     } else if (sort === "最热") {
-      // For "最热", we'll use publishedAt desc as a proxy (can be enhanced with view count later)
-      orderBy = { publishedAt: "desc" };
+      // Sort by views descending (most viewed first)
+      orderBy = { views: "desc" };
     } else if (sort === "最多评论") {
-      // For "最多评论", we'll use publishedAt desc as a proxy (can be enhanced with comment count later)
+      // Need to sort by comment count - fetch all and sort in memory
+      needInMemorySort = true;
+      sortType = "comments";
+      // Use publishedAt as initial sort, will re-sort after fetching
       orderBy = { publishedAt: "desc" };
     } else {
-      // "最新" or default
+      // "最新" or default - sort by publishedAt descending (newest first)
       orderBy = { publishedAt: "desc" };
     }
 
@@ -122,10 +129,13 @@ async function fetchArticles(
     const totalPages = Math.ceil(total / take);
 
     // Query articles from database
+    // If we need to sort by comment count, fetch more articles than needed
+    // to ensure we get the correct top N after sorting
+    const fetchLimit = needInMemorySort ? Math.min(total, 100) : take;
     const articles = await prisma.article.findMany({
       where,
-      skip,
-      take,
+      skip: needInMemorySort ? 0 : skip, // Fetch from beginning if sorting in memory
+      take: needInMemorySort ? fetchLimit : take,
       orderBy,
       include: {
         author: {
@@ -141,21 +151,42 @@ async function fetchArticles(
             tag: true,
           },
         },
+        _count: {
+          select: {
+            comments: true, // Include comment count for sorting
+          },
+        },
       },
     });
+
+    // Sort in memory if needed (for comment count)
+    let sortedArticles = articles;
+    if (needInMemorySort && sortType === "comments") {
+      sortedArticles = articles.sort((a, b) => {
+        const aCount = a._count.comments || 0;
+        const bCount = b._count.comments || 0;
+        return bCount - aCount; // Descending order (most comments first)
+      });
+      // Apply pagination after sorting
+      sortedArticles = sortedArticles.slice(skip, skip + take);
+    }
 
     // Transform tags to simple array format
     // Type assertion is safe because we filter for PUBLISHED status in where clause
     // Note: views field may not exist if migration hasn't run yet, use optional chaining
-    const transformedArticles: Article[] = articles.map((article) => ({
-      ...article,
-      status: "PUBLISHED" as const, // Explicitly set status since we filtered for PUBLISHED
-      publishedAt: article.publishedAt?.toISOString() || null,
-      views: (article as any).views ?? 0, // Use type assertion and nullish coalescing for migration compatibility
-      createdAt: article.createdAt.toISOString(),
-      updatedAt: article.updatedAt.toISOString(),
-      tags: article.tags.map((at) => at.tag),
-    }));
+    const transformedArticles: Article[] = sortedArticles.map((article) => {
+      // Remove _count from the article object as it's not part of the Article interface
+      const { _count, ...articleWithoutCount } = article;
+      return {
+        ...articleWithoutCount,
+        status: "PUBLISHED" as const, // Explicitly set status since we filtered for PUBLISHED
+        publishedAt: article.publishedAt?.toISOString() || null,
+        views: (article as any).views ?? 0, // Use type assertion and nullish coalescing for migration compatibility
+        createdAt: article.createdAt.toISOString(),
+        updatedAt: article.updatedAt.toISOString(),
+        tags: article.tags.map((at) => at.tag),
+      };
+    });
 
     return {
       articles: transformedArticles,

@@ -7,8 +7,9 @@ import { useUserRole } from "@/lib/hooks/useUserRole";
 /**
  * Mobile bottom navigation bar component.
  * 
- * Displays fixed bottom navigation on mobile devices (max-width: 768px).
- * Contains: 首页, 分类, 标签, 搜索, 登录/我的
+ * Displays fixed bottom navigation on mobile devices only (< 768px).
+ * Tablet and desktop devices use the full top navigation bar instead.
+ * Contains: 首页, 分类, 标签, 登录/我的 (搜索在顶部导航栏)
  * 
  * @component
  */
@@ -90,25 +91,6 @@ export default function MobileBottomNav() {
       ),
     },
     {
-      href: "/search",
-      label: "搜索",
-      icon: (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
-      ),
-    },
-    {
       href: isAuthenticated ? "/profile" : "/login",
       label: isAuthenticated ? (userName || "我的") : "登录",
       icon: isAuthenticated ? (
@@ -156,10 +138,11 @@ export default function MobileBottomNav() {
   return (
     <>
       {/* Spacer to prevent content from being hidden behind fixed bottom nav */}
-      <div className="lg:hidden h-16" />
+      {/* 只在手机端显示（< 768px），平板端和桌面端不显示 */}
+      <div className="md:hidden h-16" />
       
-      {/* Mobile bottom navigation */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-slate-200/80 dark:border-gray-700/80 shadow-lg">
+      {/* Mobile bottom navigation - 只在手机端显示 */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-slate-200/80 dark:border-gray-700/80 shadow-lg">
         <div className="flex items-center justify-around h-16">
           {navItems.map((item) => {
             const active = isActive(item.href);

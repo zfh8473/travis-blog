@@ -96,10 +96,10 @@ export default function NavigationBarClient({
             </div>
           </Link>
 
-          {/* Search Box - Desktop */}
+          {/* Search Box - Desktop and Tablet */}
           <form
             onSubmit={handleSearch}
-            className="hidden lg:flex flex-1 max-w-[400px] relative"
+            className="hidden md:flex flex-1 max-w-[400px] relative"
           >
             <div className="absolute left-3 top-0 bottom-0 flex items-center pointer-events-none">
               <svg
@@ -127,8 +127,8 @@ export default function NavigationBarClient({
                     />
           </form>
 
-          {/* Desktop Navigation Links */}
-          <div className="hidden lg:flex items-center gap-8 flex-shrink-0">
+          {/* Desktop and Tablet Navigation Links */}
+          <div className="hidden md:flex items-center gap-8 flex-shrink-0">
             <Link
               href="/"
               className={`text-sm font-medium transition-colors relative ${
@@ -183,8 +183,8 @@ export default function NavigationBarClient({
             </Link>
           </div>
 
-          {/* Desktop Action Buttons */}
-          <div className="hidden lg:flex items-center gap-4 flex-shrink-0">
+          {/* Desktop and Tablet Action Buttons */}
+          <div className="hidden md:flex items-center gap-4 flex-shrink-0">
             {/* 登录按钮 - 未登录时显示，已登录时显示"个人中心" */}
             {!isAuthenticated ? (
               <Link
@@ -212,48 +212,31 @@ export default function NavigationBarClient({
             )}
           </div>
 
-          {/* Mobile Menu Toggle */}
-          <button
-            onClick={toggleMobileMenu}
-            className="lg:hidden p-2 text-slate-700 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-            aria-label="切换菜单"
-            aria-expanded={isMobileMenuOpen}
+          {/* Mobile Search Icon - 手机端显示搜索图标 */}
+          <Link
+            href="/search"
+            className="md:hidden p-2 text-slate-700 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+            aria-label="搜索文章"
           >
-            {isMobileMenuOpen ? (
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            ) : (
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            )}
-          </button>
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </Link>
         </div>
 
-        {/* Mobile Menu - 简化：移除搜索（底部导航栏已有），只保留导航链接和操作按钮 */}
+        {/* Mobile Menu - 手机端菜单（平板端和桌面端不显示） */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden border-t border-slate-200 bg-white/98 backdrop-blur-md">
+          <div className="md:hidden border-t border-slate-200 bg-white/98 dark:bg-gray-900/98 backdrop-blur-md">
             {/* Mobile Navigation Links */}
             <div className="p-4 space-y-1">
               <Link

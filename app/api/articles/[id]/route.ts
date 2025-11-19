@@ -7,6 +7,10 @@ import { generateUniqueSlug } from "@/lib/utils/slug";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
+// Ensure Node.js runtime for Prisma
+export const runtime = "nodejs";
+export const maxDuration = 30; // 30 seconds max duration
+
 /**
  * Get article detail by ID.
  * 

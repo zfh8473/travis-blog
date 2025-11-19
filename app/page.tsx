@@ -330,6 +330,10 @@ function HomePageLoading() {
  * @example
  * User visits homepage, sees list of published articles with pagination
  */
+// Force dynamic rendering to ensure searchParams changes trigger re-renders
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default function Home({
   searchParams,
 }: {

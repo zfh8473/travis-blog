@@ -1,7 +1,6 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import Link from "next/link";
-import UnreadCommentsBadge from "@/components/admin/UnreadCommentsBadge";
 import UnreadCommentsList from "@/components/admin/UnreadCommentsList";
 
 /**
@@ -42,7 +41,7 @@ export default async function AdminPage() {
       </div>
 
       {/* Quick Links */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Link
           href="/admin/articles"
           className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
@@ -62,10 +61,6 @@ export default async function AdminPage() {
             管理上传的媒体文件
           </p>
         </Link>
-
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition-shadow flex items-center justify-center">
-          <UnreadCommentsBadge />
-        </div>
       </div>
     </div>
   );

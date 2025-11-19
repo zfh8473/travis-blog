@@ -32,7 +32,6 @@ async function createTestUser(email: string, role: Role = Role.USER) {
       email,
       name: `Test ${role}`,
       role,
-      emailVerified: new Date(),
     },
   });
   return user;

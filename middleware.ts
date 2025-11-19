@@ -20,7 +20,13 @@ interface ApiProtectionRule {
  * now only targets API routes.
  */
 const apiProtectionRules: ApiProtectionRule[] = [
-  { prefix: "/api/admin", requiresAdmin: true },
+  {
+    prefix: "/api/admin",
+    requiresAdmin: true,
+    excludePrefixes: [
+      "/api/admin/comments", // Authentication handled in API routes themselves
+    ],
+  },
   {
     prefix: "/api/articles",
     requiresAdmin: true,
@@ -40,7 +46,7 @@ const apiProtectionRules: ApiProtectionRule[] = [
   // { prefix: "/api/tags", requiresAdmin: true, methods: ["POST", "PUT", "PATCH", "DELETE"] },
   // Note: /api/admin/comments authentication is handled in the API routes themselves
   // This avoids middleware token retrieval issues in Vercel serverless environment
-  // { prefix: "/api/admin/comments", requiresAdmin: true },
+  // Added to excludePrefixes of /api/admin rule above
 ];
 
 /**

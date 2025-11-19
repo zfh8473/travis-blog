@@ -35,9 +35,13 @@ export interface Comment {
  * Returns comments in nested structure, sorted by creation time.
  */
 export async function GET(request: NextRequest) {
+  const startTime = Date.now();
+  console.log("[GET /api/comments] Request received at", new Date().toISOString());
+  
   try {
     const searchParams = request.nextUrl.searchParams;
     const articleId = searchParams.get("articleId");
+    console.log("[GET /api/comments] articleId:", articleId);
 
     // Validate input
     const validationResult = getCommentsSchema.safeParse({ articleId });

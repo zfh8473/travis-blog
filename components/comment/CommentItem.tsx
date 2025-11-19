@@ -247,7 +247,7 @@ export default function CommentItem({
             className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover shrink-0"
           />
         ) : (
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-300 flex items-center justify-center flex-shrink-0">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-300 flex items-center justify-center shrink-0">
             <span className="text-gray-600 text-xs sm:text-sm font-medium">
               {safeAuthorName && safeAuthorName.length > 0 ? safeAuthorName.charAt(0).toUpperCase() : "?"}
             </span>

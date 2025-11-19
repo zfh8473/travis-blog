@@ -168,28 +168,28 @@ export default function CommentForm({
   return (
     <form 
       onSubmit={handleSubmit} 
-      className={`space-y-4 ${isReplyMode ? "sm:ml-8 ml-0 sm:border-l-2 sm:pl-4 bg-gray-50 sm:bg-transparent p-3 sm:p-0 rounded-lg sm:rounded-none border-l-4 border-blue-200 sm:border-l-2 sm:border-gray-200" : ""}`}
+      className={`space-y-4 ${isReplyMode ? "sm:ml-8 ml-0 sm:border-l-2 sm:pl-4 bg-gray-50 dark:bg-gray-800/50 sm:bg-transparent dark:sm:bg-transparent p-3 sm:p-0 rounded-lg sm:rounded-none border-l-4 border-blue-200 dark:border-blue-700 sm:border-l-2 sm:border-gray-200 dark:sm:border-gray-700" : ""}`}
       aria-label={isReplyMode ? "回复留言表单" : "留言表单"}
     >
       {/* Reply mode indication */}
       {isReplyMode && parentAuthorName && (
-        <div className="text-sm text-gray-600 mb-2">
-          回复 <span className="font-medium text-blue-600">@{String(parentAuthorName || "")}</span>
+        <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+          回复 <span className="font-medium text-blue-600 dark:text-blue-400">@{String(parentAuthorName || "")}</span>
         </div>
       )}
 
       {/* Name input for anonymous users */}
       {!isLoggedIn && (
         <div>
-          <label htmlFor="authorName" className="block text-sm font-medium text-gray-700 mb-1">
-            姓名 <span className="text-red-500">*</span>
+          <label htmlFor="authorName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            姓名 <span className="text-red-500 dark:text-red-400">*</span>
           </label>
           <input
             type="text"
             id="authorName"
             value={authorName}
             onChange={(e) => setAuthorName(e.target.value)}
-            className="w-full px-3 py-2.5 min-h-[44px] border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+            className="w-full px-3 py-2.5 min-h-[44px] border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-base"
             placeholder="请输入您的姓名"
             required
             maxLength={100}
@@ -201,15 +201,15 @@ export default function CommentForm({
 
       {/* Comment content */}
       <div>
-        <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-1">
-          留言内容 <span className="text-red-500">*</span>
+        <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          留言内容 <span className="text-red-500 dark:text-red-400">*</span>
         </label>
         <textarea
           id="content"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={4}
-          className="w-full px-3 py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base resize-y"
+          className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-base resize-y"
           placeholder="请输入您的留言..."
           required
           maxLength={5000}
@@ -217,14 +217,14 @@ export default function CommentForm({
           aria-describedby="content-help"
           aria-required="true"
         />
-        <div id="content-help" className="mt-1 text-sm text-gray-500 text-right">
+        <div id="content-help" className="mt-1 text-sm text-gray-500 dark:text-gray-400 text-right">
           {content.length} / 5000
         </div>
       </div>
 
       {/* Error message - 优化样式和位置 */}
       {error && (
-        <div className="bg-red-50 border-l-4 border-red-400 text-red-700 px-4 py-3 rounded-r" role="alert">
+        <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-400 dark:border-red-500 text-red-700 dark:text-red-300 px-4 py-3 rounded-r" role="alert">
           <div className="flex items-start gap-2">
             <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
@@ -236,7 +236,7 @@ export default function CommentForm({
 
       {/* Success message - 优化样式 */}
       {success && (
-        <div className="bg-green-50 border-l-4 border-green-400 text-green-700 px-4 py-3 rounded-r" role="status">
+        <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 dark:border-green-500 text-green-700 dark:text-green-300 px-4 py-3 rounded-r" role="status">
           <div className="flex items-center gap-2">
             <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -253,7 +253,7 @@ export default function CommentForm({
             type="button"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="px-4 sm:px-5 py-2.5 min-h-[44px] min-w-[80px] border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all duration-200 text-sm sm:text-base"
+            className="px-4 sm:px-5 py-2.5 min-h-[44px] min-w-[80px] border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:focus:ring-gray-400 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all duration-200 text-sm sm:text-base"
           >
             取消
           </button>
@@ -261,7 +261,7 @@ export default function CommentForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-5 sm:px-6 py-2.5 min-h-[44px] min-w-[100px] bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base font-medium"
+          className="px-5 sm:px-6 py-2.5 min-h-[44px] min-w-[100px] bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base font-medium"
         >
           {isSubmitting ? (
             <>

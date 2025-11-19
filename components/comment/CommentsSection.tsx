@@ -175,13 +175,13 @@ export default function CommentsSection({
   };
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 max-w-4xl border-t-2 border-gray-300 mt-8 sm:mt-12">
+    <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 max-w-4xl border-t-2 border-gray-300 dark:border-gray-700 mt-8 sm:mt-12">
       {/* 优化标题区域 - 添加视觉分隔和留言数量 */}
       <div className="flex items-center gap-3 mb-6 sm:mb-8">
-        <div className="w-1 h-6 sm:h-8 bg-blue-600 rounded-full"></div>
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">留言讨论</h2>
+        <div className="w-1 h-6 sm:h-8 bg-blue-600 dark:bg-blue-500 rounded-full"></div>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">留言讨论</h2>
         {!loading && (
-          <span className="text-xs sm:text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+          <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full">
             {comments.length} 条
           </span>
         )}
@@ -194,7 +194,7 @@ export default function CommentsSection({
 
       {/* Error message - 优化移动端显示 */}
       {error && (
-        <div className="bg-red-50 border-l-4 border-red-400 text-red-700 px-4 py-3 rounded-r mb-4 sm:mb-6">
+        <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-400 dark:border-red-500 text-red-700 dark:text-red-300 px-4 py-3 rounded-r mb-4 sm:mb-6">
           <div className="flex items-start gap-2">
             <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
@@ -206,17 +206,17 @@ export default function CommentsSection({
 
       {/* Comments list */}
       <div>
-        <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900">所有留言</h3>
+        <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">所有留言</h3>
         {loading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="border-b border-gray-200 py-4">
+              <div key={i} className="border-b border-gray-200 dark:border-gray-700 py-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
+                  <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-gray-200 rounded w-1/4 animate-pulse" />
-                    <div className="h-4 bg-gray-200 rounded w-full animate-pulse" />
-                    <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse" />
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4 animate-pulse" />
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full animate-pulse" />
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 animate-pulse" />
                   </div>
                 </div>
               </div>

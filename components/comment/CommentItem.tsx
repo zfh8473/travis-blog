@@ -247,9 +247,9 @@ export default function CommentItem({
       id={`comment-${comment.id}`}
       className={`${
         isReply 
-          ? "sm:ml-8 ml-0 sm:pl-4 bg-gray-50 sm:bg-transparent p-3 sm:p-0 rounded-lg sm:rounded-none border-l-4 border-blue-200 sm:border-l-2 sm:border-gray-200" 
+          ? "sm:ml-8 ml-0 sm:pl-4 bg-gray-50 dark:bg-gray-800/50 sm:bg-transparent dark:sm:bg-transparent p-3 sm:p-0 rounded-lg sm:rounded-none border-l-4 border-blue-200 dark:border-blue-700 sm:border-l-2 sm:border-gray-200 dark:sm:border-gray-700" 
           : ""
-      } border-b border-gray-200 py-3 sm:py-4`}
+      } border-b border-gray-200 dark:border-gray-700 py-3 sm:py-4`}
     >
       <div className="flex items-start gap-2 sm:gap-3">
         {/* Author avatar - 移动端稍小 */}
@@ -260,8 +260,8 @@ export default function CommentItem({
             className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover shrink-0"
           />
         ) : (
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-300 flex items-center justify-center shrink-0">
-            <span className="text-gray-600 text-xs sm:text-sm font-medium">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center shrink-0">
+            <span className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm font-medium">
               {safeAuthorName && safeAuthorName.length > 0 ? safeAuthorName.charAt(0).toUpperCase() : "?"}
             </span>
           </div>
@@ -272,21 +272,21 @@ export default function CommentItem({
           {/* Author name and timestamp - 移动端优化布局 */}
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
             {isReply && parentAuthorName && (
-              <span className="text-xs sm:text-sm text-gray-500">
+              <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                 回复{" "}
                 <button
                   type="button"
                   onClick={handleScrollToParent}
-                  className="text-blue-600 hover:text-blue-800 font-medium underline min-h-[44px] min-w-[44px] px-1"
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium underline min-h-[44px] min-w-[44px] px-1"
                   aria-label={`跳转到 @${parentAuthorName} 的留言`}
                 >
                   @{String(parentAuthorName || "")}
                 </button>
               </span>
             )}
-            <span className="font-medium text-gray-900 text-sm sm:text-base">{safeAuthorName}</span>
+            <span className="font-medium text-gray-900 dark:text-gray-100 text-sm sm:text-base">{safeAuthorName}</span>
             <span 
-              className="text-xs sm:text-sm text-gray-500 cursor-help"
+              className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 cursor-help"
               title={safeFormattedDate}
             >
               {safeRelativeTime}
@@ -304,13 +304,13 @@ export default function CommentItem({
               : safeContent;
             
             return (
-              <div className="text-gray-700 whitespace-pre-wrap mb-2 text-sm sm:text-base leading-relaxed">
+              <div className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap mb-2 text-sm sm:text-base leading-relaxed">
                 {displayContent}
                 {shouldTruncate && (
                   <button
                     type="button"
                     onClick={() => setIsExpanded(!isExpanded)}
-                    className="text-blue-600 hover:text-blue-800 text-sm ml-2 font-medium min-h-[44px] min-w-[60px] px-2 active:scale-95 transition-transform"
+                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm ml-2 font-medium min-h-[44px] min-w-[60px] px-2 active:scale-95 transition-transform"
                     aria-label={isExpanded ? "收起内容" : "展开内容"}
                   >
                     {isExpanded ? "收起" : "展开"}
@@ -326,7 +326,7 @@ export default function CommentItem({
             {canReply && (
               <button
                 type="button"
-                className="text-sm sm:text-base text-blue-600 hover:text-blue-800 font-medium min-h-[44px] min-w-[60px] px-2 active:scale-95 transition-transform"
+                className="text-sm sm:text-base text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium min-h-[44px] min-w-[60px] px-2 active:scale-95 transition-transform"
                 onClick={handleReplyClick}
                 aria-label="回复留言"
               >
@@ -334,7 +334,7 @@ export default function CommentItem({
               </button>
             )}
             {!canReply && (
-              <span className="text-xs sm:text-sm text-gray-400">
+              <span className="text-xs sm:text-sm text-gray-400 dark:text-gray-500">
                 已达到最大回复深度
               </span>
             )}
@@ -343,7 +343,7 @@ export default function CommentItem({
             {isAdmin && (
               <button
                 type="button"
-                className="text-sm sm:text-base text-red-600 hover:text-red-800 font-medium disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] min-w-[60px] px-2 active:scale-95 transition-transform"
+                className="text-sm sm:text-base text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] min-w-[60px] px-2 active:scale-95 transition-transform"
                 onClick={handleDeleteClick}
                 disabled={isDeleting}
                 aria-label="删除留言"
@@ -356,20 +356,20 @@ export default function CommentItem({
           {/* Delete confirmation modal */}
           {showDeleteConfirm && (
             <div 
-              className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+              className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4"
               onClick={() => setShowDeleteConfirm(false)}
               role="dialog"
               aria-modal="true"
               aria-labelledby="delete-confirm-title"
             >
               <div 
-                className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl"
+                className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full shadow-xl"
                 onClick={(e) => e.stopPropagation()}
               >
-                <h3 id="delete-confirm-title" className="text-lg font-semibold mb-2 text-gray-900">
+                <h3 id="delete-confirm-title" className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">
                   确认删除
                 </h3>
-                <p className="text-gray-600 mb-4 text-sm sm:text-base">
+                <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm sm:text-base">
                   {replyCount > 0 
                     ? `确定要删除这条留言吗？此留言有 ${replyCount} 条回复，删除后所有回复也将被删除。删除后无法恢复。`
                     : "确定要删除这条留言吗？删除后无法恢复。"}
@@ -378,14 +378,14 @@ export default function CommentItem({
                   <button
                     type="button"
                     onClick={() => setShowDeleteConfirm(false)}
-                    className="px-4 py-2.5 min-h-[44px] border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 active:scale-95 transition-all duration-200 text-sm sm:text-base"
+                    className="px-4 py-2.5 min-h-[44px] border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:focus:ring-gray-400 focus:ring-offset-2 dark:focus:ring-offset-gray-800 active:scale-95 transition-all duration-200 text-sm sm:text-base"
                   >
                     取消
                   </button>
                   <button
                     type="button"
                     onClick={handleDeleteConfirm}
-                    className="px-4 py-2.5 min-h-[44px] bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 active:scale-95 transition-all duration-200 text-sm sm:text-base font-medium"
+                    className="px-4 py-2.5 min-h-[44px] bg-red-600 dark:bg-red-500 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:ring-offset-2 dark:focus:ring-offset-gray-800 active:scale-95 transition-all duration-200 text-sm sm:text-base font-medium"
                   >
                     删除
                   </button>
@@ -396,7 +396,7 @@ export default function CommentItem({
 
           {/* Reply count (if has replies) */}
           {comment.replies && Array.isArray(comment.replies) && comment.replies.length > 0 && (
-            <span className="text-sm text-gray-500 ml-2">
+            <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
               {String(comment.replies.length)} 条回复
             </span>
           )}

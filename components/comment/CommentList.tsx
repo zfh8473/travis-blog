@@ -36,7 +36,7 @@ export default function CommentList({
 }: CommentListProps) {
   if (comments.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
         <p>还没有留言，快来发表第一条留言吧！</p>
       </div>
     );

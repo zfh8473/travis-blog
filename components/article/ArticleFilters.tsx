@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 
 /**
  * Category interface.
@@ -30,6 +30,7 @@ export default function ArticleFilters({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [sort, setSort] = useState(searchParams.get("sort") || "最新");
+  const [isPending, startTransition] = useTransition();
 
   // Sync with URL params on mount
   useEffect(() => {
@@ -48,9 +49,22 @@ export default function ArticleFilters({
       params.set("sort", value);
     }
     params.delete("page"); // Reset to first page when sorting
-    // Use router.push with refresh to ensure page updates
-    router.push(`/?${params.toString()}`);
-    router.refresh();
+    
+    // Build new URL
+    const newUrl = params.toString() ? `/?${params.toString()}` : "/";
+    
+    // Use startTransition to wrap the navigation update
+    // This ensures the Server Component re-renders with new searchParams
+    startTransition(() => {
+      // Use replace instead of push to avoid adding to history
+      router.replace(newUrl);
+    });
+    
+    // Explicitly refresh to ensure Server Component re-renders
+    // This is necessary because router.replace may not trigger a re-render immediately
+    setTimeout(() => {
+      router.refresh();
+    }, 0);
   };
 
   return (
@@ -68,7 +82,8 @@ export default function ArticleFilters({
               id="sort-filter"
               value={sort}
               onChange={(e) => handleSortChange(e.target.value)}
-              className="appearance-none pl-4 pr-10 py-2 text-sm font-normal text-slate-900 border border-slate-300 rounded-lg bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer min-w-[120px]"
+              disabled={isPending}
+              className="appearance-none pl-4 pr-10 py-2 text-sm font-normal text-slate-900 border border-slate-300 rounded-lg bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer min-w-[120px] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="最新">最新</option>
               <option value="最早">最早</option>

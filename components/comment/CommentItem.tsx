@@ -275,9 +275,9 @@ export default function CommentItem({
           </div>
 
           {/* Reply count (if has replies) */}
-          {comment.replies && comment.replies.length > 0 && (
+          {comment.replies && Array.isArray(comment.replies) && comment.replies.length > 0 && (
             <span className="text-sm text-gray-500 ml-2">
-              {comment.replies.length} 条回复
+              {String(comment.replies.length)} 条回复
             </span>
           )}
 
@@ -296,18 +296,25 @@ export default function CommentItem({
           )}
 
           {/* Nested replies */}
-          {comment.replies && comment.replies.length > 0 && (
+          {comment.replies && Array.isArray(comment.replies) && comment.replies.length > 0 && (
             <div className="mt-4 space-y-0">
-              {comment.replies.map((reply) => (
-                <CommentItem
-                  key={reply.id}
-                  comment={reply}
-                  depth={currentDepth + 1}
-                  allComments={allComments}
-                  articleId={articleId}
-                  onCommentDeleted={onCommentDeleted}
-                />
-              ))}
+              {comment.replies.map((reply) => {
+                // Ensure reply is valid before rendering
+                if (!reply || !reply.id) {
+                  console.warn("Invalid reply data:", reply);
+                  return null;
+                }
+                return (
+                  <CommentItem
+                    key={reply.id}
+                    comment={reply}
+                    depth={currentDepth + 1}
+                    allComments={allComments}
+                    articleId={articleId}
+                    onCommentDeleted={onCommentDeleted}
+                  />
+                );
+              })}
             </div>
           )}
         </div>

@@ -74,7 +74,31 @@ export default function CommentsSection({
       const data = await res.json();
 
       if (data.success) {
-        setComments(data.data);
+        // Recursively sanitize comment data to prevent React errors
+        const sanitizeComment = (comment: any): Comment => {
+          const sanitized: Comment = {
+            id: String(comment.id || ""),
+            content: String(comment.content || ""),
+            articleId: String(comment.articleId || ""),
+            userId: comment.userId ? String(comment.userId) : null,
+            parentId: comment.parentId ? String(comment.parentId) : null,
+            authorName: comment.authorName ? String(comment.authorName) : null,
+            createdAt: String(comment.createdAt || ""),
+            updatedAt: String(comment.updatedAt || ""),
+            user: comment.user ? {
+              id: String(comment.user.id || ""),
+              name: comment.user.name ? String(comment.user.name) : null,
+              image: comment.user.image ? String(comment.user.image) : null,
+            } : null,
+            replies: Array.isArray(comment.replies) && comment.replies.length > 0
+              ? comment.replies.map(sanitizeComment)
+              : [],
+          };
+          return sanitized;
+        };
+        
+        const sanitizedComments = (data.data || []).map(sanitizeComment);
+        setComments(sanitizedComments);
       } else {
         throw new Error(data.error?.message || "Failed to load comments");
       }

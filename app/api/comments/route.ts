@@ -119,11 +119,20 @@ export async function GET(request: NextRequest) {
     );
 
     // Sort replies within each comment (oldest first)
+    // Ensure replies array is valid before sorting
     const sortReplies = (comment: any) => {
-      if (comment.replies && comment.replies.length > 0) {
+      if (comment.replies && Array.isArray(comment.replies) && comment.replies.length > 0) {
         comment.replies.sort(
-          (a: any, b: any) =>
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          (a: any, b: any) => {
+            try {
+              const dateA = new Date(a.createdAt || "").getTime();
+              const dateB = new Date(b.createdAt || "").getTime();
+              return dateA - dateB;
+            } catch (error) {
+              console.error("Error sorting replies:", error);
+              return 0;
+            }
+          }
         );
         comment.replies.forEach(sortReplies);
       }

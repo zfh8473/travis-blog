@@ -243,15 +243,18 @@ async function fetchArticles(
 async function HomePageContent({
   searchParams,
 }: {
-  searchParams: { page?: string; limit?: string; category?: string; sort?: string };
+  searchParams: Promise<{ page?: string; limit?: string; category?: string; sort?: string }>;
 }) {
-  const page = Math.max(1, parseInt(searchParams.page || "1", 10));
-  const limit = Math.min(100, Math.max(1, parseInt(searchParams.limit || "20", 10)));
-  const category = searchParams.category || "全部";
-  const sort = searchParams.sort || "最新";
+  // In Next.js 15, searchParams is a Promise and needs to be awaited
+  const resolvedSearchParams = await searchParams;
+  
+  const page = Math.max(1, parseInt(resolvedSearchParams.page || "1", 10));
+  const limit = Math.min(100, Math.max(1, parseInt(resolvedSearchParams.limit || "20", 10)));
+  const category = resolvedSearchParams.category || "全部";
+  const sort = resolvedSearchParams.sort || "最新";
 
   // Debug: Log searchParams
-  console.log("[HomePageContent] searchParams:", searchParams);
+  console.log("[HomePageContent] resolvedSearchParams:", resolvedSearchParams);
   console.log("[HomePageContent] sort value:", sort, "type:", typeof sort);
 
   try {
@@ -352,7 +355,7 @@ export const revalidate = 0;
 export default function Home({
   searchParams,
 }: {
-  searchParams: { page?: string; limit?: string; category?: string; sort?: string };
+  searchParams: Promise<{ page?: string; limit?: string; category?: string; sort?: string }>;
 }) {
   return (
     <Suspense fallback={<HomePageLoading />}>

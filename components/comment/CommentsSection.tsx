@@ -108,7 +108,7 @@ export default function CommentsSection({
         if (process.env.NODE_ENV === "development" || typeof window !== "undefined") {
           console.log("[CommentsSection] Sanitized comments:", sanitizedComments);
           // Check for any non-string values in text fields
-          sanitizedComments.forEach((comment, index) => {
+          sanitizedComments.forEach((comment: Comment, index: number) => {
             if (typeof comment.content !== "string") {
               console.error(`[CommentsSection] Comment ${index} content is not string:`, comment.content, typeof comment.content);
             }

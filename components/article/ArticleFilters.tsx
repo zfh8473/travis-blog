@@ -53,16 +53,10 @@ export default function ArticleFilters({
     // Build new URL
     const newUrl = params.toString() ? `/?${params.toString()}` : "/";
     
-    // Use router.push to update URL, then explicitly refresh
-    // In Next.js App Router, router.push with same path but different searchParams
-    // may not automatically trigger Server Component re-render
-    startTransition(() => {
-      router.push(newUrl);
-      // Explicitly refresh to ensure Server Component re-renders with new searchParams
-      setTimeout(() => {
-        router.refresh();
-      }, 0);
-    });
+    // Force a full page navigation to ensure Server Component re-renders
+    // This is necessary because router.push + router.refresh may not work reliably
+    // with searchParams changes in Next.js App Router
+    window.location.href = newUrl;
   };
 
   return (

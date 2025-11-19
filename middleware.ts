@@ -35,11 +35,9 @@ const apiProtectionRules: ApiProtectionRule[] = [
   // This avoids Edge Runtime limitations with getToken
   // { prefix: "/api/upload", requiresAdmin: true },
   // { prefix: "/api/media", requiresAdmin: true },
-  {
-    prefix: "/api/tags",
-    requiresAdmin: true,
-    methods: ["POST", "PUT", "PATCH", "DELETE"],
-  },
+  // Note: /api/tags POST/PUT/PATCH/DELETE authentication is handled in the API route itself
+  // This avoids middleware token retrieval issues in Vercel serverless environment
+  // { prefix: "/api/tags", requiresAdmin: true, methods: ["POST", "PUT", "PATCH", "DELETE"] },
 ];
 
 /**

@@ -101,7 +101,10 @@ async function fetchArticles(
       publishedAt: "desc", // Default: newest first
     };
 
-    if (sort === "最热") {
+    if (sort === "最早") {
+      // Sort by publishedAt ascending (oldest first)
+      orderBy = { publishedAt: "asc" };
+    } else if (sort === "最热") {
       // For "最热", we'll use publishedAt desc as a proxy (can be enhanced with view count later)
       orderBy = { publishedAt: "desc" };
     } else if (sort === "最多评论") {

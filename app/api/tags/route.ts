@@ -3,6 +3,8 @@ import { prisma } from "@/lib/db/prisma";
 import { getUserFromRequestOrHeaders } from "@/lib/auth/middleware";
 import { requireAdmin } from "@/lib/auth/permissions";
 import { generateSlug } from "@/lib/utils/slug";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 // Ensure Node.js runtime for Prisma
 export const runtime = "nodejs";
@@ -103,12 +105,48 @@ export async function GET(request: NextRequest) {
  * ```
  */
 export async function POST(request: NextRequest) {
-  // Check authentication and admin role
-  // Use getUserFromRequestOrHeaders for more reliable session retrieval
-  const user = await getUserFromRequestOrHeaders(request, request.headers);
-  const adminError = requireAdmin(user);
+  // Try multiple methods to get user information
+  // 1. First try getUserFromRequestOrHeaders (handles headers and token reading)
+  let user = await getUserFromRequestOrHeaders(request, request.headers);
+  
+  if (process.env.VERCEL_ENV || process.env.NODE_ENV === "development") {
+    console.log("[POST /api/tags] User from getUserFromRequestOrHeaders:", !!user);
+    if (user) {
+      console.log("[POST /api/tags] User role:", user.role);
+    }
+  }
+  
+  // 2. If that fails, try getServerSession as fallback
+  // Note: getServerSession may work better in some Vercel environments
+  // This is especially important when getToken returns null even with cookies present
+  if (!user) {
+    try {
+      const session = await getServerSession(authOptions);
+      if (process.env.VERCEL_ENV || process.env.NODE_ENV === "development") {
+        console.log("[POST /api/tags] Session from getServerSession:", !!session);
+      }
+      if (session?.user) {
+        user = {
+          id: session.user.id,
+          email: session.user.email,
+          name: session.user.name,
+          role: session.user.role,
+        };
+        if (process.env.VERCEL_ENV || process.env.NODE_ENV === "development") {
+          console.log("[POST /api/tags] User from getServerSession, role:", user.role);
+        }
+      }
+    } catch (error) {
+      console.error("Error getting session in POST /api/tags:", error);
+    }
+  }
 
+  // Check authentication and admin role
+  const adminError = requireAdmin(user);
   if (adminError) {
+    if (process.env.VERCEL_ENV || process.env.NODE_ENV === "development") {
+      console.log("[POST /api/tags] Admin check failed, returning error");
+    }
     return adminError;
   }
 

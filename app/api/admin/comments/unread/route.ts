@@ -95,12 +95,14 @@ export async function GET(request: NextRequest) {
 
     // Fetch unread comments with article information
     // Exclude comments made by the admin user themselves
+    // Include guest comments (userId = null) and comments from other users
     const comments = await prisma.comment.findMany({
       where: {
         isRead: false,
-        userId: {
-          not: user.id, // Exclude admin's own comments
-        },
+        OR: [
+          { userId: null }, // Guest comments
+          { userId: { not: user.id } }, // Comments from other users (not admin)
+        ],
       },
       include: {
         article: {

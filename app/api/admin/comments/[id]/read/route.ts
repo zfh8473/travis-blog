@@ -8,11 +8,12 @@ import { getUserFromRequestOrHeaders } from "@/lib/auth/middleware";
 /**
  * PUT /api/admin/comments/[id]/read
  * 
- * Marks a comment as read by the current admin user.
+ * Marks a comment and all other unread comments in the same article as read.
+ * This follows the user's expectation: when clicking a comment, they will read all comments in that article.
  * Only accessible by users with ADMIN role.
  * 
  * @param id - Comment ID from URL parameter
- * @returns { success: true, data: { id: string, isRead: boolean, readAt: string, readBy: string } }
+ * @returns { success: true, data: { id: string, isRead: boolean, readAt: string, readBy: string, markedCount: number } }
  */
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -81,10 +82,10 @@ export async function PUT(
       );
     }
 
-    // Check if comment exists
+    // Check if comment exists and get articleId
     const existingComment = await prisma.comment.findUnique({
       where: { id },
-      select: { id: true, isRead: true },
+      select: { id: true, isRead: true, articleId: true },
     });
 
     if (!existingComment) {
@@ -100,8 +101,40 @@ export async function PUT(
       );
     }
 
-    // If already read, return success without updating
+    // If already read, check if there are other unread comments in the same article
+    // If yes, mark all unread comments in the article as read
     if (existingComment.isRead) {
+      // Check if there are other unread comments in the same article
+      const unreadCount = await prisma.comment.count({
+        where: {
+          articleId: existingComment.articleId,
+          isRead: false,
+          OR: [
+            { userId: null }, // Guest comments
+            { userId: { not: user.id } }, // Comments from other users (not admin)
+          ],
+        },
+      });
+
+      // If there are unread comments, mark them all as read
+      if (unreadCount > 0) {
+        await prisma.comment.updateMany({
+          where: {
+            articleId: existingComment.articleId,
+            isRead: false,
+            OR: [
+              { userId: null }, // Guest comments
+              { userId: { not: user.id } }, // Comments from other users (not admin)
+            ],
+          },
+          data: {
+            isRead: true,
+            readAt: new Date(),
+            readBy: user.id,
+          },
+        });
+      }
+
       return NextResponse.json({
         success: true,
         data: {
@@ -113,14 +146,28 @@ export async function PUT(
       });
     }
 
-    // Mark comment as read
-    const updatedComment = await prisma.comment.update({
-      where: { id },
+    // Mark this comment and all other unread comments in the same article as read
+    // This follows the user's expectation: when clicking a comment, they will read all comments in that article
+    const now = new Date();
+    const updateResult = await prisma.comment.updateMany({
+      where: {
+        articleId: existingComment.articleId,
+        isRead: false,
+        OR: [
+          { userId: null }, // Guest comments
+          { userId: { not: user.id } }, // Comments from other users (not admin)
+        ],
+      },
       data: {
         isRead: true,
-        readAt: new Date(),
+        readAt: now,
         readBy: user.id,
       },
+    });
+
+    // Get the updated comment to return
+    const updatedComment = await prisma.comment.findUnique({
+      where: { id },
       select: {
         id: true,
         isRead: true,
@@ -129,6 +176,19 @@ export async function PUT(
       },
     });
 
+    if (!updatedComment) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            message: "Comment not found after update",
+            code: "NOT_FOUND",
+          },
+        },
+        { status: 404 }
+      );
+    }
+
     return NextResponse.json({
       success: true,
       data: {
@@ -136,6 +196,7 @@ export async function PUT(
         isRead: updatedComment.isRead,
         readAt: updatedComment.readAt?.toISOString() || null,
         readBy: updatedComment.readBy || null,
+        markedCount: updateResult.count, // Return count of marked comments
       },
     });
   } catch (error) {

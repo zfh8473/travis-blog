@@ -143,6 +143,12 @@ async function fetchArticles(
     // If we need to sort by comment count, fetch more articles than needed
     // to ensure we get the correct top N after sorting
     const fetchLimit = needInMemorySort ? Math.min(total, 100) : take;
+    
+    // Debug: Log the orderBy object
+    console.log("[fetchArticles] orderBy:", JSON.stringify(orderBy));
+    console.log("[fetchArticles] needInMemorySort:", needInMemorySort);
+    console.log("[fetchArticles] sortType:", sortType);
+    
     const articles = await prisma.article.findMany({
       where,
       skip: needInMemorySort ? 0 : skip, // Fetch from beginning if sorting in memory
@@ -169,6 +175,14 @@ async function fetchArticles(
         },
       },
     });
+    
+    // Debug: Log the first few articles after query
+    console.log("[fetchArticles] Articles after query (first 3):", articles.slice(0, 3).map(a => ({
+      title: a.title,
+      views: (a as any).views,
+      publishedAt: a.publishedAt,
+      commentCount: a._count?.comments || 0
+    })));
 
     // Sort in memory if needed (for comment count)
     let sortedArticles = articles;

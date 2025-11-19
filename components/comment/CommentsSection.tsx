@@ -74,6 +74,11 @@ export default function CommentsSection({
       const data = await res.json();
 
       if (data.success) {
+        // Debug: Log raw data to help identify React error #418
+        if (process.env.NODE_ENV === "development" || typeof window !== "undefined") {
+          console.log("[CommentsSection] Raw API response:", JSON.stringify(data.data, null, 2));
+        }
+        
         // Recursively sanitize comment data to prevent React errors
         const sanitizeComment = (comment: any): Comment => {
           const sanitized: Comment = {
@@ -98,6 +103,21 @@ export default function CommentsSection({
         };
         
         const sanitizedComments = (data.data || []).map(sanitizeComment);
+        
+        // Debug: Log sanitized data
+        if (process.env.NODE_ENV === "development" || typeof window !== "undefined") {
+          console.log("[CommentsSection] Sanitized comments:", sanitizedComments);
+          // Check for any non-string values in text fields
+          sanitizedComments.forEach((comment, index) => {
+            if (typeof comment.content !== "string") {
+              console.error(`[CommentsSection] Comment ${index} content is not string:`, comment.content, typeof comment.content);
+            }
+            if (typeof comment.authorName !== "string" && comment.authorName !== null) {
+              console.error(`[CommentsSection] Comment ${index} authorName is not string:`, comment.authorName, typeof comment.authorName);
+            }
+          });
+        }
+        
         setComments(sanitizedComments);
       } else {
         throw new Error(data.error?.message || "Failed to load comments");

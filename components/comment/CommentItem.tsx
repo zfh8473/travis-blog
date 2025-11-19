@@ -55,8 +55,23 @@ export default function CommentItem({
 }: CommentItemProps) {
   // Validate comment data at component entry to prevent React errors
   if (!comment || !comment.id) {
-    console.warn("Invalid comment data:", comment);
+    console.warn("[CommentItem] Invalid comment data:", comment);
     return null;
+  }
+  
+  // Debug: Log comment data to help identify React error #418
+  if (typeof window !== "undefined" && (process.env.NODE_ENV === "development" || window.location.hostname.includes("vercel"))) {
+    console.log("[CommentItem] Rendering comment:", {
+      id: comment.id,
+      contentType: typeof comment.content,
+      contentValue: comment.content,
+      authorNameType: typeof comment.authorName,
+      authorNameValue: comment.authorName,
+      createdAtType: typeof comment.createdAt,
+      createdAtValue: comment.createdAt,
+      userType: typeof comment.user,
+      userValue: comment.user,
+    });
   }
   
   const [showReplyForm, setShowReplyForm] = useState(false);

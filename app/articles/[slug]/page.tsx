@@ -6,6 +6,7 @@ import ArticleDetail from "@/components/article/ArticleDetail";
 import CommentsSection from "@/components/comment/CommentsSection";
 import { enhanceHtmlWithSyntaxHighlighting } from "@/lib/utils/markdown-converter";
 import ArticleViewCounter from "./ArticleViewCounter";
+import CommentScrollHandler from "@/components/article/CommentScrollHandler";
 
 /**
  * Article interface for detail page.
@@ -260,6 +261,9 @@ async function ArticleDetailContent({
       
       {/* Increment view count on client side - must be after ArticleDetail to ensure DOM is ready */}
       <ArticleViewCounter slug={slug} />
+      
+      {/* Handle comment anchor scrolling - must be before CommentsSection */}
+      <CommentScrollHandler />
       
       {/* Comments section - re-enabled with simplified architecture */}
       <CommentsSection articleId={article.id} />

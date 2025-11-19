@@ -384,13 +384,14 @@ export async function POST(request: NextRequest) {
     try {
       console.log("[POST /api/comments] Executing create query. Time so far:", Date.now() - startTime, "ms");
       comment = await prisma.comment.create({
-      data: {
-        content: sanitizedContent,
-        articleId: validatedData.articleId,
-        userId: userId,
-        parentId: validatedData.parentId || null,
-        authorName: userId ? null : validatedData.authorName || null,
-      },
+        data: {
+          content: sanitizedContent,
+          articleId: validatedData.articleId,
+          userId: userId,
+          parentId: validatedData.parentId || null,
+          authorName: userId ? null : validatedData.authorName || null,
+          isRead: false, // New comments are unread by default
+        },
       include: {
         user: {
           select: {

@@ -47,6 +47,7 @@ export default function AdminNavigation() {
   const navItems = [
     { href: "/admin", label: "仪表板" },
     { href: "/admin/articles", label: "文章管理" },
+    { href: "/admin/comments", label: "评论管理" },
     { href: "/admin/media", label: "媒体管理" },
   ];
 

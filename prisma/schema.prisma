@@ -171,6 +171,11 @@ model Comment {
   authorName String? // Name for anonymous comments (when userId is null)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  
+  // Admin notification fields
+  isRead   Boolean   @default(false) // Whether admin has read this comment
+  readAt   DateTime? // When the comment was marked as read
+  readBy   String?   // Admin user ID who marked as read
 
   article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -179,5 +184,7 @@ model Comment {
 
   @@index([articleId])
   @@index([parentId])
+  @@index([articleId, isRead]) // Optimize query for unread comments by article
+  @@index([isRead, createdAt]) // Optimize query for unread comments list
   @@map("comments")
 }

@@ -1,6 +1,8 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import Link from "next/link";
+import UnreadCommentsBadge from "@/components/admin/UnreadCommentsBadge";
+import UnreadCommentsList from "@/components/admin/UnreadCommentsList";
 
 /**
  * Admin dashboard homepage.
@@ -34,27 +36,36 @@ export default async function AdminPage() {
         </div>
       </div>
 
+      {/* Unread Comments Section */}
+      <div className="mb-6">
+        <UnreadCommentsList />
+      </div>
+
       {/* Quick Links */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Link
           href="/admin/articles"
-          className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
         >
-          <h3 className="text-lg font-semibold mb-2">文章管理</h3>
-          <p className="text-gray-600 text-sm">
+          <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">文章管理</h3>
+          <p className="text-gray-600 dark:text-gray-400 text-sm">
             创建、编辑和管理文章
           </p>
         </Link>
         
         <Link
           href="/admin/media"
-          className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
         >
-          <h3 className="text-lg font-semibold mb-2">媒体管理</h3>
-          <p className="text-gray-600 text-sm">
+          <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">媒体管理</h3>
+          <p className="text-gray-600 dark:text-gray-400 text-sm">
             管理上传的媒体文件
           </p>
         </Link>
+
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition-shadow flex items-center justify-center">
+          <UnreadCommentsBadge />
+        </div>
       </div>
     </div>
   );

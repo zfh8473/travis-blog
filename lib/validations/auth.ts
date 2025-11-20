@@ -26,26 +26,26 @@ export const registrationSchema = z
   .object({
     email: z
       .string()
-      .min(1, "Email is required")
-      .email("Invalid email format"),
+      .min(1, "邮箱地址是必填项")
+      .email("邮箱格式无效"),
     password: z
       .string()
-      .min(8, "Password must be at least 8 characters long")
+      .min(8, "密码长度至少为 8 个字符")
       .regex(
         /^(?=.*[A-Za-z])(?=.*\d)/,
-        "Password must contain at least one letter and one number"
+        "密码必须包含至少一个字母和一个数字"
       ),
     confirmPassword: z
       .string()
-      .min(1, "Please confirm your password"),
+      .min(1, "请确认您的密码"),
     name: z
       .string()
-      .max(100, "Name must be less than 100 characters")
+      .max(100, "姓名长度不能超过 100 个字符")
       .optional()
       .or(z.literal("")),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
+    message: "两次输入的密码不一致",
     path: ["confirmPassword"],
   });
 
@@ -65,11 +65,11 @@ export const registrationSchema = z
 export const loginSchema = z.object({
   email: z
     .string()
-    .min(1, "Email is required")
-    .email("Invalid email format"),
+    .min(1, "邮箱地址是必填项")
+    .email("邮箱格式无效"),
   password: z
     .string()
-    .min(1, "Password is required"),
+    .min(1, "密码是必填项"),
 });
 
 /**

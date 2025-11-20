@@ -40,20 +40,29 @@ export async function POST(request: Request) {
     validationResult = registrationSchema.safeParse(body);
 
     if (!validationResult.success) {
+      // Convert Zod error messages to Chinese-friendly format
+      const errorDetails = validationResult.error.issues.map((issue) => ({
+        ...issue,
+        message: issue.message, // Keep original message (already in Chinese from schema)
+      }));
+
       return NextResponse.json(
         {
           success: false,
           error: {
-            message: "Invalid input data",
+            message: "输入数据无效",
             code: "VALIDATION_ERROR",
-            details: validationResult.error.issues,
+            details: errorDetails,
           },
         },
         { status: 400 }
       );
     }
 
-    const { email, password, name } = validationResult.data;
+    const { email, password, name, confirmPassword } = validationResult.data;
+    
+    // Note: confirmPassword is validated by schema but not used in user creation
+    // It's only used to ensure password match
 
     // Check for duplicate email
     const existingUser = await prisma.user.findUnique({
@@ -133,7 +142,7 @@ export async function POST(request: Request) {
           {
             success: false,
             error: {
-              message: "Email already registered",
+              message: "该邮箱已被注册",
               code: "DUPLICATE_EMAIL",
             },
           },
@@ -147,7 +156,7 @@ export async function POST(request: Request) {
       {
         success: false,
         error: {
-          message: "Internal server error",
+          message: "服务器内部错误",
           code: "INTERNAL_ERROR",
         },
       },

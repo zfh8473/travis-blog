@@ -37,31 +37,31 @@ export default function RegisterPage() {
 
     // Email validation
     if (!formData.email) {
-      newErrors.email = "Email is required";
+      newErrors.email = "邮箱地址是必填项";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Invalid email format";
+      newErrors.email = "邮箱格式无效";
     }
 
     // Password validation
     if (!formData.password) {
-      newErrors.password = "Password is required";
+      newErrors.password = "密码是必填项";
     } else if (formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters long";
+      newErrors.password = "密码长度至少为 8 个字符";
     } else if (!/^(?=.*[A-Za-z])(?=.*\d)/.test(formData.password)) {
       newErrors.password =
-        "Password must contain at least one letter and one number";
+        "密码必须包含至少一个字母和一个数字";
     }
 
     // Confirm password validation
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Please confirm your password";
+      newErrors.confirmPassword = "请确认您的密码";
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
+      newErrors.confirmPassword = "两次输入的密码不一致";
     }
 
     // Name validation (optional)
     if (formData.name && formData.name.length > 100) {
-      newErrors.name = "Name must be less than 100 characters";
+      newErrors.name = "姓名长度不能超过 100 个字符";
     }
 
     setErrors(newErrors);
@@ -92,6 +92,7 @@ export default function RegisterPage() {
         body: JSON.stringify({
           email: formData.email,
           password: formData.password,
+          confirmPassword: formData.confirmPassword,
           name: formData.name,
         }),
       });
@@ -101,7 +102,7 @@ export default function RegisterPage() {
       if (!response.ok || !data.success) {
         // Handle error response
         const errorMessage =
-          data.error?.message || "Registration failed. Please try again.";
+          data.error?.message || "注册失败，请重试。";
         setErrors({ general: errorMessage });
 
         // Set field-specific errors if available
@@ -140,7 +141,7 @@ export default function RegisterPage() {
         // Login failed, but registration succeeded
         setErrors({
           general:
-            "Registration successful, but automatic login failed. Please log in manually.",
+            "注册成功，但自动登录失败。请手动登录。",
         });
         setIsLoading(false);
         // Redirect to login page
@@ -153,7 +154,7 @@ export default function RegisterPage() {
     } catch (error) {
       console.error("Registration error:", error);
       setErrors({
-        general: "An unexpected error occurred. Please try again.",
+        general: "发生意外错误，请重试。",
       });
       setIsLoading(false);
     }

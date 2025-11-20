@@ -83,9 +83,21 @@ export default function NavigationBarClient({
           <div className="flex items-center justify-between h-16 gap-8 px-6">
           {/* Logo Section */}
           <Link href="/" className="flex items-center gap-3 no-underline group flex-shrink-0">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-bold text-lg leading-none">T</span>
-            </div>
+            {/* 风 · 书韵 Logo */}
+            <svg width="48" height="48" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" className="w-12 h-12">
+              <defs>
+                <linearGradient id="trad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style={{stopColor:"#92400e",stopOpacity:1}} />
+                  <stop offset="100%" style={{stopColor:"#d97706",stopOpacity:1}} />
+                </linearGradient>
+              </defs>
+              <path d="M35 35 L105 35 Q110 35 110 40 L110 42 Q110 47 105 47 L35 47 Q30 47 30 42 L30 40 Q30 35 35 35" fill="url(#trad1)"/>
+              <path d="M35 60 L80 60 Q85 60 85 65 L85 67 Q85 72 80 72 L35 72 Q30 72 30 67 L30 65 Q30 60 35 60" fill="url(#trad1)"/>
+              <rect x="62" y="42" width="8" height="58" rx="4" fill="url(#trad1)"/>
+              <ellipse cx="88" cy="85" rx="4" ry="5" fill="#92400e" opacity={0.8}/>
+              <ellipse cx="98" cy="85" rx="4" ry="5" fill="#92400e" opacity={0.8}/>
+              <path d="M40 85 Q50 95 60 87" stroke="#d97706" strokeWidth="6" fill="none" strokeLinecap="round"/>
+            </svg>
             <div className="flex flex-col">
               <span className="text-xl font-bold text-slate-900 leading-tight group-hover:text-blue-600 transition-colors">
                 Travis-Blog

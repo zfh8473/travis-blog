@@ -83,20 +83,23 @@ export default function NavigationBarClient({
           <div className="flex items-center justify-between h-16 gap-8 px-6">
           {/* Logo Section */}
           <Link href="/" className="flex items-center gap-3 no-underline group flex-shrink-0">
-            {/* 风 · 书韵 Logo */}
+            {/* 风 · 水墨 Logo */}
             <svg width="48" height="48" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" className="w-12 h-12">
               <defs>
-                <linearGradient id="trad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style={{stopColor:"#92400e",stopOpacity:1}} />
-                  <stop offset="100%" style={{stopColor:"#d97706",stopOpacity:1}} />
-                </linearGradient>
+                <radialGradient id="ink1" cx="50%" cy="50%">
+                  <stop offset="0%" style={{stopColor:"#1e293b",stopOpacity:0.9}} />
+                  <stop offset="100%" style={{stopColor:"#475569",stopOpacity:0.6}} />
+                </radialGradient>
+                <filter id="ink-blur">
+                  <feGaussianBlur in="SourceGraphic" stdDeviation="0.5"/>
+                </filter>
               </defs>
-              <path d="M35 35 L105 35 Q110 35 110 40 L110 42 Q110 47 105 47 L35 47 Q30 47 30 42 L30 40 Q30 35 35 35" fill="url(#trad1)"/>
-              <path d="M35 60 L80 60 Q85 60 85 65 L85 67 Q85 72 80 72 L35 72 Q30 72 30 67 L30 65 Q30 60 35 60" fill="url(#trad1)"/>
-              <rect x="62" y="42" width="8" height="58" rx="4" fill="url(#trad1)"/>
-              <ellipse cx="88" cy="85" rx="4" ry="5" fill="#92400e" opacity={0.8}/>
-              <ellipse cx="98" cy="85" rx="4" ry="5" fill="#92400e" opacity={0.8}/>
-              <path d="M40 85 Q50 95 60 87" stroke="#d97706" strokeWidth="6" fill="none" strokeLinecap="round"/>
+              <path d="M35 38 L100 38 Q105 38 105 43 Q105 48 100 48 L35 48 Q30 48 30 43 Q30 38 35 38" fill="url(#ink1)" filter="url(#ink-blur)"/>
+              <path d="M35 62 L75 62 Q80 62 80 67 Q80 72 75 72 L35 72 Q30 72 30 67 Q30 62 35 62" fill="url(#ink1)" filter="url(#ink-blur)"/>
+              <ellipse cx="66" cy="70" rx="6" ry="32" fill="url(#ink1)" filter="url(#ink-blur)"/>
+              <circle cx="85" cy="88" r="4" fill="#1e293b" opacity={0.7}/>
+              <circle cx="95" cy="88" r="4" fill="#1e293b" opacity={0.7}/>
+              <path d="M42 88 Q52 98 62 90" stroke="#475569" strokeWidth="5" fill="none" strokeLinecap="round" filter="url(#ink-blur)"/>
             </svg>
             <div className="flex flex-col">
               <span className="text-xl font-bold text-slate-900 leading-tight group-hover:text-blue-600 transition-colors">

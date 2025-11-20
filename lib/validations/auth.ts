@@ -22,24 +22,32 @@ import { z } from "zod";
  * }
  * ```
  */
-export const registrationSchema = z.object({
-  email: z
-    .string()
-    .min(1, "Email is required")
-    .email("Invalid email format"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters long")
-    .regex(
-      /^(?=.*[A-Za-z])(?=.*\d)/,
-      "Password must contain at least one letter and one number"
-    ),
-  name: z
-    .string()
-    .max(100, "Name must be less than 100 characters")
-    .optional()
-    .or(z.literal("")),
-});
+export const registrationSchema = z
+  .object({
+    email: z
+      .string()
+      .min(1, "Email is required")
+      .email("Invalid email format"),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters long")
+      .regex(
+        /^(?=.*[A-Za-z])(?=.*\d)/,
+        "Password must contain at least one letter and one number"
+      ),
+    confirmPassword: z
+      .string()
+      .min(1, "Please confirm your password"),
+    name: z
+      .string()
+      .max(100, "Name must be less than 100 characters")
+      .optional()
+      .or(z.literal("")),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
 /**
  * Login input validation schema.

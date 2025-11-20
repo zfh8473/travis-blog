@@ -1,46 +1,38 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 /**
- * User registration page.
+ * Reset password page content.
  * 
- * Allows visitors to create a new account using email and password.
- * After successful registration, automatically logs in the user and redirects.
+ * Allows users to reset their password using a token from the email.
  * 
- * @returns {JSX.Element} Registration page component
+ * @component
  */
-export default function RegisterPage() {
+function ResetPasswordPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams?.get("token");
+
   const [formData, setFormData] = useState({
-    email: "",
     password: "",
     confirmPassword: "",
-    name: "",
   });
   const [errors, setErrors] = useState<{
-    email?: string;
     password?: string;
     confirmPassword?: string;
-    name?: string;
     general?: string;
   }>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   /**
-   * Validates form input on the client side.
+   * Validates form input.
    */
   const validateForm = (): boolean => {
     const newErrors: typeof errors = {};
-
-    // Email validation
-    if (!formData.email) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Invalid email format";
-    }
 
     // Password validation
     if (!formData.password) {
@@ -59,11 +51,6 @@ export default function RegisterPage() {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
-    // Name validation (optional)
-    if (formData.name && formData.name.length > 100) {
-      newErrors.name = "Name must be less than 100 characters";
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -74,6 +61,13 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    if (!token) {
+      setErrors({
+        general: "Invalid or missing reset token. Please request a new password reset link.",
+      });
+      return;
+    }
+
     // Client-side validation
     if (!validateForm()) {
       return;
@@ -83,75 +77,39 @@ export default function RegisterPage() {
     setErrors({});
 
     try {
-      // Register user
-      const response = await fetch("/api/auth/register", {
+      const response = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: formData.email,
+          token,
           password: formData.password,
-          name: formData.name,
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        // Handle error response
-        const errorMessage =
-          data.error?.message || "Registration failed. Please try again.";
-        setErrors({ general: errorMessage });
-
-        // Set field-specific errors if available
-        if (data.error?.code === "DUPLICATE_EMAIL") {
-          setErrors({ email: "This email is already registered" });
-        } else if (data.error?.code === "VALIDATION_ERROR") {
-          // Handle validation errors from server
-          const validationErrors = data.error.details || [];
-          const fieldErrors: typeof errors = {};
-          validationErrors.forEach((err: any) => {
-            if (err.path[0] === "email") {
-              fieldErrors.email = err.message;
-            } else if (err.path[0] === "password") {
-              fieldErrors.password = err.message;
-            } else if (err.path[0] === "confirmPassword") {
-              fieldErrors.confirmPassword = err.message;
-            } else if (err.path[0] === "name") {
-              fieldErrors.name = err.message;
-            }
-          });
-          setErrors(fieldErrors);
-        }
-
-        setIsLoading(false);
-        return;
-      }
-
-      // Registration successful - auto-login
-      const signInResult = await signIn("credentials", {
-        email: formData.email,
-        password: formData.password,
-        redirect: false,
-      });
-
-      if (signInResult?.error) {
-        // Login failed, but registration succeeded
         setErrors({
           general:
-            "Registration successful, but automatic login failed. Please log in manually.",
+            data.error?.message ||
+            "Failed to reset password. The link may have expired. Please request a new one.",
         });
         setIsLoading(false);
-        // Redirect to login page
-        router.push("/login");
         return;
       }
 
-      // Success - redirect to homepage
-      router.push("/");
+      // Success
+      setIsSuccess(true);
+      setIsLoading(false);
+
+      // Redirect to login page after 3 seconds
+      setTimeout(() => {
+        router.push("/login");
+      }, 3000);
     } catch (error) {
-      console.error("Registration error:", error);
+      console.error("Reset password error:", error);
       setErrors({
         general: "An unexpected error occurred. Please try again.",
       });
@@ -159,21 +117,76 @@ export default function RegisterPage() {
     }
   };
 
+  if (!token) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
+        <div className="w-full max-w-md space-y-8">
+          <div className="rounded-md bg-red-50 p-4">
+            <div className="text-sm text-red-800">
+              <p className="font-medium">无效的密码重置链接</p>
+              <p className="mt-2">
+                密码重置链接无效或已过期。请重新申请密码重置。
+              </p>
+            </div>
+          </div>
+          <div className="text-center">
+            <Link
+              href="/forgot-password"
+              className="text-sm font-medium text-blue-600 hover:text-blue-500"
+            >
+              重新申请密码重置
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isSuccess) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
+        <div className="w-full max-w-md space-y-8">
+          <div className="rounded-md bg-green-50 p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-5 w-5 text-green-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-green-800">
+                  密码重置成功
+                </h3>
+                <div className="mt-2 text-sm text-green-700">
+                  <p>您的密码已成功重置。</p>
+                  <p className="mt-2">正在跳转到登录页面...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-            Create your account
+            重置密码
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Or{" "}
-            <a
-              href="/login"
-              className="font-medium text-blue-600 hover:text-blue-500"
-            >
-              sign in to your existing account
-            </a>
+            请输入您的新密码
           </p>
         </div>
 
@@ -186,51 +199,8 @@ export default function RegisterPage() {
 
           <div className="space-y-4 rounded-md shadow-sm">
             <div>
-              <label htmlFor="name" className="sr-only">
-                Name
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                autoComplete="name"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className="relative block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
-                placeholder="Name (optional)"
-              />
-              {errors.name && (
-                <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-              )}
-            </div>
-
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                className="relative block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
-                placeholder="Email address"
-              />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-              )}
-            </div>
-
-            <div>
               <label htmlFor="password" className="sr-only">
-                Password
+                New Password
               </label>
               <input
                 id="password"
@@ -243,7 +213,7 @@ export default function RegisterPage() {
                   setFormData({ ...formData, password: e.target.value })
                 }
                 className="relative block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
-                placeholder="Password"
+                placeholder="New Password"
               />
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600">{errors.password}</p>
@@ -272,7 +242,9 @@ export default function RegisterPage() {
                 placeholder="Confirm Password"
               />
               {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.confirmPassword}
+                </p>
               )}
             </div>
           </div>
@@ -283,12 +255,32 @@ export default function RegisterPage() {
               disabled={isLoading}
               className="group relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? "Creating account..." : "Create account"}
+              {isLoading ? "重置中..." : "重置密码"}
             </button>
+          </div>
+
+          <div className="text-center">
+            <Link
+              href="/login"
+              className="text-sm font-medium text-blue-600 hover:text-blue-500"
+            >
+              返回登录页面
+            </Link>
           </div>
         </form>
       </div>
     </div>
+  );
+}
+
+/**
+ * Reset password page wrapper with Suspense boundary.
+ */
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResetPasswordPageContent />
+    </Suspense>
   );
 }
 

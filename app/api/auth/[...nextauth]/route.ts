@@ -1,6 +1,5 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/lib/db/prisma";
 import { comparePassword } from "@/lib/auth/password";
@@ -29,7 +28,6 @@ validateAuthEnv();
  * 
  * Configured with:
  * - Credentials provider for email/password authentication
- * - GitHub OAuth provider
  * - Google OAuth provider
  * - JWT session strategy
  * - httpOnly cookie storage for tokens
@@ -103,15 +101,6 @@ export const authOptions: NextAuthOptions = {
         };
       },
     }),
-    // GitHub OAuth Provider
-    ...(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET
-      ? [
-          GitHubProvider({
-            clientId: process.env.GITHUB_CLIENT_ID,
-            clientSecret: process.env.GITHUB_CLIENT_SECRET,
-          }),
-        ]
-      : []),
     // Google OAuth Provider
     ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
       ? [
@@ -143,8 +132,8 @@ export const authOptions: NextAuthOptions = {
      * For OAuth providers, creates or links user account based on email.
      */
     async signIn({ user, account, profile }) {
-      // For OAuth providers (GitHub, Google)
-      if (account?.provider === "github" || account?.provider === "google") {
+      // For OAuth providers (Google)
+      if (account?.provider === "google") {
         if (!user.email) {
           console.error("OAuth signIn: Provider did not return email", {
             provider: account?.provider,
@@ -228,7 +217,7 @@ export const authOptions: NextAuthOptions = {
       // Initial sign in
       if (user) {
         // For OAuth providers, fetch complete user data from database
-        if (account?.provider === "github" || account?.provider === "google") {
+        if (account?.provider === "google") {
           try {
             const dbUser = await prisma.user.findUnique({
               where: { email: user.email! },

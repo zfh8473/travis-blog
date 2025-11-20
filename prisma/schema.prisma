@@ -56,15 +56,17 @@ enum ArticleStatus {
  * For email/password users, password is stored as bcrypt hash.
  */
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String?  // Optional: bcrypt hashed password (null for OAuth users)
-  name      String?
-  image     String?  // Avatar image path
-  bio       String?  // User biography/bio
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                   String    @id @default(cuid())
+  email                String    @unique
+  password             String?   // Optional: bcrypt hashed password (null for OAuth users)
+  name                 String?
+  image                String?   // Avatar image path
+  bio                  String?   // User biography/bio
+  role                 Role      @default(USER)
+  passwordResetToken   String?   // Token for password reset
+  passwordResetExpires DateTime? // Expiration time for reset token
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
   articles  Article[]
   comments  Comment[]

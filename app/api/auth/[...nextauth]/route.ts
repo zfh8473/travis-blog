@@ -23,6 +23,18 @@ function validateAuthEnv() {
 // Validate environment variables at module load time
 validateAuthEnv();
 
+// Log Google OAuth configuration status (only in development)
+if (process.env.NODE_ENV === "development") {
+  const hasGoogleConfig =
+    !!process.env.GOOGLE_CLIENT_ID && !!process.env.GOOGLE_CLIENT_SECRET;
+  console.log("[NextAuth] Google OAuth configuration:", {
+    enabled: hasGoogleConfig,
+    hasClientId: !!process.env.GOOGLE_CLIENT_ID,
+    hasClientSecret: !!process.env.GOOGLE_CLIENT_SECRET,
+    nextAuthUrl: process.env.NEXTAUTH_URL || "not set",
+  });
+}
+
 /**
  * NextAuth.js configuration for authentication.
  * 
@@ -107,6 +119,13 @@ export const authOptions: NextAuthOptions = {
           GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            authorization: {
+              params: {
+                prompt: "consent",
+                access_type: "offline",
+                response_type: "code",
+              },
+            },
           }),
         ]
       : []),

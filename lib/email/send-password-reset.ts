@@ -1,4 +1,4 @@
-import { resend } from './resend';
+import { getResend } from './resend';
 import { PasswordResetEmail } from './templates/password-reset';
 
 /**
@@ -37,6 +37,17 @@ export async function sendPasswordResetEmail({
   userName,
 }: SendPasswordResetEmailParams) {
   try {
+    const resend = getResend();
+    
+    if (!resend) {
+      console.warn('RESEND_API_KEY not configured. Email sending is disabled.');
+      // In development, log the reset URL instead
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[Password Reset] Reset URL for ${to}: ${resetUrl}`);
+      }
+      return null;
+    }
+
     const fromEmail = process.env.RESEND_FROM_EMAIL || 'Travis Blog <noreply@travis-blog.vercel.app>';
 
     const { data, error } = await resend.emails.send({

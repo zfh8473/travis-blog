@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import crypto from "crypto";
+import { sendPasswordResetEmail } from "@/lib/email/send-password-reset";
 
 /**
  * POST /api/auth/forgot-password
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
     // Find user by email
     const user = await prisma.user.findUnique({
       where: { email },
-      select: { id: true, email: true },
+      select: { id: true, email: true, name: true },
     });
 
     // If user doesn't exist, return success anyway (security: prevent enumeration)
@@ -60,13 +61,19 @@ export async function POST(request: NextRequest) {
     // Generate reset URL
     const resetUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/reset-password?token=${resetToken}`;
 
-    // TODO: Send email with reset link
-    // For now, we'll log it (in production, use a proper email service like Resend)
-    console.log(`[Password Reset] Token for ${email}: ${resetToken}`);
-    console.log(`[Password Reset] Reset URL: ${resetUrl}`);
-
-    // In production, send email here:
-    // await sendPasswordResetEmail(user.email, resetUrl);
+    // Send password reset email
+    try {
+      await sendPasswordResetEmail({
+        to: user.email,
+        resetUrl,
+        userName: user.name || undefined,
+      });
+      console.log(`[Password Reset] Email sent successfully to ${email}`);
+    } catch (error) {
+      console.error(`[Password Reset] Failed to send email to ${email}:`, error);
+      // Even if email sending fails, return success (security: prevent enumeration)
+      // The error is logged for debugging purposes
+    }
 
     return NextResponse.json({
       success: true,
